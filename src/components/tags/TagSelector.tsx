@@ -8,7 +8,7 @@ interface TagSelectorProps {
   tags: Tag[];
   selectedIds: string[];
   onChange: (ids: string[]) => void;
-  onCreate?: (name: string) => void;
+  onCreate?: (name: string) => void | Promise<void>;
 }
 
 export default function TagSelector({
@@ -33,10 +33,14 @@ export default function TagSelector({
     }
   };
 
-  const handleCreate = (): void => {
+  const handleCreate = async (): Promise<void> => {
     if (onCreate && search.trim()) {
-      onCreate(search.trim());
-      setSearch("");
+      try {
+        await onCreate(search.trim());
+        setSearch("");
+      } catch {
+        // Error is handled by the store
+      }
     }
   };
 

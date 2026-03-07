@@ -14,7 +14,7 @@ interface NotePageProps {
 export default function NotePage({ params }: NotePageProps): ReactNode {
   const { id } = use(params);
   const router = useRouter();
-  const { currentNote, isLoading, fetchNote, deleteNote } = useNotesStore();
+  const { currentNote, isLoading, error, fetchNote, deleteNote } = useNotesStore();
   const [showDelete, setShowDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -33,10 +33,20 @@ export default function NotePage({ params }: NotePageProps): ReactNode {
     }
   };
 
-  if (isLoading || !currentNote) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error || !currentNote) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <p className="text-lg font-medium text-red-600" role="alert">
+          {error ?? "Note not found"}
+        </p>
       </div>
     );
   }

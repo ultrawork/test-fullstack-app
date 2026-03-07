@@ -11,16 +11,26 @@ interface EditNotePageProps {
 
 export default function EditNotePage({ params }: EditNotePageProps): ReactNode {
   const { id } = use(params);
-  const { currentNote, isLoading, fetchNote } = useNotesStore();
+  const { currentNote, isLoading, error, fetchNote } = useNotesStore();
 
   useEffect(() => {
     void fetchNote(id);
   }, [id, fetchNote]);
 
-  if (isLoading || !currentNote) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error || !currentNote) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-center">
+        <p className="text-lg font-medium text-red-600" role="alert">
+          {error ?? "Note not found"}
+        </p>
       </div>
     );
   }
