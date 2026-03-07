@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import type { JwtPayload } from "@/types/auth";
+import { AuthError } from "@/lib/errors";
 
 const SALT_ROUNDS = 10;
 
@@ -53,16 +54,16 @@ export async function generateRefreshToken(
 
 export async function verifyAccessToken(token: string): Promise<JwtPayload> {
   const { payload } = await jwtVerify(token, getJwtSecret());
-  return {
-    userId: payload.userId as string,
-    email: payload.email as string,
-  };
+  if (typeof payload.userId !== "string" || typeof payload.email !== "string") {
+    throw new AuthError("Invalid token payload");
+  }
+  return { userId: payload.userId, email: payload.email };
 }
 
 export async function verifyRefreshToken(token: string): Promise<JwtPayload> {
   const { payload } = await jwtVerify(token, getRefreshSecret());
-  return {
-    userId: payload.userId as string,
-    email: payload.email as string,
-  };
+  if (typeof payload.userId !== "string" || typeof payload.email !== "string") {
+    throw new AuthError("Invalid token payload");
+  }
+  return { userId: payload.userId, email: payload.email };
 }

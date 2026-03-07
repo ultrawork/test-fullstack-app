@@ -32,9 +32,15 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   try {
     const secret = new TextEncoder().encode(jwtSecret);
     const { payload } = await jwtVerify(token, secret);
+    if (typeof payload.userId !== "string") {
+      return NextResponse.json(
+        { success: false, error: "Invalid token payload" },
+        { status: 401 },
+      );
+    }
     const requestHeaders = new Headers(request.headers);
     requestHeaders.delete("x-user-id");
-    requestHeaders.set("x-user-id", payload.userId as string);
+    requestHeaders.set("x-user-id", payload.userId);
     return NextResponse.next({ request: { headers: requestHeaders } });
   } catch {
     return NextResponse.json(

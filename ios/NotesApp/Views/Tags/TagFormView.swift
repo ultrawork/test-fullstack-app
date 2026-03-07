@@ -46,6 +46,11 @@ struct TagFormView: View {
                 text: $name
             )
             .textFieldStyle(.roundedBorder)
+            .onChange(of: name) { _, newValue in
+                if newValue.count > 50 {
+                    name = String(newValue.prefix(50))
+                }
+            }
             .accessibilityLabel(NSLocalizedString("tag_form_name_a11y", tableName: "TagsLocalizable", comment: "Tag name input"))
         }
     }

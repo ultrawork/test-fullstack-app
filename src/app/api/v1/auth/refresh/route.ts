@@ -7,6 +7,7 @@ import {
   generateRefreshToken,
 } from "@/lib/auth";
 import { successResponse, handleApiError } from "@/lib/api-response";
+import { setAuthCookies } from "@/lib/cookies";
 import { AuthError } from "@/lib/errors";
 
 export async function POST(): Promise<NextResponse> {
@@ -62,20 +63,7 @@ export async function POST(): Promise<NextResponse> {
       },
     });
 
-    cookieStore.set("access_token", newAccessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 15 * 60,
-      path: "/",
-    });
-    cookieStore.set("refresh_token", newRefreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60,
-      path: "/",
-    });
+    await setAuthCookies(newAccessToken, newRefreshToken);
 
     return successResponse({
       user: {

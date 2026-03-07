@@ -1,4 +1,5 @@
 import Foundation
+import Security
 
 /// Service for interacting with the Tags API endpoints.
 final class TagService {
@@ -108,14 +109,59 @@ enum TagServiceError: LocalizedError {
     }
 }
 
-/// Simple token storage. In production, use Keychain.
+/// Secure token storage using Keychain.
 final class TokenStorage: @unchecked Sendable {
     static let shared = TokenStorage()
-    private let lock = NSLock()
-    private var _accessToken: String?
+    private let service = "com.notesapp.auth"
+    private let accountKey = "accessToken"
+
     var accessToken: String? {
-        get { lock.withLock { _accessToken } }
-        set { lock.withLock { _accessToken = newValue } }
+        get { readFromKeychain() }
+        set {
+            if let value = newValue {
+                saveToKeychain(value)
+            } else {
+                deleteFromKeychain()
+            }
+        }
     }
+
     private init() {}
+
+    private func saveToKeychain(_ token: String) {
+        let data = Data(token.utf8)
+        deleteFromKeychain()
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: accountKey,
+            kSecValueData as String: data,
+        ]
+        SecItemAdd(query as CFDictionary, nil)
+    }
+
+    private func readFromKeychain() -> String? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: accountKey,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+        guard status == errSecSuccess, let data = result as? Data else {
+            return nil
+        }
+        return String(data: data, encoding: .utf8)
+    }
+
+    private func deleteFromKeychain() {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: accountKey,
+        ]
+        SecItemDelete(query as CFDictionary)
+    }
 }

@@ -62,6 +62,7 @@ model NoteTag {
   tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
 
   @@id([noteId, tagId])
+  @@index([tagId])
   @@map("note_tags")
 }
 

@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
@@ -9,6 +8,7 @@ import {
 } from "@/lib/auth";
 import { registerSchema } from "@/lib/validation";
 import { successResponse, handleApiError } from "@/lib/api-response";
+import { setAuthCookies } from "@/lib/cookies";
 import { ValidationError } from "@/lib/errors";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -56,21 +56,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       },
     });
 
-    const cookieStore = await cookies();
-    cookieStore.set("access_token", accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 15 * 60,
-      path: "/",
-    });
-    cookieStore.set("refresh_token", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60,
-      path: "/",
-    });
+    await setAuthCookies(accessToken, refreshToken);
 
     return successResponse(
       {
