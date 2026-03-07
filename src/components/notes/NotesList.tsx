@@ -6,7 +6,6 @@ import TagFilter from "@/components/tags/TagFilter";
 import SearchBar from "./SearchBar";
 import Spinner from "@/components/ui/Spinner";
 import EmptyState from "@/components/ui/EmptyState";
-import Button from "@/components/ui/Button";
 import { useNotesStore } from "@/stores/notes-store";
 import { useTagsStore } from "@/stores/tags-store";
 import Link from "next/link";
@@ -53,8 +52,11 @@ export default function NotesList(): ReactNode {
           }
           action={
             !search && filterTagIds.length === 0 ? (
-              <Link href="/dashboard/notes/new">
-                <Button>Create Note</Button>
+              <Link
+                href="/dashboard/notes/new"
+                className="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-base font-medium text-white transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              >
+                Create Note
               </Link>
             ) : undefined
           }

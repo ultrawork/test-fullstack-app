@@ -66,39 +66,41 @@ export async function PUT(
       throw new ForbiddenError();
     }
 
-    if (data.tagIds !== undefined) {
-      if (data.tagIds.length > 0) {
-        const tags = await prisma.tag.findMany({
-          where: { id: { in: data.tagIds }, userId },
+    const note = await prisma.$transaction(async (tx) => {
+      if (data.tagIds !== undefined) {
+        if (data.tagIds.length > 0) {
+          const tags = await tx.tag.findMany({
+            where: { id: { in: data.tagIds }, userId },
+          });
+
+          if (tags.length !== data.tagIds.length) {
+            throw new ForbiddenError("One or more tags do not belong to you");
+          }
+        }
+
+        await tx.noteTag.deleteMany({
+          where: { noteId: id },
         });
 
-        if (tags.length !== data.tagIds.length) {
-          throw new ForbiddenError("One or more tags do not belong to you");
+        if (data.tagIds.length > 0) {
+          await tx.noteTag.createMany({
+            data: data.tagIds.map((tagId) => ({ noteId: id, tagId })),
+          });
         }
       }
 
-      await prisma.noteTag.deleteMany({
-        where: { noteId: id },
-      });
-
-      if (data.tagIds.length > 0) {
-        await prisma.noteTag.createMany({
-          data: data.tagIds.map((tagId) => ({ noteId: id, tagId })),
-        });
-      }
-    }
-
-    const note = await prisma.note.update({
-      where: { id },
-      data: {
-        ...(data.title !== undefined && { title: data.title }),
-        ...(data.content !== undefined && { content: data.content }),
-      },
-      include: {
-        tags: {
-          include: { tag: true },
+      return tx.note.update({
+        where: { id },
+        data: {
+          ...(data.title !== undefined && { title: data.title }),
+          ...(data.content !== undefined && { content: data.content }),
         },
-      },
+        include: {
+          tags: {
+            include: { tag: true },
+          },
+        },
+      });
     });
 
     return successResponse({

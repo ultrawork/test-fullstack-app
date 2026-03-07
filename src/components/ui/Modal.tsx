@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef, useCallback } from "react";
+import { type ReactNode, useEffect, useRef, useCallback, useId } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ export default function Modal({
 }: ModalProps): ReactNode {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const titleId = useId();
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent): void => {
@@ -51,14 +52,14 @@ export default function Modal({
     <dialog
       ref={dialogRef}
       className="w-full max-w-lg rounded-lg bg-white p-0 shadow-xl backdrop:bg-black/50"
-      aria-labelledby="modal-title"
+      aria-labelledby={titleId}
       onClick={(e) => {
         if (e.target === dialogRef.current) onClose();
       }}
     >
       <div className="p-6">
         <header className="mb-4 flex items-center justify-between">
-          <h2 id="modal-title" className="text-xl font-semibold text-gray-900">
+          <h2 id={titleId} className="text-xl font-semibold text-gray-900">
             {title}
           </h2>
           <button

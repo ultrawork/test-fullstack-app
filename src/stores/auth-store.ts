@@ -24,11 +24,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
   login: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await apiClient.post<ApiResponse<User>>("/auth/login", {
+      const res = await apiClient.post<ApiResponse<{ user: User }>>("/auth/login", {
         email,
         password,
       });
-      set({ user: res.data, isAuthenticated: true, isLoading: false });
+      set({ user: res.data.user, isAuthenticated: true, isLoading: false });
     } catch (err) {
       set({
         isLoading: false,
@@ -41,12 +41,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
   register: async (email, name, password) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await apiClient.post<ApiResponse<User>>("/auth/register", {
+      const res = await apiClient.post<ApiResponse<{ user: User }>>("/auth/register", {
         email,
         name,
         password,
       });
-      set({ user: res.data, isAuthenticated: true, isLoading: false });
+      set({ user: res.data.user, isAuthenticated: true, isLoading: false });
     } catch (err) {
       set({
         isLoading: false,
@@ -67,8 +67,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
   fetchUser: async () => {
     set({ isLoading: true });
     try {
-      const res = await apiClient.get<ApiResponse<User>>("/auth/me");
-      set({ user: res.data, isAuthenticated: true, isLoading: false });
+      const res = await apiClient.get<ApiResponse<{ user: User }>>("/auth/me");
+      set({ user: res.data.user, isAuthenticated: true, isLoading: false });
     } catch {
       set({ user: null, isAuthenticated: false, isLoading: false });
     }

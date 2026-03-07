@@ -41,7 +41,7 @@ describe("AuthStore", () => {
       name: "Test",
       createdAt: "2024-01-01",
     };
-    mockedApi.post.mockResolvedValueOnce({ success: true, data: mockUser });
+    mockedApi.post.mockResolvedValueOnce({ success: true, data: { user: mockUser } });
 
     await useAuthStore.getState().login("test@test.com", "password");
 
@@ -71,7 +71,7 @@ describe("AuthStore", () => {
       name: "Test",
       createdAt: "2024-01-01",
     };
-    mockedApi.post.mockResolvedValueOnce({ success: true, data: mockUser });
+    mockedApi.post.mockResolvedValueOnce({ success: true, data: { user: mockUser } });
 
     await useAuthStore
       .getState()
@@ -103,7 +103,7 @@ describe("AuthStore", () => {
       name: "Test",
       createdAt: "2024-01-01",
     };
-    mockedApi.get.mockResolvedValueOnce({ success: true, data: mockUser });
+    mockedApi.get.mockResolvedValueOnce({ success: true, data: { user: mockUser } });
 
     await useAuthStore.getState().fetchUser();
 

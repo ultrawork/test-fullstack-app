@@ -34,12 +34,14 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
       const params = new URLSearchParams();
       const { search, filterTagIds } = get();
       if (search) params.set("search", search);
-      if (filterTagIds.length > 0) params.set("tagIds", filterTagIds.join(","));
+      for (const id of filterTagIds) {
+        params.append("tagIds", id);
+      }
       const query = params.toString();
-      const res = await apiClient.get<ApiResponse<Note[]>>(
+      const res = await apiClient.get<ApiResponse<{ notes: Note[]; pagination: { page: number; limit: number; total: number; totalPages: number } }>>(
         `/notes${query ? `?${query}` : ""}`,
       );
-      set({ notes: res.data, isLoading: false });
+      set({ notes: res.data.notes, isLoading: false });
     } catch (err) {
       set({
         isLoading: false,

@@ -43,8 +43,11 @@ export default function NoteView({
       </div>
 
       <footer className="mt-6 flex gap-2 border-t border-gray-200 pt-4">
-        <Link href={`/dashboard/notes/${note.id}/edit`}>
-          <Button variant="secondary">Edit</Button>
+        <Link
+          href={`/dashboard/notes/${note.id}/edit`}
+          className="inline-flex items-center justify-center rounded-md bg-gray-200 px-4 py-2 text-base font-medium text-gray-900 transition-colors hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+        >
+          Edit
         </Link>
         <Button variant="danger" onClick={onDelete} isLoading={isDeleting}>
           Delete

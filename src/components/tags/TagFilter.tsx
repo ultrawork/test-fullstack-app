@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { Tag } from "@/types/tag";
+import { getContrastColor } from "@/components/tags/TagBadge";
 
 interface TagFilterProps {
   tags: Tag[];
@@ -44,7 +45,7 @@ export default function TagFilter({
             }`}
             style={{
               backgroundColor: tag.color,
-              color: isSelected ? "#000" : undefined,
+              color: getContrastColor(tag.color),
             }}
             aria-pressed={isSelected}
             aria-label={`Filter by tag ${tag.name}`}

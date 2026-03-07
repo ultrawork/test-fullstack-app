@@ -19,8 +19,16 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     );
   }
 
+  const jwtSecret = process.env.JWT_SECRET;
+  if (!jwtSecret) {
+    return NextResponse.json(
+      { success: false, error: "Server configuration error" },
+      { status: 500 },
+    );
+  }
+
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const secret = new TextEncoder().encode(jwtSecret);
     const { payload } = await jwtVerify(token, secret);
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-user-id", payload.userId as string);

@@ -28,42 +28,48 @@ export async function PUT(
       throw new ForbiddenError();
     }
 
-    if (data.tagIds.length > 0) {
-      const tags = await prisma.tag.findMany({
-        where: { id: { in: data.tagIds }, userId },
-      });
+    const updatedNote = await prisma.$transaction(async (tx) => {
+      if (data.tagIds.length > 0) {
+        const tags = await tx.tag.findMany({
+          where: { id: { in: data.tagIds }, userId },
+        });
 
-      if (tags.length !== data.tagIds.length) {
-        throw new ForbiddenError("One or more tags do not belong to you");
+        if (tags.length !== data.tagIds.length) {
+          throw new ForbiddenError("One or more tags do not belong to you");
+        }
       }
-    }
 
-    await prisma.noteTag.deleteMany({
-      where: { noteId: id },
-    });
-
-    if (data.tagIds.length > 0) {
-      await prisma.noteTag.createMany({
-        data: data.tagIds.map((tagId) => ({ noteId: id, tagId })),
+      await tx.noteTag.deleteMany({
+        where: { noteId: id },
       });
-    }
 
-    const updatedNote = await prisma.note.findUnique({
-      where: { id },
-      include: {
-        tags: {
-          include: { tag: true },
+      if (data.tagIds.length > 0) {
+        await tx.noteTag.createMany({
+          data: data.tagIds.map((tagId) => ({ noteId: id, tagId })),
+        });
+      }
+
+      return tx.note.findUnique({
+        where: { id },
+        include: {
+          tags: {
+            include: { tag: true },
+          },
         },
-      },
+      });
     });
+
+    if (!updatedNote) {
+      throw new NotFoundError("Note");
+    }
 
     return successResponse({
-      id: updatedNote!.id,
-      title: updatedNote!.title,
-      content: updatedNote!.content,
-      createdAt: updatedNote!.createdAt.toISOString(),
-      updatedAt: updatedNote!.updatedAt.toISOString(),
-      tags: updatedNote!.tags.map((nt) => nt.tag),
+      id: updatedNote.id,
+      title: updatedNote.title,
+      content: updatedNote.content,
+      createdAt: updatedNote.createdAt.toISOString(),
+      updatedAt: updatedNote.updatedAt.toISOString(),
+      tags: updatedNote.tags.map((nt) => nt.tag),
     });
   } catch (error: unknown) {
     return handleApiError(error);
