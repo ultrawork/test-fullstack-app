@@ -9,7 +9,6 @@ import {
 } from "@/lib/auth";
 import { loginSchema } from "@/lib/validation";
 import { successResponse, errorResponse } from "@/lib/api-response";
-import { randomUUID } from "crypto";
 
 export async function POST(request: NextRequest): Promise<Response> {
   try {
@@ -38,7 +37,7 @@ export async function POST(request: NextRequest): Promise<Response> {
 
     await prisma.refreshToken.create({
       data: {
-        token: randomUUID(),
+        token: refreshTokenValue,
         userId: user.id,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },

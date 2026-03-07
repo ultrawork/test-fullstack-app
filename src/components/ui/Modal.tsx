@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useCallback } from "react";
+import { type ReactNode, useEffect, useCallback, useId, useRef } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -15,9 +15,37 @@ export default function Modal({
   title,
   children,
 }: ModalProps): ReactNode {
+  const titleId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusable.length === 0) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
     },
     [onClose],
   );
@@ -25,7 +53,14 @@ export default function Modal({
   useEffect(() => {
     if (isOpen) {
       document.addEventListener("keydown", handleKeyDown);
-      return () => document.removeEventListener("keydown", handleKeyDown);
+      const prev = document.activeElement as HTMLElement | null;
+      dialogRef.current
+        ?.querySelector<HTMLElement>("button, [href], input, select, textarea")
+        ?.focus();
+      return () => {
+        document.removeEventListener("keydown", handleKeyDown);
+        prev?.focus();
+      };
     }
   }, [isOpen, handleKeyDown]);
 
@@ -39,14 +74,15 @@ export default function Modal({
         aria-hidden="true"
       />
       <div
+        ref={dialogRef}
         className="relative z-10 w-full max-w-lg rounded-lg bg-white shadow-xl"
         role="dialog"
-        aria-labelledby="modal-title"
+        aria-labelledby={titleId}
         aria-modal="true"
       >
         <div className="p-6">
           <header className="mb-4 flex items-center justify-between">
-            <h2 id="modal-title" className="text-lg font-semibold">
+            <h2 id={titleId} className="text-lg font-semibold">
               {title}
             </h2>
             <button

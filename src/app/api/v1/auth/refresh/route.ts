@@ -8,7 +8,6 @@ import {
   generateRefreshToken,
 } from "@/lib/auth";
 import { successResponse, errorResponse } from "@/lib/api-response";
-import { randomUUID } from "crypto";
 
 export async function POST(request: NextRequest): Promise<Response> {
   try {
@@ -20,6 +19,13 @@ export async function POST(request: NextRequest): Promise<Response> {
     const payload = await verifyRefreshToken(refreshToken);
     if (!payload) {
       return errorResponse("Invalid refresh token", 401);
+    }
+
+    const storedToken = await prisma.refreshToken.findUnique({
+      where: { token: refreshToken },
+    });
+    if (!storedToken) {
+      return errorResponse("Refresh token revoked", 401);
     }
 
     const user = await prisma.user.findUnique({
@@ -38,7 +44,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
     await prisma.refreshToken.create({
       data: {
-        token: randomUUID(),
+        token: newRefreshTokenValue,
         userId: user.id,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },

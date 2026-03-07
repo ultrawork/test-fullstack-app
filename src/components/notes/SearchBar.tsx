@@ -13,8 +13,14 @@ export default function SearchBar({
 }: SearchBarProps): ReactNode {
   const [query, setQuery] = useState("");
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
     if (debounceRef.current) clearTimeout(debounceRef.current);
 
     debounceRef.current = setTimeout(() => {
