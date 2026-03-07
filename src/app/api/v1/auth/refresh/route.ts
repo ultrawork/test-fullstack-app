@@ -21,7 +21,11 @@ export async function POST(): Promise<NextResponse> {
     const payload = await verifyRefreshToken(refreshTokenValue);
 
     const storedToken = await prisma.refreshToken.findFirst({
-      where: { token: refreshTokenValue, userId: payload.userId },
+      where: {
+        token: refreshTokenValue,
+        userId: payload.userId,
+        expiresAt: { gt: new Date() },
+      },
     });
 
     if (!storedToken) {

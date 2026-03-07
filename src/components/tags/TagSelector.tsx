@@ -3,6 +3,7 @@
 import { type ReactNode, useState, useMemo } from "react";
 import type { Tag } from "@/types/tag";
 import TagBadge from "./TagBadge";
+import { useTagsStore } from "@/stores/tags-store";
 
 interface TagSelectorProps {
   tags: Tag[];
@@ -18,6 +19,7 @@ export default function TagSelector({
   onCreate,
 }: TagSelectorProps): ReactNode {
   const [search, setSearch] = useState("");
+  const { error } = useTagsStore();
 
   const filteredTags = useMemo((): Tag[] => {
     if (!search.trim()) return tags;
@@ -96,6 +98,12 @@ export default function TagSelector({
           <li className="px-3 py-2 text-sm text-gray-500">No tags found</li>
         )}
       </ul>
+
+      {error && (
+        <p role="alert" className="text-sm text-red-600">
+          {error}
+        </p>
+      )}
 
       {canCreate && (
         <button

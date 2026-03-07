@@ -116,17 +116,13 @@ export async function DELETE(
     const userId = await getUserId();
     const { id } = await params;
 
-    const note = await prisma.note.findFirst({
+    const result = await prisma.note.deleteMany({
       where: { id, userId },
     });
 
-    if (!note) {
+    if (result.count === 0) {
       throw new NotFoundError("Note");
     }
-
-    await prisma.note.delete({
-      where: { id },
-    });
 
     return successResponse({ message: "Note deleted successfully" });
   } catch (error: unknown) {

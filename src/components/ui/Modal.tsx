@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useRef, useCallback, useId } from "react";
+import { type ReactNode, useEffect, useRef, useId } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -19,15 +19,6 @@ export default function Modal({
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const titleId = useId();
 
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent): void => {
-      if (event.key === "Escape") {
-        onClose();
-      }
-    },
-    [onClose],
-  );
-
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
@@ -35,16 +26,11 @@ export default function Modal({
     if (isOpen) {
       previousFocusRef.current = document.activeElement as HTMLElement;
       dialog.showModal();
-      document.addEventListener("keydown", handleKeyDown);
     } else {
       dialog.close();
       previousFocusRef.current?.focus();
     }
-
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, handleKeyDown]);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -53,6 +39,10 @@ export default function Modal({
       ref={dialogRef}
       className="w-full max-w-lg rounded-lg bg-white p-0 shadow-xl backdrop:bg-black/50"
       aria-labelledby={titleId}
+      onCancel={(e) => {
+        e.preventDefault();
+        onClose();
+      }}
       onClick={(e) => {
         if (e.target === dialogRef.current) onClose();
       }}

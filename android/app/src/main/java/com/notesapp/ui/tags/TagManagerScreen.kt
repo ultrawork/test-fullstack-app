@@ -63,6 +63,8 @@ fun TagManagerScreen(
     }
 
     if (deletingTag != null) {
+        val confirmDeleteDescription = stringResource(R.string.tag_manager_confirm_delete_a11y)
+        val cancelDeleteDescription = stringResource(R.string.tag_manager_cancel_delete_a11y)
         AlertDialog(
             onDismissRequest = { deletingTag = null },
             title = { Text(stringResource(R.string.tag_manager_delete_title)) },
@@ -77,7 +79,7 @@ fun TagManagerScreen(
                         viewModel.deleteTag(id)
                     },
                     modifier = Modifier.semantics {
-                        contentDescription = stringResource(R.string.tag_manager_confirm_delete_a11y)
+                        contentDescription = confirmDeleteDescription
                     },
                 ) {
                     Text(
@@ -90,7 +92,7 @@ fun TagManagerScreen(
                 TextButton(
                     onClick = { deletingTag = null },
                     modifier = Modifier.semantics {
-                        contentDescription = stringResource(R.string.tag_manager_cancel_delete_a11y)
+                        contentDescription = cancelDeleteDescription
                     },
                 ) {
                     Text(stringResource(R.string.tag_manager_delete_cancel))
@@ -103,10 +105,11 @@ fun TagManagerScreen(
         modifier = modifier,
         floatingActionButton = {
             if (viewMode == TagManagerViewMode.LIST) {
+                val createNewDescription = stringResource(R.string.tag_manager_create_new_a11y)
                 FloatingActionButton(
                     onClick = { viewMode = TagManagerViewMode.CREATE },
                     modifier = Modifier.semantics {
-                        contentDescription = stringResource(R.string.tag_manager_create_new_a11y)
+                        contentDescription = createNewDescription
                     },
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
@@ -117,6 +120,7 @@ fun TagManagerScreen(
         when (viewMode) {
             TagManagerViewMode.LIST -> {
                 if (isLoading && tags.isEmpty()) {
+                    val loadingDescription = stringResource(R.string.tag_manager_loading_a11y)
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -125,7 +129,7 @@ fun TagManagerScreen(
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.semantics {
-                                contentDescription = stringResource(R.string.tag_manager_loading_a11y)
+                                contentDescription = loadingDescription
                             },
                         )
                     }
@@ -211,12 +215,16 @@ private fun TagRow(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val tagSummaryDescription = stringResource(R.string.tag_manager_tag_summary, tag.name, tag.count.notes)
+    val editTagDescription = stringResource(R.string.tag_manager_edit_tag_a11y, tag.name)
+    val deleteTagDescription = stringResource(R.string.tag_manager_delete_tag_a11y, tag.name)
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .semantics {
-                contentDescription = stringResource(R.string.tag_manager_tag_summary, tag.name, tag.count.notes)
+                contentDescription = tagSummaryDescription
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -234,7 +242,7 @@ private fun TagRow(
         IconButton(
             onClick = onEdit,
             modifier = Modifier.semantics {
-                contentDescription = stringResource(R.string.tag_manager_edit_tag_a11y, tag.name)
+                contentDescription = editTagDescription
             },
         ) {
             Icon(
@@ -247,7 +255,7 @@ private fun TagRow(
         IconButton(
             onClick = onDelete,
             modifier = Modifier.semantics {
-                contentDescription = stringResource(R.string.tag_manager_delete_tag_a11y, tag.name)
+                contentDescription = deleteTagDescription
             },
         ) {
             Icon(

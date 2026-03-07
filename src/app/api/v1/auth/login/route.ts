@@ -11,6 +11,10 @@ import { loginSchema } from "@/lib/validation";
 import { successResponse, handleApiError } from "@/lib/api-response";
 import { AuthError } from "@/lib/errors";
 
+// Pre-computed bcrypt hash for timing attack mitigation on invalid emails
+const DUMMY_HASH =
+  "$2b$10$K4.eVSF/yO0NkU5rKwJbeOJWMEaFbQJDhB4sSqfDmKr9RoSmxshWG";
+
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const body: unknown = await request.json();
@@ -21,6 +25,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     });
 
     if (!user) {
+      await comparePassword(data.password, DUMMY_HASH);
       throw new AuthError("Invalid email or password");
     }
 

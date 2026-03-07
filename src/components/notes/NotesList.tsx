@@ -14,6 +14,7 @@ export default function NotesList(): ReactNode {
   const {
     notes,
     isLoading,
+    error,
     search,
     filterTagIds,
     fetchNotes,
@@ -42,7 +43,12 @@ export default function NotesList(): ReactNode {
         selectedIds={filterTagIds}
         onChange={setFilterTagIds}
       />
-      {notes.length === 0 ? (
+      {error && (
+        <div role="alert" className="rounded-md bg-red-50 p-4 text-sm text-red-700">
+          {error}
+        </div>
+      )}
+      {notes.length === 0 && !error ? (
         <EmptyState
           title="No notes found"
           description={

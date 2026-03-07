@@ -79,6 +79,7 @@ export default function TagsPage(): ReactNode {
       {showForm && (
         <section className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
           <TagForm
+            key={editingTag?.id ?? "create"}
             initialName={editingTag?.name}
             initialColor={editingTag?.color}
             onSubmit={editingTag ? handleUpdate : handleCreate}

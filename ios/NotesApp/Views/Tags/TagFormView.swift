@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Form for creating or editing a tag with name and color picker.
 struct TagFormView: View {
@@ -34,30 +35,30 @@ struct TagFormView: View {
 
     private var nameField: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(NSLocalizedString("tag_form_name_label", comment: "Tag name label"))
+            Text(NSLocalizedString("tag_form_name_label", tableName: "TagsLocalizable", comment: "Tag name label"))
                 .font(.subheadline)
                 .fontWeight(.medium)
 
             TextField(
-                NSLocalizedString("tag_form_name_placeholder", comment: "Tag name placeholder"),
+                NSLocalizedString("tag_form_name_placeholder", tableName: "TagsLocalizable", comment: "Tag name placeholder"),
                 text: $name
             )
             .textFieldStyle(.roundedBorder)
-            .accessibilityLabel(NSLocalizedString("tag_form_name_a11y", comment: "Tag name input"))
+            .accessibilityLabel(NSLocalizedString("tag_form_name_a11y", tableName: "TagsLocalizable", comment: "Tag name input"))
         }
     }
 
     private var colorField: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(NSLocalizedString("tag_form_color_label", comment: "Tag color label"))
+            Text(NSLocalizedString("tag_form_color_label", tableName: "TagsLocalizable", comment: "Tag color label"))
                 .font(.subheadline)
                 .fontWeight(.medium)
 
             ColorPicker(
-                NSLocalizedString("tag_form_color_picker", comment: "Color picker label"),
+                NSLocalizedString("tag_form_color_picker", tableName: "TagsLocalizable", comment: "Color picker label"),
                 selection: colorBinding
             )
-            .accessibilityLabel(NSLocalizedString("tag_form_color_picker_a11y", comment: "Color picker accessibility"))
+            .accessibilityLabel(NSLocalizedString("tag_form_color_picker_a11y", tableName: "TagsLocalizable", comment: "Color picker accessibility"))
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -76,7 +77,7 @@ struct TagFormView: View {
                         }
                         .accessibilityLabel(
                             String(
-                                format: NSLocalizedString("tag_form_select_color", comment: "Select preset color"),
+                                format: NSLocalizedString("tag_form_select_color", tableName: "TagsLocalizable", comment: "Select preset color"),
                                 presetColor
                             )
                         )
@@ -84,7 +85,7 @@ struct TagFormView: View {
                 }
             }
 
-            TagBadgeView(name: name.isEmpty ? NSLocalizedString("tag_form_preview", comment: "Tag preview placeholder") : name, color: color)
+            TagBadgeView(name: name.isEmpty ? NSLocalizedString("tag_form_preview", tableName: "TagsLocalizable", comment: "Tag preview placeholder") : name, color: color)
         }
     }
 
@@ -96,7 +97,7 @@ struct TagFormView: View {
                 .foregroundColor(.red)
                 .accessibilityLabel(
                     String(
-                        format: NSLocalizedString("tag_form_error", comment: "Tag form error"),
+                        format: NSLocalizedString("tag_form_error", tableName: "TagsLocalizable", comment: "Tag form error"),
                         errorMessage
                     )
                 )
@@ -105,11 +106,11 @@ struct TagFormView: View {
 
     private var actionButtons: some View {
         HStack {
-            Button(NSLocalizedString("tag_form_cancel", comment: "Cancel button")) {
+            Button(NSLocalizedString("tag_form_cancel", tableName: "TagsLocalizable", comment: "Cancel button")) {
                 onCancel()
             }
             .foregroundColor(.secondary)
-            .accessibilityLabel(NSLocalizedString("tag_form_cancel_a11y", comment: "Cancel tag editing"))
+            .accessibilityLabel(NSLocalizedString("tag_form_cancel_a11y", tableName: "TagsLocalizable", comment: "Cancel tag editing"))
 
             Spacer()
 
@@ -121,8 +122,8 @@ struct TagFormView: View {
                 } else {
                     Text(
                         isEditing
-                            ? NSLocalizedString("tag_form_update", comment: "Update tag button")
-                            : NSLocalizedString("tag_form_create", comment: "Create tag button")
+                            ? NSLocalizedString("tag_form_update", tableName: "TagsLocalizable", comment: "Update tag button")
+                            : NSLocalizedString("tag_form_create", tableName: "TagsLocalizable", comment: "Create tag button")
                     )
                 }
             }
@@ -130,8 +131,8 @@ struct TagFormView: View {
             .disabled(isSubmitting || name.trimmingCharacters(in: .whitespaces).isEmpty)
             .accessibilityLabel(
                 isEditing
-                    ? NSLocalizedString("tag_form_update_a11y", comment: "Update tag accessibility")
-                    : NSLocalizedString("tag_form_create_a11y", comment: "Create tag accessibility")
+                    ? NSLocalizedString("tag_form_update_a11y", tableName: "TagsLocalizable", comment: "Update tag accessibility")
+                    : NSLocalizedString("tag_form_create_a11y", tableName: "TagsLocalizable", comment: "Create tag accessibility")
             )
         }
     }
@@ -140,12 +141,13 @@ struct TagFormView: View {
         Binding(
             get: { Color(hex: color) ?? .blue },
             set: { newColor in
-                if let components = newColor.cgColor?.components, components.count >= 3 {
-                    let r = Int(components[0] * 255)
-                    let g = Int(components[1] * 255)
-                    let b = Int(components[2] * 255)
-                    color = String(format: "#%02X%02X%02X", r, g, b)
-                }
+                let uiColor = UIColor(newColor)
+                var r: CGFloat = 0
+                var g: CGFloat = 0
+                var b: CGFloat = 0
+                var a: CGFloat = 0
+                uiColor.getRed(&r, green: &g, blue: &b, alpha: &a)
+                color = String(format: "#%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
             }
         )
     }
@@ -153,17 +155,17 @@ struct TagFormView: View {
     private func submitForm() {
         let trimmedName = name.trimmingCharacters(in: .whitespaces)
         guard !trimmedName.isEmpty else {
-            errorMessage = NSLocalizedString("tag_form_error_name_required", comment: "Tag name required")
+            errorMessage = NSLocalizedString("tag_form_error_name_required", tableName: "TagsLocalizable", comment: "Tag name required")
             return
         }
         guard trimmedName.count <= 50 else {
-            errorMessage = NSLocalizedString("tag_form_error_name_too_long", comment: "Tag name too long")
+            errorMessage = NSLocalizedString("tag_form_error_name_too_long", tableName: "TagsLocalizable", comment: "Tag name too long")
             return
         }
 
         let hexPattern = /^#[0-9A-Fa-f]{6}$/
         guard color.wholeMatch(of: hexPattern) != nil else {
-            errorMessage = NSLocalizedString("tag_form_error_invalid_color", comment: "Invalid color format")
+            errorMessage = NSLocalizedString("tag_form_error_invalid_color", tableName: "TagsLocalizable", comment: "Invalid color format")
             return
         }
 

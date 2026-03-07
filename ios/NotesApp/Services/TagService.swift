@@ -98,10 +98,10 @@ enum TagServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidResponse:
-            return NSLocalizedString("tag_service_error_invalid_response", comment: "Invalid server response")
+            return NSLocalizedString("tag_service_error_invalid_response", tableName: "TagsLocalizable", comment: "Invalid server response")
         case .httpError(let statusCode):
             return String(
-                format: NSLocalizedString("tag_service_error_http", comment: "HTTP error"),
+                format: NSLocalizedString("tag_service_error_http", tableName: "TagsLocalizable", comment: "HTTP error"),
                 statusCode
             )
         }
@@ -109,8 +109,13 @@ enum TagServiceError: LocalizedError {
 }
 
 /// Simple token storage. In production, use Keychain.
-final class TokenStorage {
+final class TokenStorage: @unchecked Sendable {
     static let shared = TokenStorage()
-    var accessToken: String?
+    private let lock = NSLock()
+    private var _accessToken: String?
+    var accessToken: String? {
+        get { lock.withLock { _accessToken } }
+        set { lock.withLock { _accessToken = newValue } }
+    }
     private init() {}
 }

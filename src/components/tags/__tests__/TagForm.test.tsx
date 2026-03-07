@@ -57,4 +57,31 @@ describe("TagForm", () => {
       );
     expect(colorButtons.length).toBeGreaterThan(0);
   });
+
+  it("should call onSubmit with name and color on form submit", async () => {
+    const onSubmit = vi.fn().mockResolvedValue(undefined);
+    render(<TagForm onSubmit={onSubmit} onCancel={vi.fn()} />);
+
+    fireEvent.change(screen.getByLabelText("Tag name"), {
+      target: { value: "Work" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: /Create Tag/ }));
+
+    await vi.waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({ name: "Work" }),
+      );
+    });
+  });
+
+  it("should show validation error for empty name", async () => {
+    const onSubmit = vi.fn();
+    render(<TagForm onSubmit={onSubmit} onCancel={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /Create Tag/ }));
+
+    await vi.waitFor(() => {
+      expect(onSubmit).not.toHaveBeenCalled();
+    });
+  });
 });

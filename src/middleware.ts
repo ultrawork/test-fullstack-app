@@ -31,6 +31,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     const secret = new TextEncoder().encode(jwtSecret);
     const { payload } = await jwtVerify(token, secret);
     const requestHeaders = new Headers(request.headers);
+    requestHeaders.delete("x-user-id");
     requestHeaders.set("x-user-id", payload.userId as string);
     return NextResponse.next({ request: { headers: requestHeaders } });
   } catch {

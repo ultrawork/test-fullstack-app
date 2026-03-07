@@ -30,9 +30,11 @@ fun TagFilter(
 ) {
     if (tags.isEmpty()) return
 
+    val filterGroupDescription = stringResource(R.string.tag_filter_group)
+
     LazyRow(
         modifier = modifier.semantics {
-            contentDescription = stringResource(R.string.tag_filter_group)
+            contentDescription = filterGroupDescription
         },
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -41,6 +43,7 @@ fun TagFilter(
             val tagColor = parseHexColor(tag.color)
             val textColor = contrastColor(tag.color)
             val stateDesc = if (isSelected) stringResource(R.string.tag_filter_active) else stringResource(R.string.tag_filter_inactive)
+            val toggleDescription = stringResource(R.string.tag_filter_toggle, tag.name)
 
             FilterChip(
                 selected = isSelected,
@@ -57,7 +60,7 @@ fun TagFilter(
                     selectedContainerColor = tagColor,
                 ),
                 modifier = Modifier.semantics {
-                    contentDescription = stringResource(R.string.tag_filter_toggle, tag.name)
+                    contentDescription = toggleDescription
                     stateDescription = stateDesc
                 },
             )
@@ -65,12 +68,13 @@ fun TagFilter(
 
         if (selectedIds.isNotEmpty()) {
             item {
+                val clearAllDescription = stringResource(R.string.tag_filter_clear_all)
                 TextButton(
                     onClick = { onSelectionChange(emptyList()) },
                     modifier = Modifier
                         .padding(start = 4.dp)
                         .semantics {
-                            contentDescription = stringResource(R.string.tag_filter_clear_all)
+                            contentDescription = clearAllDescription
                         },
                 ) {
                     Text(stringResource(R.string.tag_filter_clear))

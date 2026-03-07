@@ -88,17 +88,13 @@ export async function DELETE(
     const userId = await getUserId();
     const { id } = await params;
 
-    const tag = await prisma.tag.findFirst({
+    const result = await prisma.tag.deleteMany({
       where: { id, userId },
     });
 
-    if (!tag) {
+    if (result.count === 0) {
       throw new NotFoundError("Tag");
     }
-
-    await prisma.tag.delete({
-      where: { id },
-    });
 
     return successResponse({ message: "Tag deleted successfully" });
   } catch (error: unknown) {

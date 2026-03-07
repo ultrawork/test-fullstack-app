@@ -20,7 +20,7 @@ struct TagFilterView: View {
                 .padding(.horizontal, 4)
             }
             .accessibilityElement(children: .contain)
-            .accessibilityLabel(NSLocalizedString("tag_filter_group_label", comment: "Tag filter group"))
+            .accessibilityLabel(NSLocalizedString("tag_filter_group_label", tableName: "TagsLocalizable", comment: "Tag filter group"))
         }
     }
 
@@ -47,14 +47,14 @@ struct TagFilterView: View {
         }
         .accessibilityLabel(
             String(
-                format: NSLocalizedString("tag_filter_toggle", comment: "Toggle tag filter"),
+                format: NSLocalizedString("tag_filter_toggle", tableName: "TagsLocalizable", comment: "Toggle tag filter"),
                 tag.name
             )
         )
         .accessibilityValue(
             isSelected
-                ? NSLocalizedString("tag_filter_active", comment: "Filter active")
-                : NSLocalizedString("tag_filter_inactive", comment: "Filter inactive")
+                ? NSLocalizedString("tag_filter_active", tableName: "TagsLocalizable", comment: "Filter active")
+                : NSLocalizedString("tag_filter_inactive", tableName: "TagsLocalizable", comment: "Filter inactive")
         )
         .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
@@ -63,11 +63,11 @@ struct TagFilterView: View {
         Button {
             selectedIds.removeAll()
         } label: {
-            Text(NSLocalizedString("tag_filter_clear", comment: "Clear tag filter"))
+            Text(NSLocalizedString("tag_filter_clear", tableName: "TagsLocalizable", comment: "Clear tag filter"))
                 .font(.subheadline)
                 .foregroundColor(.secondary)
         }
-        .accessibilityLabel(NSLocalizedString("tag_filter_clear_a11y", comment: "Clear all tag filters"))
+        .accessibilityLabel(NSLocalizedString("tag_filter_clear_a11y", tableName: "TagsLocalizable", comment: "Clear all tag filters"))
     }
 
     private func toggleTag(id: String) {

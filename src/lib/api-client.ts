@@ -13,23 +13,23 @@ async function refreshToken(): Promise<boolean> {
 }
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const { headers: customHeaders, ...rest } = options;
+  const mergedHeaders = {
+    "Content-Type": "application/json",
+    ...(customHeaders as Record<string, string>),
+  };
+
   const response = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers as Record<string, string>),
-    },
-    ...options,
+    ...rest,
+    headers: mergedHeaders,
   });
 
   if (response.status === 401 && !path.includes("/auth/")) {
     const refreshed = await refreshToken();
     if (refreshed) {
       const retryRes = await fetch(`${API_BASE}${path}`, {
-        headers: {
-          "Content-Type": "application/json",
-          ...(options.headers as Record<string, string>),
-        },
-        ...options,
+        ...rest,
+        headers: mergedHeaders,
       });
       if (!retryRes.ok) {
         const err = await retryRes.json().catch(() => null);

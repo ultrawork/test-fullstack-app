@@ -94,6 +94,7 @@ fun TagForm(
         ) {
             DEFAULT_COLORS.forEach { presetColor ->
                 val isSelected = color == presetColor
+                val selectColorDescription = stringResource(R.string.tag_form_select_color, presetColor)
                 Box(
                     modifier = Modifier
                         .size(32.dp)
@@ -105,8 +106,7 @@ fun TagForm(
                         )
                         .clickable { color = presetColor }
                         .semantics {
-                            contentDescription =
-                                stringResource(R.string.tag_form_select_color, presetColor)
+                            contentDescription = selectColorDescription
                         },
                 )
             }

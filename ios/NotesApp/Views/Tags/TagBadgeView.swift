@@ -20,7 +20,7 @@ struct TagBadgeView: View {
                 }
                 .accessibilityLabel(
                     String(
-                        format: NSLocalizedString("tag_badge_remove", comment: "Remove tag action"),
+                        format: NSLocalizedString("tag_badge_remove", tableName: "TagsLocalizable", comment: "Remove tag action"),
                         name
                     )
                 )
@@ -34,7 +34,7 @@ struct TagBadgeView: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel(
             String(
-                format: NSLocalizedString("tag_badge_label", comment: "Tag badge label"),
+                format: NSLocalizedString("tag_badge_label", tableName: "TagsLocalizable", comment: "Tag badge label"),
                 name
             )
         )

@@ -22,8 +22,11 @@ export const createNoteSchema = z.object({
     .string()
     .min(1, "Title is required")
     .max(255, "Title must be at most 255 characters"),
-  content: z.string().min(1, "Content is required"),
-  tagIds: z.array(z.string().cuid()).optional(),
+  content: z
+    .string()
+    .min(1, "Content is required")
+    .max(100000, "Content must be at most 100000 characters"),
+  tagIds: z.array(z.string().cuid()).max(50, "Too many tags").optional(),
 });
 
 export const updateNoteSchema = z.object({
@@ -32,8 +35,12 @@ export const updateNoteSchema = z.object({
     .min(1, "Title is required")
     .max(255, "Title must be at most 255 characters")
     .optional(),
-  content: z.string().min(1, "Content is required").optional(),
-  tagIds: z.array(z.string().cuid()).optional(),
+  content: z
+    .string()
+    .min(1, "Content is required")
+    .max(100000, "Content must be at most 100000 characters")
+    .optional(),
+  tagIds: z.array(z.string().cuid()).max(50, "Too many tags").optional(),
 });
 
 const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
@@ -63,7 +70,7 @@ export const updateTagSchema = z.object({
 });
 
 export const attachTagsSchema = z.object({
-  tagIds: z.array(z.string().cuid()),
+  tagIds: z.array(z.string().cuid()).max(50, "Too many tags"),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

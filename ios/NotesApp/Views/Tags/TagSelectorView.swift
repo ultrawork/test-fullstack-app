@@ -25,7 +25,7 @@ struct TagSelectorView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(NSLocalizedString("tag_selector_title", comment: "Tags section title"))
+            Text(NSLocalizedString("tag_selector_title", tableName: "TagsLocalizable", comment: "Tags section title"))
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .foregroundColor(.secondary)
@@ -33,11 +33,11 @@ struct TagSelectorView: View {
             selectedTagsSection
 
             TextField(
-                NSLocalizedString("tag_selector_search_placeholder", comment: "Search tags placeholder"),
+                NSLocalizedString("tag_selector_search_placeholder", tableName: "TagsLocalizable", comment: "Search tags placeholder"),
                 text: $searchText
             )
             .textFieldStyle(.roundedBorder)
-            .accessibilityLabel(NSLocalizedString("tag_selector_search_label", comment: "Search tags input"))
+            .accessibilityLabel(NSLocalizedString("tag_selector_search_label", tableName: "TagsLocalizable", comment: "Search tags input"))
 
             tagsList
 
@@ -81,14 +81,14 @@ struct TagSelectorView: View {
                 }
                 .accessibilityLabel(
                     String(
-                        format: NSLocalizedString("tag_selector_toggle", comment: "Toggle tag selection"),
+                        format: NSLocalizedString("tag_selector_toggle", tableName: "TagsLocalizable", comment: "Toggle tag selection"),
                         tag.name
                     )
                 )
                 .accessibilityValue(
                     selectedIds.contains(tag.id)
-                        ? NSLocalizedString("tag_selected", comment: "Tag is selected")
-                        : NSLocalizedString("tag_not_selected", comment: "Tag is not selected")
+                        ? NSLocalizedString("tag_selected", tableName: "TagsLocalizable", comment: "Tag is selected")
+                        : NSLocalizedString("tag_not_selected", tableName: "TagsLocalizable", comment: "Tag is not selected")
                 )
             }
         }
@@ -106,7 +106,7 @@ struct TagSelectorView: View {
         } label: {
             Label(
                 String(
-                    format: NSLocalizedString("tag_selector_create", comment: "Create new tag button"),
+                    format: NSLocalizedString("tag_selector_create", tableName: "TagsLocalizable", comment: "Create new tag button"),
                     searchText.trimmingCharacters(in: .whitespaces)
                 ),
                 systemImage: "plus.circle.fill"
@@ -116,7 +116,7 @@ struct TagSelectorView: View {
         }
         .accessibilityLabel(
             String(
-                format: NSLocalizedString("tag_selector_create_a11y", comment: "Create new tag accessibility label"),
+                format: NSLocalizedString("tag_selector_create_a11y", tableName: "TagsLocalizable", comment: "Create new tag accessibility label"),
                 searchText.trimmingCharacters(in: .whitespaces)
             )
         )
