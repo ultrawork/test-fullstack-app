@@ -1,3 +1,5 @@
+// NOTE: bcryptjs is used for portability. For better performance in serverless/Edge,
+// consider switching to native `bcrypt` or `@node-rs/bcrypt`.
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { createHash } from 'crypto';

@@ -23,6 +23,7 @@ export function getCurrentUser(request: NextRequest): { id: string; email: strin
   if (!token) return null;
   try {
     const payload = verifyAccessToken(token);
+    if (!payload.sub || !payload.email) return null;
     return { id: payload.sub, email: payload.email };
   } catch {
     return null;

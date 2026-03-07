@@ -11,6 +11,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   loading?: boolean;
   children: ReactNode;
+  'aria-label'?: string;
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -33,12 +34,20 @@ export function Button({
   disabled,
   children,
   className = '',
+  'aria-label': ariaLabel,
   ...props
 }: ButtonProps): ReactNode {
+  const hasNoChildren = children == null || children === '' || children === false;
+
+  if (hasNoChildren && !ariaLabel && process.env.NODE_ENV !== 'production') {
+    console.warn('Button: provide text content or aria-label for accessibility.');
+  }
+
   return (
     <button
       className={`inline-flex items-center justify-center rounded-md font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
       disabled={disabled || loading}
+      aria-label={ariaLabel}
       {...props}
     >
       {loading && <Spinner className="mr-2 h-4 w-4" />}

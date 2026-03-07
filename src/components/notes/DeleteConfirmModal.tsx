@@ -20,7 +20,8 @@ export function DeleteConfirmModal({
   return (
     <Modal isOpen={isOpen} onClose={onCancel} title="Delete Note">
       <p className="mb-6 text-gray-600">
-        Are you sure you want to delete &quot;{noteTitle}&quot;? This action cannot be undone.
+        Are you sure you want to delete &quot;{noteTitle || 'this note'}&quot;? This action cannot
+        be undone.
       </p>
       <div className="flex justify-end gap-3">
         <Button variant="secondary" onClick={onCancel}>
