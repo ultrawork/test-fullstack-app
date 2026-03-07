@@ -42,7 +42,10 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
     },
   });
 
-  if (response.status === 401 && !url.includes('/auth/')) {
+  const SKIP_REFRESH_URLS = ['/auth/login', '/auth/register', '/auth/refresh', '/auth/logout'];
+  const shouldSkipRefresh = SKIP_REFRESH_URLS.some((path) => url.includes(path));
+
+  if (response.status === 401 && !shouldSkipRefresh) {
     const refreshed = await refreshToken();
     if (refreshed) {
       const retryResponse = await fetch(url, {

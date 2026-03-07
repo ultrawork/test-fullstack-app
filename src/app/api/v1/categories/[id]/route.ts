@@ -40,9 +40,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
 
     const { name, color } = result.data;
 
-    if (name && name !== existing.name) {
+    if (name && name.toLowerCase() !== existing.name.toLowerCase()) {
       const duplicate = await prisma.category.findFirst({
-        where: { userId: currentUser.id, name, NOT: { id } },
+        where: {
+          userId: currentUser.id,
+          name: { equals: name, mode: 'insensitive' },
+          NOT: { id },
+        },
       });
       if (duplicate) {
         return errorResponse('Category with this name already exists', 409);

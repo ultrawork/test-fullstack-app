@@ -2,10 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
 const PUBLIC_PATHS = ['/', '/login', '/register'];
-const PUBLIC_API_PATHS = ['/api/v1/auth/login', '/api/v1/auth/register', '/api/v1/auth/refresh'];
 
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.includes(pathname) || PUBLIC_API_PATHS.includes(pathname);
+  return PUBLIC_PATHS.includes(pathname);
 }
 
 function isProtectedPath(pathname: string): boolean {
