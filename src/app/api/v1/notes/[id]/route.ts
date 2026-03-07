@@ -50,15 +50,15 @@ export async function PUT(
     const body: unknown = await request.json();
     const data = updateNoteSchema.parse(body);
 
-    const existingNote = await prisma.note.findFirst({
-      where: { id, userId },
-    });
-
-    if (!existingNote) {
-      throw new NotFoundError("Note");
-    }
-
     const note = await prisma.$transaction(async (tx) => {
+      const existingNote = await tx.note.findFirst({
+        where: { id, userId },
+      });
+
+      if (!existingNote) {
+        throw new NotFoundError("Note");
+      }
+
       if (data.tagIds !== undefined) {
         if (data.tagIds.length > 0) {
           const tags = await tx.tag.findMany({
@@ -82,7 +82,7 @@ export async function PUT(
       }
 
       return tx.note.update({
-        where: { id },
+        where: { id, userId },
         data: {
           ...(data.title !== undefined && { title: data.title }),
           ...(data.content !== undefined && { content: data.content }),

@@ -19,6 +19,7 @@ interface TagsStore {
   updateTag: (id: string, input: UpdateTagInput) => Promise<void>;
   deleteTag: (id: string) => Promise<void>;
   clearError: () => void;
+  reset: () => void;
 }
 
 export const useTagsStore = create<TagsStore>((set) => ({
@@ -95,4 +96,12 @@ export const useTagsStore = create<TagsStore>((set) => ({
   },
 
   clearError: () => set({ error: null }),
+  reset: () =>
+    set({
+      tags: [],
+      isLoadingList: false,
+      isSaving: false,
+      isDeleting: false,
+      error: null,
+    }),
 }));

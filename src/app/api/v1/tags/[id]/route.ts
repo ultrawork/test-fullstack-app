@@ -61,12 +61,20 @@ export async function PUT(
       }
     }
 
-    const tag = await prisma.tag.update({
-      where: { id },
+    const result = await prisma.tag.updateMany({
+      where: { id, userId },
       data: {
         ...(data.name !== undefined && { name: data.name }),
         ...(data.color !== undefined && { color: data.color }),
       },
+    });
+
+    if (result.count === 0) {
+      throw new NotFoundError("Tag");
+    }
+
+    const tag = await prisma.tag.findFirst({
+      where: { id, userId },
       include: {
         _count: {
           select: { notes: true },

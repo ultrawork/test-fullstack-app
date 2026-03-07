@@ -14,16 +14,18 @@ interface TagFormProps {
   isEditing?: boolean;
 }
 
-const DEFAULT_COLORS = [
-  "#EF4444",
-  "#F59E0B",
-  "#10B981",
-  "#3B82F6",
-  "#8B5CF6",
-  "#EC4899",
-  "#6B7280",
-  "#14B8A6",
-];
+const COLOR_MAP: Record<string, string> = {
+  "#EF4444": "Red",
+  "#F59E0B": "Amber",
+  "#10B981": "Green",
+  "#3B82F6": "Blue",
+  "#8B5CF6": "Purple",
+  "#EC4899": "Pink",
+  "#6B7280": "Gray",
+  "#14B8A6": "Teal",
+};
+
+const DEFAULT_COLORS = Object.keys(COLOR_MAP);
 
 export default function TagForm({
   initialName = "",
@@ -105,7 +107,7 @@ export default function TagForm({
                 onClick={() => setColor(c)}
                 className={`h-6 w-6 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${color === c ? "border-gray-900" : "border-transparent"}`}
                 style={{ backgroundColor: c }}
-                aria-label={`Select color ${c}`}
+                aria-label={`Select color ${COLOR_MAP[c] ?? c}`}
               />
             ))}
           </div>

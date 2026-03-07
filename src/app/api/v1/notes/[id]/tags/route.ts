@@ -16,15 +16,15 @@ export async function PUT(
     const body: unknown = await request.json();
     const data = attachTagsSchema.parse(body);
 
-    const note = await prisma.note.findFirst({
-      where: { id, userId },
-    });
-
-    if (!note) {
-      throw new NotFoundError("Note");
-    }
-
     const updatedNote = await prisma.$transaction(async (tx) => {
+      const note = await tx.note.findFirst({
+        where: { id, userId },
+      });
+
+      if (!note) {
+        throw new NotFoundError("Note");
+      }
+
       if (data.tagIds.length > 0) {
         const tags = await tx.tag.findMany({
           where: { id: { in: data.tagIds }, userId },

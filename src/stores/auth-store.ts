@@ -2,6 +2,8 @@ import { create } from "zustand";
 import type { User } from "@/types/auth";
 import type { ApiResponse } from "@/types/api";
 import { apiClient } from "@/lib/api-client";
+import { useNotesStore } from "./notes-store";
+import { useTagsStore } from "./tags-store";
 
 interface AuthStore {
   user: User | null;
@@ -77,6 +79,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
       await apiClient.post("/auth/logout");
     } finally {
       set({ user: null, isAuthenticated: false });
+      useNotesStore.getState().reset();
+      useTagsStore.getState().reset();
     }
   },
 

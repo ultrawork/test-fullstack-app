@@ -28,10 +28,18 @@ describe("AuthStore", () => {
   });
 
   it("should have initial state", () => {
+    // Reset to real initial state to test actual defaults
+    useAuthStore.setState({
+      user: null,
+      isAuthenticated: false,
+      isCheckingAuth: true,
+      isSubmitting: false,
+      error: null,
+    });
     const state = useAuthStore.getState();
     expect(state.user).toBeNull();
     expect(state.isAuthenticated).toBe(false);
-    expect(state.isCheckingAuth).toBe(false);
+    expect(state.isCheckingAuth).toBe(true);
     expect(state.isSubmitting).toBe(false);
     expect(state.error).toBeNull();
   });

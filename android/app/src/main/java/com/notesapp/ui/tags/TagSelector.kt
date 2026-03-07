@@ -90,8 +90,11 @@ fun TagSelector(
             singleLine = true,
         )
 
+        val itemHeight = 48.dp
+        val maxItems = 4
+        val maxHeight = itemHeight * minOf(filteredTags.size, maxItems)
         LazyColumn(
-            modifier = Modifier.heightIn(max = 160.dp),
+            modifier = Modifier.heightIn(max = maxHeight),
         ) {
             items(filteredTags, key = { it.id }) { tag ->
                 val isSelected = selectedIds.contains(tag.id)

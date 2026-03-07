@@ -66,5 +66,6 @@
     <string name="tag_error_update_generic">Failed to update tag</string>
     <string name="tag_error_delete_failed">Failed to delete tag: %1$d</string>
     <string name="tag_error_delete_generic">Failed to delete tag</string>
+    <string name="tag_error_attach_failed">Failed to attach tags: %1$d</string>
     <string name="tag_error_attach_generic">Failed to attach tags</string>
 </resources>

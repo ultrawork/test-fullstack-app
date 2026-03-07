@@ -14,7 +14,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const search = searchParams.get("search") || undefined;
     const rawTagIds = searchParams.getAll("tagIds");
-    const cuidRegex = /^c[a-z0-9]{24}$/;
+    const cuidRegex = /^c[a-z0-9]{20,32}$/;
     const tagIds = rawTagIds.filter((id) => cuidRegex.test(id)).slice(0, 50);
     const page = Math.max(
       1,
@@ -97,33 +97,35 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const body: unknown = await request.json();
     const data = createNoteSchema.parse(body);
 
-    if (data.tagIds && data.tagIds.length > 0) {
-      const tags = await prisma.tag.findMany({
-        where: { id: { in: data.tagIds }, userId },
-      });
+    const note = await prisma.$transaction(async (tx) => {
+      if (data.tagIds && data.tagIds.length > 0) {
+        const tags = await tx.tag.findMany({
+          where: { id: { in: data.tagIds }, userId },
+        });
 
-      if (tags.length !== data.tagIds.length) {
-        throw new ValidationError("One or more tags are invalid");
+        if (tags.length !== data.tagIds.length) {
+          throw new ValidationError("One or more tags are invalid");
+        }
       }
-    }
 
-    const note = await prisma.note.create({
-      data: {
-        title: data.title,
-        content: data.content,
-        userId,
-        ...(data.tagIds &&
-          data.tagIds.length > 0 && {
-            tags: {
-              create: data.tagIds.map((tagId) => ({ tagId })),
-            },
-          }),
-      },
-      include: {
-        tags: {
-          include: { tag: true },
+      return tx.note.create({
+        data: {
+          title: data.title,
+          content: data.content,
+          userId,
+          ...(data.tagIds &&
+            data.tagIds.length > 0 && {
+              tags: {
+                create: data.tagIds.map((tagId) => ({ tagId })),
+              },
+            }),
         },
-      },
+        include: {
+          tags: {
+            include: { tag: true },
+          },
+        },
+      });
     });
 
     return successResponse(

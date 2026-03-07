@@ -68,11 +68,13 @@ export default function NotesList(): ReactNode {
           }
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <ul role="list" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {notes.map((note) => (
-            <NoteCard key={note.id} note={note} />
+            <li key={note.id}>
+              <NoteCard note={note} />
+            </li>
           ))}
-        </div>
+        </ul>
       )}
     </section>
   );

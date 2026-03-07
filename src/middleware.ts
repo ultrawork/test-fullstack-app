@@ -2,12 +2,12 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const protectedPaths = ["/api/v1/notes", "/api/v1/tags"];
+const publicPaths = ["/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh"];
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
-  const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
-  if (!isProtected) {
+  const isPublic = publicPaths.some((p) => pathname === p);
+  if (isPublic) {
     const headers = new Headers(request.headers);
     headers.delete("x-user-id");
     return NextResponse.next({ request: { headers } });
@@ -45,5 +45,5 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-  matcher: ["/api/v1/notes/:path*", "/api/v1/tags/:path*"],
+  matcher: ["/api/v1/:path*"],
 };

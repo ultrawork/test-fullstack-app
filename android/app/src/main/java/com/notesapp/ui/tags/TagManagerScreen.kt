@@ -29,7 +29,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
+
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -54,10 +54,10 @@ fun TagManagerScreen(
     val tags by viewModel.tags.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    var viewMode by rememberSaveable { mutableStateOf(TagManagerViewMode.LIST) }
+    var viewMode by remember { mutableStateOf(TagManagerViewMode.LIST) }
     var editingTag by remember { mutableStateOf<TagWithNoteCount?>(null) }
     var deletingTag by remember { mutableStateOf<TagWithNoteCount?>(null) }
-    var isSubmitting by rememberSaveable { mutableStateOf(false) }
+    var isSubmitting by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.fetchTags()

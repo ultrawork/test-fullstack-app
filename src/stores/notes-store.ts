@@ -22,7 +22,10 @@ interface NotesStore {
   setFilterTagIds: (tagIds: string[]) => void;
   clearCurrentNote: () => void;
   clearError: () => void;
+  reset: () => void;
 }
+
+let fetchNotesController: AbortController | null = null;
 
 export const useNotesStore = create<NotesStore>((set, get) => ({
   notes: [],
@@ -36,6 +39,12 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
   filterTagIds: [],
 
   fetchNotes: async () => {
+    if (fetchNotesController) {
+      fetchNotesController.abort();
+    }
+    fetchNotesController = new AbortController();
+    const { signal } = fetchNotesController;
+
     set({ isLoadingList: true, error: null });
     try {
       const params = new URLSearchParams();
@@ -55,9 +64,14 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
             totalPages: number;
           };
         }>
-      >(`/notes${query ? `?${query}` : ""}`);
-      set({ notes: res.data.notes, isLoadingList: false });
+      >(`/notes${query ? `?${query}` : ""}`, { signal });
+      if (!signal.aborted) {
+        set({ notes: res.data.notes, isLoadingList: false });
+      }
     } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return;
+      }
       set({
         isLoadingList: false,
         error: err instanceof Error ? err.message : "Failed to fetch notes",
@@ -134,4 +148,21 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
   setFilterTagIds: (tagIds) => set({ filterTagIds: tagIds }),
   clearCurrentNote: () => set({ currentNote: null }),
   clearError: () => set({ error: null }),
+  reset: () => {
+    if (fetchNotesController) {
+      fetchNotesController.abort();
+      fetchNotesController = null;
+    }
+    set({
+      notes: [],
+      currentNote: null,
+      isLoadingList: false,
+      isLoadingNote: false,
+      isSaving: false,
+      isDeleting: false,
+      error: null,
+      search: "",
+      filterTagIds: [],
+    });
+  },
 }));

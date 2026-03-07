@@ -137,7 +137,10 @@ class TagViewModel(application: Application, private val tagApi: TagApi) : Andro
     fun attachTags(noteId: String, tagIds: List<String>) {
         viewModelScope.launch {
             try {
-                tagApi.attachTags(noteId, AttachTagsInput(tagIds))
+                val response = tagApi.attachTags(noteId, AttachTagsInput(tagIds))
+                if (!response.isSuccessful) {
+                    _errorMessage.value = context.getString(R.string.tag_error_attach_failed, response.code())
+                }
             } catch (e: Exception) {
                 _errorMessage.value = e.message ?: context.getString(R.string.tag_error_attach_generic)
             }

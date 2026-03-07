@@ -75,7 +75,10 @@ describe("NotesStore", () => {
 
     await useNotesStore.getState().fetchNotes();
 
-    expect(mockedApi.get).toHaveBeenCalledWith("/notes?search=test&tagIds=t1");
+    expect(mockedApi.get).toHaveBeenCalledWith(
+      "/notes?search=test&tagIds=t1",
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 
   it("should create note", async () => {

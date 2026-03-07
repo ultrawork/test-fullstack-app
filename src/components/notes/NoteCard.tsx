@@ -24,16 +24,17 @@ export default function NoteCard({ note }: NoteCardProps): ReactNode {
         </p>
       </Link>
       {note.tags.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-1">
+        <ul role="list" className="mt-3 flex flex-wrap gap-1">
           {note.tags.map((tag) => (
-            <TagBadge
-              key={tag.id}
-              name={tag.name}
-              color={tag.color}
-              size="sm"
-            />
+            <li key={tag.id}>
+              <TagBadge
+                name={tag.name}
+                color={tag.color}
+                size="sm"
+              />
+            </li>
           ))}
-        </div>
+        </ul>
       )}
       <time
         className="mt-2 block text-xs text-gray-400"

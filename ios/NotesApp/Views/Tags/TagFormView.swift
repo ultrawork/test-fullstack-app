@@ -1,5 +1,7 @@
 import SwiftUI
+#if canImport(UIKit)
 import UIKit
+#endif
 
 /// Form for creating or editing a tag with name and color picker.
 struct TagFormView: View {
