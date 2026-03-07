@@ -46,7 +46,7 @@ export default function CategoriesPage(): ReactNode {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
+    <div data-testid="categories-page" className="mx-auto max-w-2xl">
       <h1 className="mb-6 text-2xl font-bold text-gray-900">Categories</h1>
       <section className="mb-8">
         <h2 className="mb-4 text-lg font-semibold text-gray-800">Add Category</h2>

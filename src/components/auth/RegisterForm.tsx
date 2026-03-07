@@ -49,7 +49,7 @@ export function RegisterForm(): ReactNode {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate data-testid="register-form">
       <fieldset>
         <legend className="sr-only">Register</legend>
         {serverError && (
@@ -94,7 +94,7 @@ export function RegisterForm(): ReactNode {
       </fieldset>
       <p className="text-center text-sm text-gray-600">
         Already have an account?{' '}
-        <Link href="/login" className="text-blue-600 hover:text-blue-500">
+        <Link href="/login" className="text-blue-600 hover:text-blue-500" data-testid="login-link">
           Sign in
         </Link>
       </p>

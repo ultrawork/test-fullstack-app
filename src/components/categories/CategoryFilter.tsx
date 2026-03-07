@@ -13,7 +13,7 @@ export function CategoryFilter(): ReactNode {
   }, [fetchCategories]);
 
   return (
-    <div className="space-y-1">
+    <div data-testid="category-filter" className="space-y-1">
       <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
         Categories
       </h3>

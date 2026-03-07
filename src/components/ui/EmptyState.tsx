@@ -15,7 +15,7 @@ export function EmptyState({
   onAction,
 }: EmptyStateProps): ReactNode {
   return (
-    <section className="flex flex-col items-center justify-center py-12 text-center">
+    <section data-testid="empty-state" className="flex flex-col items-center justify-center py-12 text-center">
       <svg
         className="mx-auto h-12 w-12 text-gray-400"
         fill="none"

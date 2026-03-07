@@ -24,7 +24,7 @@ export function NoteView({ note }: NoteViewProps): ReactNode {
   };
 
   return (
-    <article className="mx-auto max-w-2xl">
+    <article data-testid="note-view" className="mx-auto max-w-2xl">
       <header className="mb-6">
         <div className="mb-2 flex items-center gap-2">
           {note.category && <Badge name={note.category.name} color={note.category.color} />}

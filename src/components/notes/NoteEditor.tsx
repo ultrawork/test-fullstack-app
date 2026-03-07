@@ -80,7 +80,7 @@ export function NoteEditor({ note }: NoteEditorProps): ReactNode {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-4" noValidate>
+    <form onSubmit={handleSubmit} className="mx-auto max-w-2xl space-y-4" noValidate data-testid="note-editor-form">
       <Input
         label="Title"
         value={title}
@@ -100,7 +100,7 @@ export function NoteEditor({ note }: NoteEditorProps): ReactNode {
           Category
         </label>
         <select
-          id="category-select"
+          id="category-select" data-testid="category-select"
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           className="block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"

@@ -51,7 +51,7 @@ export function CategoryForm({ category, onSubmit, onCancel }: CategoryFormProps
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-end gap-3">
+    <form onSubmit={handleSubmit} className="flex items-end gap-3" data-testid="category-form">
       <div className="flex-1">
         <Input
           label="Category name"
@@ -66,7 +66,7 @@ export function CategoryForm({ category, onSubmit, onCancel }: CategoryFormProps
           Color
         </label>
         <input
-          id="category-color"
+          id="category-color" data-testid="category-color"
           type="color"
           value={color}
           onChange={(e) => setColor(e.target.value)}

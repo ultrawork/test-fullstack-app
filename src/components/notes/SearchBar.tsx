@@ -24,7 +24,7 @@ export function SearchBar(): ReactNode {
     <div className="relative">
       <input
         type="search"
-        aria-label="Search notes"
+        aria-label="Search notes" data-testid="search-input"
         placeholder="Search notes..."
         value={query}
         onChange={(e) => setQuery(e.target.value)}

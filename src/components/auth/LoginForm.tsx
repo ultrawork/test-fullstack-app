@@ -48,7 +48,7 @@ export function LoginForm(): ReactNode {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+    <form onSubmit={handleSubmit} className="space-y-4" noValidate data-testid="login-form">
       <fieldset>
         <legend className="sr-only">Login</legend>
         {serverError && (
@@ -84,7 +84,7 @@ export function LoginForm(): ReactNode {
       </fieldset>
       <p className="text-center text-sm text-gray-600">
         Don&apos;t have an account?{' '}
-        <Link href="/register" className="text-blue-600 hover:text-blue-500">
+        <Link href="/register" className="text-blue-600 hover:text-blue-500" data-testid="register-link">
           Register
         </Link>
       </p>

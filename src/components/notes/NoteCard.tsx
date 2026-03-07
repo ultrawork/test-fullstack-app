@@ -15,11 +15,11 @@ export function NoteCard({ note, onDelete }: NoteCardProps): ReactNode {
   const updatedAt = new Date(note.updatedAt).toLocaleDateString();
 
   return (
-    <article className="rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md">
+    <article data-testid="note-card" className="rounded-lg border border-gray-200 bg-white p-4 transition-shadow hover:shadow-md">
       <header className="mb-2 flex items-start justify-between">
         <Link
           href={`/dashboard/notes/${note.id}`}
-          className="text-lg font-semibold text-gray-900 hover:text-blue-600"
+          className="text-lg font-semibold text-gray-900 hover:text-blue-600" data-testid="note-title-link"
         >
           {note.title}
         </Link>
@@ -27,7 +27,7 @@ export function NoteCard({ note, onDelete }: NoteCardProps): ReactNode {
           <Link
             href={`/dashboard/notes/${note.id}/edit`}
             className="rounded p-1 text-gray-400 hover:text-blue-600"
-            aria-label={`Edit ${note.title}`}
+            aria-label={`Edit ${note.title}`} data-testid="note-edit-link"
           >
             <svg
               className="h-4 w-4"
@@ -47,7 +47,7 @@ export function NoteCard({ note, onDelete }: NoteCardProps): ReactNode {
           <button
             onClick={() => onDelete(note.id)}
             className="rounded p-1 text-gray-400 hover:text-red-600"
-            aria-label={`Delete ${note.title}`}
+            aria-label={`Delete ${note.title}`} data-testid="note-delete-button"
           >
             <svg
               className="h-4 w-4"
