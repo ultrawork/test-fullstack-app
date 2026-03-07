@@ -1,5 +1,17 @@
 const API_BASE = "/api/v1";
 
+let refreshPromise: Promise<boolean> | null = null;
+
+async function refreshToken(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = fetch(`${API_BASE}/auth/refresh`, { method: "POST" })
+    .then((res) => res.ok)
+    .finally(() => {
+      refreshPromise = null;
+    });
+  return refreshPromise;
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     headers: {
@@ -10,11 +22,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   });
 
   if (response.status === 401 && !path.includes("/auth/")) {
-    // Try refresh
-    const refreshRes = await fetch(`${API_BASE}/auth/refresh`, {
-      method: "POST",
-    });
-    if (refreshRes.ok) {
+    const refreshed = await refreshToken();
+    if (refreshed) {
       const retryRes = await fetch(`${API_BASE}${path}`, {
         headers: {
           "Content-Type": "application/json",

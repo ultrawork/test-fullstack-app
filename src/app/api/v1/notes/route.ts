@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getUserId } from "@/lib/get-user-id";
 import { createNoteSchema } from "@/lib/validation";
 import { successResponse, handleApiError } from "@/lib/api-response";
-import { ForbiddenError } from "@/lib/errors";
+import { ValidationError } from "@/lib/errors";
 import type { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       });
 
       if (tags.length !== data.tagIds.length) {
-        throw new ForbiddenError("One or more tags do not belong to you");
+        throw new ValidationError("One or more tags are invalid");
       }
     }
 
