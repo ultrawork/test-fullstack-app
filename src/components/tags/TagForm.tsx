@@ -4,7 +4,7 @@ import { type ReactNode, type FormEvent, useState } from "react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { createTagSchema, updateTagSchema } from "@/lib/validation";
-import type { ZodError } from "zod";
+import { ZodError } from "zod";
 
 interface TagFormProps {
   initialName?: string;
@@ -45,13 +45,16 @@ export default function TagForm({
       const schema = isEditing ? updateTagSchema : createTagSchema;
       schema.parse({ name, color });
     } catch (err) {
-      const zodError = err as ZodError;
-      const fieldErrors: Record<string, string> = {};
-      for (const issue of zodError.issues) {
-        const path = issue.path.join(".");
-        fieldErrors[path] = issue.message;
+      if (err instanceof ZodError) {
+        const fieldErrors: Record<string, string> = {};
+        for (const issue of err.issues) {
+          const path = issue.path.join(".");
+          fieldErrors[path] = issue.message;
+        }
+        setErrors(fieldErrors);
+      } else {
+        setErrors({ form: "Validation error" });
       }
-      setErrors(fieldErrors);
       return;
     }
 

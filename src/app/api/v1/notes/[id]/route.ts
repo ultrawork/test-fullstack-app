@@ -14,8 +14,8 @@ export async function GET(
     const userId = await getUserId();
     const { id } = await params;
 
-    const note = await prisma.note.findUnique({
-      where: { id },
+    const note = await prisma.note.findFirst({
+      where: { id, userId },
       include: {
         tags: {
           include: { tag: true },
@@ -25,10 +25,6 @@ export async function GET(
 
     if (!note) {
       throw new NotFoundError("Note");
-    }
-
-    if (note.userId !== userId) {
-      throw new ForbiddenError();
     }
 
     return successResponse({
@@ -54,16 +50,12 @@ export async function PUT(
     const body: unknown = await request.json();
     const data = updateNoteSchema.parse(body);
 
-    const existingNote = await prisma.note.findUnique({
-      where: { id },
+    const existingNote = await prisma.note.findFirst({
+      where: { id, userId },
     });
 
     if (!existingNote) {
       throw new NotFoundError("Note");
-    }
-
-    if (existingNote.userId !== userId) {
-      throw new ForbiddenError();
     }
 
     const note = await prisma.$transaction(async (tx) => {
@@ -124,16 +116,12 @@ export async function DELETE(
     const userId = await getUserId();
     const { id } = await params;
 
-    const note = await prisma.note.findUnique({
-      where: { id },
+    const note = await prisma.note.findFirst({
+      where: { id, userId },
     });
 
     if (!note) {
       throw new NotFoundError("Note");
-    }
-
-    if (note.userId !== userId) {
-      throw new ForbiddenError();
     }
 
     await prisma.note.delete({

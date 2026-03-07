@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getUserId } from "@/lib/get-user-id";
 import { updateTagSchema } from "@/lib/validation";
 import { successResponse, handleApiError } from "@/lib/api-response";
-import { NotFoundError, ForbiddenError, ValidationError } from "@/lib/errors";
+import { NotFoundError, ValidationError } from "@/lib/errors";
 
 export async function GET(
   _request: NextRequest,
@@ -14,8 +14,8 @@ export async function GET(
     const userId = await getUserId();
     const { id } = await params;
 
-    const tag = await prisma.tag.findUnique({
-      where: { id },
+    const tag = await prisma.tag.findFirst({
+      where: { id, userId },
       include: {
         _count: {
           select: { notes: true },
@@ -25,10 +25,6 @@ export async function GET(
 
     if (!tag) {
       throw new NotFoundError("Tag");
-    }
-
-    if (tag.userId !== userId) {
-      throw new ForbiddenError();
     }
 
     return successResponse(tag);
@@ -47,16 +43,12 @@ export async function PUT(
     const body: unknown = await request.json();
     const data = updateTagSchema.parse(body);
 
-    const existingTag = await prisma.tag.findUnique({
-      where: { id },
+    const existingTag = await prisma.tag.findFirst({
+      where: { id, userId },
     });
 
     if (!existingTag) {
       throw new NotFoundError("Tag");
-    }
-
-    if (existingTag.userId !== userId) {
-      throw new ForbiddenError();
     }
 
     if (data.name && data.name !== existingTag.name) {
@@ -96,16 +88,12 @@ export async function DELETE(
     const userId = await getUserId();
     const { id } = await params;
 
-    const tag = await prisma.tag.findUnique({
-      where: { id },
+    const tag = await prisma.tag.findFirst({
+      where: { id, userId },
     });
 
     if (!tag) {
       throw new NotFoundError("Tag");
-    }
-
-    if (tag.userId !== userId) {
-      throw new ForbiddenError();
     }
 
     await prisma.tag.delete({
