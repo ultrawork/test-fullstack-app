@@ -1,0 +1,168 @@
+import { create } from "zustand";
+import type { Note, CreateNoteInput, UpdateNoteInput } from "@/types/note";
+import type { ApiResponse } from "@/types/api";
+import { apiClient } from "@/lib/api-client";
+
+interface NotesStore {
+  notes: Note[];
+  currentNote: Note | null;
+  isLoadingList: boolean;
+  isLoadingNote: boolean;
+  isSaving: boolean;
+  isDeleting: boolean;
+  error: string | null;
+  search: string;
+  filterTagIds: string[];
+  fetchNotes: () => Promise<void>;
+  fetchNote: (id: string) => Promise<void>;
+  createNote: (input: CreateNoteInput) => Promise<Note>;
+  updateNote: (id: string, input: UpdateNoteInput) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
+  setSearch: (search: string) => void;
+  setFilterTagIds: (tagIds: string[]) => void;
+  clearCurrentNote: () => void;
+  clearError: () => void;
+  reset: () => void;
+}
+
+let fetchNotesController: AbortController | null = null;
+
+export const useNotesStore = create<NotesStore>((set, get) => ({
+  notes: [],
+  currentNote: null,
+  isLoadingList: false,
+  isLoadingNote: false,
+  isSaving: false,
+  isDeleting: false,
+  error: null,
+  search: "",
+  filterTagIds: [],
+
+  fetchNotes: async () => {
+    if (fetchNotesController) {
+      fetchNotesController.abort();
+    }
+    fetchNotesController = new AbortController();
+    const { signal } = fetchNotesController;
+
+    set({ isLoadingList: true, error: null });
+    try {
+      const params = new URLSearchParams();
+      const { search, filterTagIds } = get();
+      if (search) params.set("search", search);
+      for (const id of filterTagIds) {
+        params.append("tagIds", id);
+      }
+      const query = params.toString();
+      const res = await apiClient.get<
+        ApiResponse<{
+          notes: Note[];
+          pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+          };
+        }>
+      >(`/notes${query ? `?${query}` : ""}`, { signal });
+      if (!signal.aborted) {
+        set({ notes: res.data.notes, isLoadingList: false });
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") {
+        return;
+      }
+      set({
+        isLoadingList: false,
+        error: err instanceof Error ? err.message : "Failed to fetch notes",
+      });
+    }
+  },
+
+  fetchNote: async (id) => {
+    set({ isLoadingNote: true, error: null });
+    try {
+      const res = await apiClient.get<ApiResponse<Note>>(`/notes/${id}`);
+      set({ currentNote: res.data, isLoadingNote: false });
+    } catch (err) {
+      set({
+        isLoadingNote: false,
+        error: err instanceof Error ? err.message : "Failed to fetch note",
+      });
+    }
+  },
+
+  createNote: async (input) => {
+    set({ isSaving: true, error: null });
+    try {
+      const res = await apiClient.post<ApiResponse<Note>>("/notes", input);
+      set((state) => ({ notes: [res.data, ...state.notes], isSaving: false }));
+      return res.data;
+    } catch (err) {
+      set({
+        isSaving: false,
+        error: err instanceof Error ? err.message : "Failed to create note",
+      });
+      throw err;
+    }
+  },
+
+  updateNote: async (id, input) => {
+    set({ isSaving: true, error: null });
+    try {
+      const res = await apiClient.put<ApiResponse<Note>>(`/notes/${id}`, input);
+      set((state) => ({
+        notes: state.notes.map((n) => (n.id === id ? res.data : n)),
+        currentNote:
+          state.currentNote?.id === id ? res.data : state.currentNote,
+        isSaving: false,
+      }));
+    } catch (err) {
+      set({
+        isSaving: false,
+        error: err instanceof Error ? err.message : "Failed to update note",
+      });
+      throw err;
+    }
+  },
+
+  deleteNote: async (id) => {
+    set({ isDeleting: true, error: null });
+    try {
+      await apiClient.delete(`/notes/${id}`);
+      set((state) => ({
+        notes: state.notes.filter((n) => n.id !== id),
+        currentNote: state.currentNote?.id === id ? null : state.currentNote,
+        isDeleting: false,
+      }));
+    } catch (err) {
+      set({
+        isDeleting: false,
+        error: err instanceof Error ? err.message : "Failed to delete note",
+      });
+      throw err;
+    }
+  },
+
+  setSearch: (search) => set({ search }),
+  setFilterTagIds: (tagIds) => set({ filterTagIds: tagIds }),
+  clearCurrentNote: () => set({ currentNote: null }),
+  clearError: () => set({ error: null }),
+  reset: () => {
+    if (fetchNotesController) {
+      fetchNotesController.abort();
+      fetchNotesController = null;
+    }
+    set({
+      notes: [],
+      currentNote: null,
+      isLoadingList: false,
+      isLoadingNote: false,
+      isSaving: false,
+      isDeleting: false,
+      error: null,
+      search: "",
+      filterTagIds: [],
+    });
+  },
+}));
