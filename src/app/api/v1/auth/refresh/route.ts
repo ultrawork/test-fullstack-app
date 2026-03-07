@@ -5,6 +5,7 @@ import {
   verifyRefreshToken,
   generateAccessToken,
   generateRefreshToken,
+  hashRefreshToken,
 } from "@/lib/auth";
 import { successResponse, handleApiError } from "@/lib/api-response";
 import { setAuthCookies } from "@/lib/cookies";
@@ -21,9 +22,11 @@ export async function POST(): Promise<NextResponse> {
 
     const payload = await verifyRefreshToken(refreshTokenValue);
 
+    const hashedToken = hashRefreshToken(refreshTokenValue);
+
     const storedToken = await prisma.refreshToken.findFirst({
       where: {
-        token: refreshTokenValue,
+        token: hashedToken,
         userId: payload.userId,
         expiresAt: { gt: new Date() },
       },
@@ -57,7 +60,7 @@ export async function POST(): Promise<NextResponse> {
 
     await prisma.refreshToken.create({
       data: {
-        token: newRefreshToken,
+        token: hashRefreshToken(newRefreshToken),
         userId: user.id,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },

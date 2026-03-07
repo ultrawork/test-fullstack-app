@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyAccessToken } from "@/lib/auth";
+import { verifyAccessToken, hashRefreshToken } from "@/lib/auth";
 import { successResponse, handleApiError } from "@/lib/api-response";
 import { AuthError } from "@/lib/errors";
 
@@ -20,7 +20,7 @@ export async function POST(): Promise<NextResponse> {
 
     if (refreshToken) {
       await prisma.refreshToken.deleteMany({
-        where: { token: refreshToken, userId: payload.userId },
+        where: { token: hashRefreshToken(refreshToken), userId: payload.userId },
       });
     }
 

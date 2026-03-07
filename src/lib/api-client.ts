@@ -4,7 +4,7 @@ let refreshPromise: Promise<boolean> | null = null;
 
 async function refreshToken(): Promise<boolean> {
   if (refreshPromise) return refreshPromise;
-  refreshPromise = fetch(`${API_BASE}/auth/refresh`, { method: "POST" })
+  refreshPromise = fetch(`${API_BASE}/auth/refresh`, { method: "POST", credentials: "include" })
     .then((res) => res.ok)
     .finally(() => {
       refreshPromise = null;
@@ -22,14 +22,16 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
     ...rest,
     headers: mergedHeaders,
+    credentials: "include",
   });
 
-  if (response.status === 401 && !path.includes("/auth/")) {
+  if (response.status === 401 && !path.startsWith("/auth/")) {
     const refreshed = await refreshToken();
     if (refreshed) {
       const retryRes = await fetch(`${API_BASE}${path}`, {
         ...rest,
         headers: mergedHeaders,
+        credentials: "include",
       });
       if (!retryRes.ok) {
         const err = await retryRes.json().catch(() => null);

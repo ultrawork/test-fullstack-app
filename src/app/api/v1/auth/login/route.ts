@@ -5,6 +5,7 @@ import {
   comparePassword,
   generateAccessToken,
   generateRefreshToken,
+  hashRefreshToken,
 } from "@/lib/auth";
 import { loginSchema } from "@/lib/validation";
 import { successResponse, handleApiError } from "@/lib/api-response";
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     await prisma.refreshToken.create({
       data: {
-        token: refreshToken,
+        token: hashRefreshToken(refreshToken),
         userId: user.id,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       },

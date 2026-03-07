@@ -1,3 +1,4 @@
+import { createHash } from "crypto";
 import bcrypt from "bcryptjs";
 import { SignJWT, jwtVerify } from "jose";
 import type { JwtPayload } from "@/types/auth";
@@ -66,4 +67,8 @@ export async function verifyRefreshToken(token: string): Promise<JwtPayload> {
     throw new AuthError("Invalid token payload");
   }
   return { userId: payload.userId, email: payload.email };
+}
+
+export function hashRefreshToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
 }
