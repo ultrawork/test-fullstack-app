@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TagBadge -->
+    <string name="tag_badge_label">Tag: %1$s</string>
+    <string name="tag_badge_remove">Remove tag %1$s</string>
+
+    <!-- TagSelector -->
+    <string name="tag_selector_title">Tags</string>
+    <string name="tag_selector_search_placeholder">Search or create tags…</string>
+    <string name="tag_selector_create">Create \"%1$s\"</string>
+
+    <!-- TagFilter -->
+    <string name="tag_filter_toggle">Filter by tag %1$s</string>
+    <string name="tag_filter_clear">Clear</string>
+
+    <!-- TagForm -->
+    <string name="tag_form_name_label">Tag name</string>
+    <string name="tag_form_name_placeholder">Enter tag name</string>
+    <string name="tag_form_color_label">Color</string>
+    <string name="tag_form_select_color">Select color %1$s</string>
+    <string name="tag_form_preview">Preview</string>
+    <string name="tag_form_cancel">Cancel</string>
+    <string name="tag_form_create">Create Tag</string>
+    <string name="tag_form_update">Update Tag</string>
+
+    <!-- TagManager -->
+    <string name="tag_manager_title">Manage Tags</string>
+    <string name="tag_manager_empty_title">No tags yet. Create your first tag!</string>
+    <string name="tag_manager_note_count">%1$d notes</string>
+    <string name="tag_manager_delete_title">Delete Tag</string>
+    <string name="tag_manager_delete_message">Are you sure you want to delete \"%1$s\"?</string>
+    <string name="tag_manager_delete_confirm">Delete</string>
+    <string name="tag_manager_delete_cancel">Cancel</string>
+    <string name="tag_manager_edit_tag_a11y">Edit tag %1$s</string>
+    <string name="tag_manager_delete_tag_a11y">Delete tag %1$s</string>
+</resources>
