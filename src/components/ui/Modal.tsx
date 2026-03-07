@@ -25,7 +25,8 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps): ReactNo
       }
 
       if (event.key === 'Tab' && overlayRef.current) {
-        const focusableElements = overlayRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+        const focusableElements =
+          overlayRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
         if (focusableElements.length === 0) return;
 
         const firstElement = focusableElements[0];
