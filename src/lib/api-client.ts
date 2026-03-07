@@ -26,7 +26,9 @@ class ApiClient {
   ): Promise<Response> {
     const response = await fetch(url, config);
 
-    if (response.status === 401 && !url.includes("/auth/")) {
+    const authExcludedPaths = ["/auth/login", "/auth/register", "/auth/refresh", "/auth/logout"];
+    const isAuthExcluded = authExcludedPaths.some((path) => url.includes(path));
+    if (response.status === 401 && !isAuthExcluded) {
       const refreshed = await this.refreshTokens();
 
       if (refreshed) {

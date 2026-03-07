@@ -20,10 +20,10 @@ export async function GET(request: NextRequest): Promise<Response> {
     if (!payload) return errorResponse("Invalid token", 401);
 
     const { searchParams } = new URL(request.url);
-    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"));
+    const page = Math.max(1, parseInt(searchParams.get("page") ?? "1") || 1);
     const limit = Math.min(
       100,
-      Math.max(1, parseInt(searchParams.get("limit") ?? "10")),
+      Math.max(1, parseInt(searchParams.get("limit") ?? "10") || 10),
     );
     const categoryId = searchParams.get("categoryId");
     const search = searchParams.get("search");

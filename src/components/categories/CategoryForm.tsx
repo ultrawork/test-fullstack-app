@@ -34,6 +34,10 @@ export default function CategoryForm({
     e.preventDefault();
     if (!validate()) return;
     onSubmit(name.trim(), color);
+    if (!initialName) {
+      setName("");
+      setColor("#6B7280");
+    }
   };
 
   return (
