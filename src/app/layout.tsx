@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
 
 export const metadata: Metadata = {
-  title: "Notes App",
-  description: "Private, self-hosted notes application with cloud sync",
+  title: 'Notes App',
+  description: 'Private, self-hosted notes application with cloud sync',
 };
 
 export default function RootLayout({
