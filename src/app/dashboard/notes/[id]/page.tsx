@@ -59,7 +59,10 @@ export default function NotePage({ params }: NotePageProps): ReactNode {
   return (
     <div className="mx-auto max-w-2xl">
       {deleteError && (
-        <div role="alert" className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
+        <div
+          role="alert"
+          className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700"
+        >
           {deleteError}
         </div>
       )}

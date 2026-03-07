@@ -20,7 +20,10 @@ export async function POST(): Promise<NextResponse> {
 
     if (refreshToken) {
       await prisma.refreshToken.deleteMany({
-        where: { token: hashRefreshToken(refreshToken), userId: payload.userId },
+        where: {
+          token: hashRefreshToken(refreshToken),
+          userId: payload.userId,
+        },
       });
     }
 

@@ -4,7 +4,10 @@ let refreshPromise: Promise<boolean> | null = null;
 
 async function refreshToken(): Promise<boolean> {
   if (refreshPromise) return refreshPromise;
-  refreshPromise = fetch(`${API_BASE}/auth/refresh`, { method: "POST", credentials: "include" })
+  refreshPromise = fetch(`${API_BASE}/auth/refresh`, {
+    method: "POST",
+    credentials: "include",
+  })
     .then((res) => res.ok)
     .finally(() => {
       refreshPromise = null;

@@ -27,11 +27,7 @@ export default function NoteCard({ note }: NoteCardProps): ReactNode {
         <ul role="list" className="mt-3 flex flex-wrap gap-1">
           {note.tags.map((tag) => (
             <li key={tag.id}>
-              <TagBadge
-                name={tag.name}
-                color={tag.color}
-                size="sm"
-              />
+              <TagBadge name={tag.name} color={tag.color} size="sm" />
             </li>
           ))}
         </ul>
