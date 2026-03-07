@@ -7,38 +7,7 @@ import {
   validateUUID,
   badRequestResponse,
 } from "@/lib/validation";
-import type { NoteDTO, TagDTO } from "@/types";
-
-function formatNote(
-  note: {
-    id: string;
-    title: string;
-    content: string;
-    userId: string;
-    createdAt: Date;
-    updatedAt: Date;
-    noteTags: { tag: { id: string; name: string; color: string; userId: string; createdAt: Date; updatedAt: Date } }[];
-  }
-): NoteDTO {
-  return {
-    id: note.id,
-    title: note.title,
-    content: note.content,
-    userId: note.userId,
-    createdAt: note.createdAt.toISOString(),
-    updatedAt: note.updatedAt.toISOString(),
-    tags: note.noteTags.map(
-      (nt): TagDTO => ({
-        id: nt.tag.id,
-        name: nt.tag.name,
-        color: nt.tag.color,
-        userId: nt.tag.userId,
-        createdAt: nt.tag.createdAt.toISOString(),
-        updatedAt: nt.tag.updatedAt.toISOString(),
-      })
-    ),
-  };
-}
+import { formatNote } from "@/lib/formatters";
 
 export async function GET(request: NextRequest): Promise<Response> {
   const user = await getUserFromRequest(request);
@@ -84,6 +53,13 @@ export async function POST(request: NextRequest): Promise<Response> {
   if (tagIds !== undefined) {
     if (!Array.isArray(tagIds) || !tagIds.every(validateUUID))
       return badRequestResponse("tagIds must be an array of valid UUIDs");
+
+    // Verify all tags belong to the current user
+    const tags = await prisma.tag.findMany({
+      where: { id: { in: tagIds }, userId: user.id },
+    });
+    if (tags.length !== tagIds.length)
+      return badRequestResponse("Some tags not found");
   }
 
   const note = await prisma.note.create({

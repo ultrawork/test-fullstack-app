@@ -16,13 +16,12 @@ export async function GET(request: NextRequest): Promise<Response> {
   const { searchParams } = new URL(request.url);
   const withCount = searchParams.get("withCount") === "true";
 
-  const tags = await prisma.tag.findMany({
-    where: { userId: user.id },
-    include: withCount ? { _count: { select: { noteTags: true } } } : undefined,
-    orderBy: { name: "asc" },
-  });
-
   if (withCount) {
+    const tags = await prisma.tag.findMany({
+      where: { userId: user.id },
+      include: { _count: { select: { noteTags: true } } },
+      orderBy: { name: "asc" },
+    });
     const result: TagWithCount[] = tags.map((tag) => ({
       id: tag.id,
       name: tag.name,
@@ -30,11 +29,15 @@ export async function GET(request: NextRequest): Promise<Response> {
       userId: tag.userId,
       createdAt: tag.createdAt.toISOString(),
       updatedAt: tag.updatedAt.toISOString(),
-      noteCount: (tag as unknown as { _count: { noteTags: number } })._count.noteTags,
+      noteCount: tag._count.noteTags,
     }));
     return Response.json(result);
   }
 
+  const tags = await prisma.tag.findMany({
+    where: { userId: user.id },
+    orderBy: { name: "asc" },
+  });
   const result: TagDTO[] = tags.map((tag) => ({
     id: tag.id,
     name: tag.name,

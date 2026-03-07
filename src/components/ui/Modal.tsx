@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useRef } from "react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -16,6 +16,7 @@ export default function Modal({
   children,
 }: ModalProps): React.ReactElement | null {
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     const dialog = dialogRef.current;
@@ -46,10 +47,10 @@ export default function Modal({
     <dialog
       ref={dialogRef}
       className="fixed inset-0 z-50 m-auto max-w-lg rounded-lg bg-white p-0 shadow-xl backdrop:bg-black/50"
-      aria-labelledby="modal-title"
+      aria-labelledby={titleId}
     >
       <div className="flex items-center justify-between border-b px-6 py-4">
-        <h2 id="modal-title" className="text-lg font-semibold">
+        <h2 id={titleId} className="text-lg font-semibold">
           {title}
         </h2>
         <button

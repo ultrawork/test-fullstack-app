@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useAuthStore } from "@/stores/auth-store";
 import { useNotesStore } from "@/stores/notes-store";
 import { useTagsStore } from "@/stores/tags-store";
@@ -31,14 +31,13 @@ export default function NotesPage(): React.ReactElement {
   const [editingNote, setEditingNote] = useState<NoteDTO | null>(null);
   const [showTagManager, setShowTagManager] = useState(false);
 
-  const loadData = useCallback((): void => {
-    fetchNotes();
+  useEffect(() => {
     fetchTags();
-  }, [fetchNotes, fetchTags]);
+  }, [fetchTags]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData, selectedTagIds]);
+    fetchNotes();
+  }, [fetchNotes, selectedTagIds]);
 
   const handleCreateNote = async (data: {
     title: string;
