@@ -5,6 +5,7 @@ Private, self-hosted notes application with cloud sync across Web, iOS, and Andr
 ## Tech Stack
 
 **Web (this package):**
+
 - [Next.js 15](https://nextjs.org/) — React framework (App Router)
 - [React 19](https://react.dev/) — UI library
 - [TypeScript 5](https://www.typescriptlang.org/) — Type safety
@@ -13,6 +14,7 @@ Private, self-hosted notes application with cloud sync across Web, iOS, and Andr
 - [ESLint](https://eslint.org/) — Linting
 
 **Backend (separate service):**
+
 - Node.js + Express.js
 - PostgreSQL + Prisma ORM
 - JWT authentication (access + refresh tokens)
