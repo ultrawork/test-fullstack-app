@@ -30,7 +30,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 0,
-      path: '/',
+      path: '/api/v1/auth',
     });
 
     return response;

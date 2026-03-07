@@ -9,8 +9,10 @@ vi.mock('next/navigation', () => ({
 const mockState = {
   notes: [] as unknown[],
   isLoading: false,
+  error: null as string | null,
   total: 0,
   page: 1,
+  filter: {},
   setPage: vi.fn(),
   deleteNote: vi.fn(),
 };

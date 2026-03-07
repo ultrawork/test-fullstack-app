@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useEffect, useRef, useCallback } from 'react';
+import { type ReactNode, useEffect, useRef, useCallback, useId } from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -15,7 +15,7 @@ const FOCUSABLE_SELECTOR =
 export function Modal({ isOpen, onClose, title, children }: ModalProps): ReactNode {
   const overlayRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
-  const titleId = `modal-title-${title.replace(/\s+/g, '-').toLowerCase()}`;
+  const titleId = useId();
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {

@@ -11,10 +11,11 @@ import { useRouter } from 'next/navigation';
 
 export function NotesList(): ReactNode {
   const router = useRouter();
-  const { notes, isLoading, error, total, page, setPage, deleteNote } = useNotesStore();
+  const { notes, isLoading, error, total, page, filter, setPage, deleteNote } = useNotesStore();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const noteToDelete = notes.find((n) => n.id === deleteId);
-  const totalPages = Math.ceil(total / 20);
+  const limit = filter.limit || 20;
+  const totalPages = Math.ceil(total / limit);
 
   const handleDelete = async (): Promise<void> => {
     if (deleteId) {

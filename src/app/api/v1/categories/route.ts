@@ -40,7 +40,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const { name, color } = result.data;
 
     const existing = await prisma.category.findFirst({
-      where: { userId: currentUser.id, name },
+      where: { userId: currentUser.id, name: { equals: name, mode: 'insensitive' } },
     });
     if (existing) {
       return errorResponse('Category with this name already exists', 409);
