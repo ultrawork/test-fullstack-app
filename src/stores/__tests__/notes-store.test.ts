@@ -47,7 +47,13 @@ describe("NotesStore", () => {
   });
 
   it("should fetch notes", async () => {
-    mockedApi.get.mockResolvedValueOnce({ success: true, data: { notes: [mockNote], pagination: { page: 1, limit: 20, total: 1, totalPages: 1 } } });
+    mockedApi.get.mockResolvedValueOnce({
+      success: true,
+      data: {
+        notes: [mockNote],
+        pagination: { page: 1, limit: 20, total: 1, totalPages: 1 },
+      },
+    });
 
     await useNotesStore.getState().fetchNotes();
 
@@ -56,7 +62,13 @@ describe("NotesStore", () => {
 
   it("should fetch notes with search and tag filter", async () => {
     useNotesStore.setState({ search: "test", filterTagIds: ["t1"] });
-    mockedApi.get.mockResolvedValueOnce({ success: true, data: { notes: [mockNote], pagination: { page: 1, limit: 20, total: 1, totalPages: 1 } } });
+    mockedApi.get.mockResolvedValueOnce({
+      success: true,
+      data: {
+        notes: [mockNote],
+        pagination: { page: 1, limit: 20, total: 1, totalPages: 1 },
+      },
+    });
 
     await useNotesStore.getState().fetchNotes();
 

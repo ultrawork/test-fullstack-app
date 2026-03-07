@@ -38,9 +38,17 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
         params.append("tagIds", id);
       }
       const query = params.toString();
-      const res = await apiClient.get<ApiResponse<{ notes: Note[]; pagination: { page: number; limit: number; total: number; totalPages: number } }>>(
-        `/notes${query ? `?${query}` : ""}`,
-      );
+      const res = await apiClient.get<
+        ApiResponse<{
+          notes: Note[];
+          pagination: {
+            page: number;
+            limit: number;
+            total: number;
+            totalPages: number;
+          };
+        }>
+      >(`/notes${query ? `?${query}` : ""}`);
       set({ notes: res.data.notes, isLoading: false });
     } catch (err) {
       set({

@@ -27,7 +27,8 @@ export const useTagsStore = create<TagsStore>((set) => ({
   fetchTags: async () => {
     set({ isLoading: true, error: null });
     try {
-      const res = await apiClient.get<ApiResponse<{ tags: TagWithNoteCount[] }>>("/tags");
+      const res =
+        await apiClient.get<ApiResponse<{ tags: TagWithNoteCount[] }>>("/tags");
       set({ tags: res.data.tags, isLoading: false });
     } catch (err) {
       set({

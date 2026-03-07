@@ -24,10 +24,13 @@ export const useAuthStore = create<AuthStore>((set) => ({
   login: async (email, password) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await apiClient.post<ApiResponse<{ user: User }>>("/auth/login", {
-        email,
-        password,
-      });
+      const res = await apiClient.post<ApiResponse<{ user: User }>>(
+        "/auth/login",
+        {
+          email,
+          password,
+        },
+      );
       set({ user: res.data.user, isAuthenticated: true, isLoading: false });
     } catch (err) {
       set({
@@ -41,11 +44,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
   register: async (email, name, password) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await apiClient.post<ApiResponse<{ user: User }>>("/auth/register", {
-        email,
-        name,
-        password,
-      });
+      const res = await apiClient.post<ApiResponse<{ user: User }>>(
+        "/auth/register",
+        {
+          email,
+          name,
+          password,
+        },
+      );
       set({ user: res.data.user, isAuthenticated: true, isLoading: false });
     } catch (err) {
       set({

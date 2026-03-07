@@ -5,7 +5,13 @@ import HomePage from "./page";
 
 vi.mock("next/link", () => {
   return {
-    default: function MockLink({ children, href }: { children: React.ReactNode; href: string }) {
+    default: function MockLink({
+      children,
+      href,
+    }: {
+      children: React.ReactNode;
+      href: string;
+    }) {
       return <a href={href}>{children}</a>;
     },
   };

@@ -14,7 +14,8 @@ interface NotePageProps {
 export default function NotePage({ params }: NotePageProps): ReactNode {
   const { id } = use(params);
   const router = useRouter();
-  const { currentNote, isLoading, error, fetchNote, deleteNote } = useNotesStore();
+  const { currentNote, isLoading, error, fetchNote, deleteNote } =
+    useNotesStore();
   const [showDelete, setShowDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 

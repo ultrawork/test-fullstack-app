@@ -41,7 +41,10 @@ describe("TagsStore", () => {
   });
 
   it("should fetch tags", async () => {
-    mockedApi.get.mockResolvedValueOnce({ success: true, data: { tags: [mockTag] } });
+    mockedApi.get.mockResolvedValueOnce({
+      success: true,
+      data: { tags: [mockTag] },
+    });
 
     await useTagsStore.getState().fetchTags();
 
