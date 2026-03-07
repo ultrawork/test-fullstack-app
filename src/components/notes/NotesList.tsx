@@ -13,7 +13,7 @@ import Link from "next/link";
 export default function NotesList(): ReactNode {
   const {
     notes,
-    isLoading,
+    isLoadingList,
     error,
     search,
     filterTagIds,
@@ -31,7 +31,7 @@ export default function NotesList(): ReactNode {
     void fetchNotes();
   }, [fetchNotes, search, filterTagIds]);
 
-  if (isLoading && notes.length === 0) {
+  if (isLoadingList && notes.length === 0) {
     return <Spinner size="lg" />;
   }
 

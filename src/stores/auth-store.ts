@@ -6,7 +6,8 @@ import { apiClient } from "@/lib/api-client";
 interface AuthStore {
   user: User | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
+  isCheckingAuth: boolean;
+  isSubmitting: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, name: string, password: string) => Promise<void>;
@@ -18,11 +19,12 @@ interface AuthStore {
 export const useAuthStore = create<AuthStore>((set) => ({
   user: null,
   isAuthenticated: false,
-  isLoading: true,
+  isCheckingAuth: true,
+  isSubmitting: false,
   error: null,
 
   login: async (email, password) => {
-    set({ isLoading: true, error: null });
+    set({ isSubmitting: true, error: null });
     try {
       const res = await apiClient.post<ApiResponse<{ user: User }>>(
         "/auth/login",
@@ -31,10 +33,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
           password,
         },
       );
-      set({ user: res.data.user, isAuthenticated: true, isLoading: false });
+      set({
+        user: res.data.user,
+        isAuthenticated: true,
+        isSubmitting: false,
+      });
     } catch (err) {
       set({
-        isLoading: false,
+        isSubmitting: false,
         error: err instanceof Error ? err.message : "Login failed",
       });
       throw err;
@@ -42,7 +48,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   register: async (email, name, password) => {
-    set({ isLoading: true, error: null });
+    set({ isSubmitting: true, error: null });
     try {
       const res = await apiClient.post<ApiResponse<{ user: User }>>(
         "/auth/register",
@@ -52,10 +58,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
           password,
         },
       );
-      set({ user: res.data.user, isAuthenticated: true, isLoading: false });
+      set({
+        user: res.data.user,
+        isAuthenticated: true,
+        isSubmitting: false,
+      });
     } catch (err) {
       set({
-        isLoading: false,
+        isSubmitting: false,
         error: err instanceof Error ? err.message : "Registration failed",
       });
       throw err;
@@ -71,12 +81,16 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   fetchUser: async () => {
-    set({ isLoading: true });
+    set({ isCheckingAuth: true });
     try {
       const res = await apiClient.get<ApiResponse<{ user: User }>>("/auth/me");
-      set({ user: res.data.user, isAuthenticated: true, isLoading: false });
+      set({
+        user: res.data.user,
+        isAuthenticated: true,
+        isCheckingAuth: false,
+      });
     } catch {
-      set({ user: null, isAuthenticated: false, isLoading: false });
+      set({ user: null, isAuthenticated: false, isCheckingAuth: false });
     }
   },
 

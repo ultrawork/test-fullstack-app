@@ -14,10 +14,11 @@ interface NotePageProps {
 export default function NotePage({ params }: NotePageProps): ReactNode {
   const { id } = use(params);
   const router = useRouter();
-  const { currentNote, isLoading, error, fetchNote, deleteNote } =
+  const { currentNote, isLoadingNote, error, fetchNote, deleteNote } =
     useNotesStore();
   const [showDelete, setShowDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     void fetchNote(id);
@@ -25,16 +26,19 @@ export default function NotePage({ params }: NotePageProps): ReactNode {
 
   const handleDelete = async (): Promise<void> => {
     setIsDeleting(true);
+    setDeleteError(null);
     try {
       await deleteNote(id);
       router.push("/dashboard");
-    } finally {
+    } catch (err) {
+      setDeleteError(
+        err instanceof Error ? err.message : "Failed to delete note",
+      );
       setIsDeleting(false);
-      setShowDelete(false);
     }
   };
 
-  if (isLoading) {
+  if (isLoadingNote) {
     return (
       <div className="flex items-center justify-center py-12">
         <Spinner size="lg" />
@@ -54,6 +58,11 @@ export default function NotePage({ params }: NotePageProps): ReactNode {
 
   return (
     <div className="mx-auto max-w-2xl">
+      {deleteError && (
+        <div role="alert" className="mb-4 rounded-md bg-red-50 p-4 text-sm text-red-700">
+          {deleteError}
+        </div>
+      )}
       <NoteView
         note={currentNote}
         onDelete={() => setShowDelete(true)}

@@ -9,7 +9,7 @@ import { useAuthStore } from "@/stores/auth-store";
 
 export default function RegisterForm(): ReactNode {
   const router = useRouter();
-  const { register, isLoading, error, clearError } = useAuthStore();
+  const { register, isSubmitting, error, clearError } = useAuthStore();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -79,7 +79,7 @@ export default function RegisterForm(): ReactNode {
         </p>
       )}
 
-      <Button type="submit" isLoading={isLoading}>
+      <Button type="submit" isLoading={isSubmitting}>
         Create Account
       </Button>
 

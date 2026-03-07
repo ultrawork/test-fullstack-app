@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Allows selecting multiple tags from available list with search and inline creation.
 struct TagSelectorView: View {
@@ -93,7 +94,7 @@ struct TagSelectorView: View {
             }
         }
         .listStyle(.plain)
-        .frame(maxHeight: 160)
+        .frame(maxHeight: UIFontMetrics.default.scaledValue(for: 160))
     }
 
     private var createButton: some View {

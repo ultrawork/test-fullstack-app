@@ -119,9 +119,9 @@ describe("Validation schemas", () => {
       expect(result.success).toBe(true);
     });
 
-    it("should validate empty object", () => {
+    it("should reject empty object", () => {
       const result = updateTagSchema.safeParse({});
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
     });
   });
 

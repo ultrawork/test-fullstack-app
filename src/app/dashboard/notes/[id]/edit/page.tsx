@@ -11,13 +11,13 @@ interface EditNotePageProps {
 
 export default function EditNotePage({ params }: EditNotePageProps): ReactNode {
   const { id } = use(params);
-  const { currentNote, isLoading, error, fetchNote } = useNotesStore();
+  const { currentNote, isLoadingNote, error, fetchNote } = useNotesStore();
 
   useEffect(() => {
     void fetchNote(id);
   }, [id, fetchNote]);
 
-  if (isLoading) {
+  if (isLoadingNote) {
     return (
       <div className="flex items-center justify-center py-12">
         <Spinner size="lg" />

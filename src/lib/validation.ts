@@ -29,19 +29,27 @@ export const createNoteSchema = z.object({
   tagIds: z.array(z.string().cuid()).max(50, "Too many tags").optional(),
 });
 
-export const updateNoteSchema = z.object({
-  title: z
-    .string()
-    .min(1, "Title is required")
-    .max(255, "Title must be at most 255 characters")
-    .optional(),
-  content: z
-    .string()
-    .min(1, "Content is required")
-    .max(100000, "Content must be at most 100000 characters")
-    .optional(),
-  tagIds: z.array(z.string().cuid()).max(50, "Too many tags").optional(),
-});
+export const updateNoteSchema = z
+  .object({
+    title: z
+      .string()
+      .min(1, "Title is required")
+      .max(255, "Title must be at most 255 characters")
+      .optional(),
+    content: z
+      .string()
+      .min(1, "Content is required")
+      .max(100000, "Content must be at most 100000 characters")
+      .optional(),
+    tagIds: z.array(z.string().cuid()).max(50, "Too many tags").optional(),
+  })
+  .refine(
+    (data) =>
+      data.title !== undefined ||
+      data.content !== undefined ||
+      data.tagIds !== undefined,
+    { message: "At least one field must be provided" },
+  );
 
 const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;
 
@@ -56,18 +64,22 @@ export const createTagSchema = z.object({
     .regex(hexColorRegex, "Color must be a valid hex color (e.g. #FF0000)"),
 });
 
-export const updateTagSchema = z.object({
-  name: z
-    .string()
-    .min(1, "Tag name is required")
-    .max(50, "Tag name must be at most 50 characters")
-    .trim()
-    .optional(),
-  color: z
-    .string()
-    .regex(hexColorRegex, "Color must be a valid hex color (e.g. #FF0000)")
-    .optional(),
-});
+export const updateTagSchema = z
+  .object({
+    name: z
+      .string()
+      .min(1, "Tag name is required")
+      .max(50, "Tag name must be at most 50 characters")
+      .trim()
+      .optional(),
+    color: z
+      .string()
+      .regex(hexColorRegex, "Color must be a valid hex color (e.g. #FF0000)")
+      .optional(),
+  })
+  .refine((data) => data.name !== undefined || data.color !== undefined, {
+    message: "At least one field must be provided",
+  });
 
 export const attachTagsSchema = z.object({
   tagIds: z.array(z.string().cuid()).max(50, "Too many tags"),

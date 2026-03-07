@@ -9,7 +9,7 @@ import { useAuthStore } from "@/stores/auth-store";
 
 export default function LoginForm(): ReactNode {
   const router = useRouter();
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, isSubmitting, error, clearError } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -65,7 +65,7 @@ export default function LoginForm(): ReactNode {
         </p>
       )}
 
-      <Button type="submit" isLoading={isLoading}>
+      <Button type="submit" isLoading={isSubmitting}>
         Sign In
       </Button>
 

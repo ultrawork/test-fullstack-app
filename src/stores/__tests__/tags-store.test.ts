@@ -28,7 +28,9 @@ describe("TagsStore", () => {
     vi.clearAllMocks();
     useTagsStore.setState({
       tags: [],
-      isLoading: false,
+      isLoadingList: false,
+      isSaving: false,
+      isDeleting: false,
       error: null,
     });
   });
@@ -36,7 +38,7 @@ describe("TagsStore", () => {
   it("should have initial state", () => {
     const state = useTagsStore.getState();
     expect(state.tags).toEqual([]);
-    expect(state.isLoading).toBe(false);
+    expect(state.isLoadingList).toBe(false);
     expect(state.error).toBeNull();
   });
 

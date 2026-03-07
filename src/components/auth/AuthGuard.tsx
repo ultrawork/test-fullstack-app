@@ -11,19 +11,19 @@ interface AuthGuardProps {
 
 export default function AuthGuard({ children }: AuthGuardProps): ReactNode {
   const router = useRouter();
-  const { isAuthenticated, isLoading, fetchUser } = useAuthStore();
+  const { isAuthenticated, isCheckingAuth, fetchUser } = useAuthStore();
 
   useEffect(() => {
     void fetchUser();
   }, [fetchUser]);
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push("/login");
+    if (!isCheckingAuth && !isAuthenticated) {
+      router.replace("/login");
     }
-  }, [isLoading, isAuthenticated, router]);
+  }, [isCheckingAuth, isAuthenticated, router]);
 
-  if (isLoading) {
+  if (isCheckingAuth) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner size="lg" />

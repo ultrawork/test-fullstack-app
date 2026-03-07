@@ -13,7 +13,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const { searchParams } = request.nextUrl;
 
     const search = searchParams.get("search") || undefined;
-    const tagIds = searchParams.getAll("tagIds");
+    const rawTagIds = searchParams.getAll("tagIds");
+    const cuidRegex = /^c[a-z0-9]{24}$/;
+    const tagIds = rawTagIds.filter((id) => cuidRegex.test(id)).slice(0, 50);
     const page = Math.max(
       1,
       parseInt(searchParams.get("page") || "1", 10) || 1,

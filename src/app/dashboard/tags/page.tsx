@@ -10,7 +10,7 @@ import { useTagsStore } from "@/stores/tags-store";
 import type { TagWithNoteCount } from "@/types/tag";
 
 export default function TagsPage(): ReactNode {
-  const { tags, isLoading, fetchTags, createTag, updateTag, deleteTag } =
+  const { tags, isLoadingList, fetchTags, createTag, updateTag, deleteTag } =
     useTagsStore();
   const [showForm, setShowForm] = useState(false);
   const [editingTag, setEditingTag] = useState<TagWithNoteCount | null>(null);
@@ -59,7 +59,7 @@ export default function TagsPage(): ReactNode {
     }
   };
 
-  if (isLoading && tags.length === 0) {
+  if (isLoadingList && tags.length === 0) {
     return (
       <div className="flex items-center justify-center py-12">
         <Spinner size="lg" />

@@ -31,7 +31,10 @@ describe("NotesStore", () => {
     useNotesStore.setState({
       notes: [],
       currentNote: null,
-      isLoading: false,
+      isLoadingList: false,
+      isLoadingNote: false,
+      isSaving: false,
+      isDeleting: false,
       error: null,
       search: "",
       filterTagIds: [],

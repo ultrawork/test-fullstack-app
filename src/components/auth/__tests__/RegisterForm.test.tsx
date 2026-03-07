@@ -27,7 +27,7 @@ vi.mock("next/link", () => {
 vi.mock("@/stores/auth-store", () => ({
   useAuthStore: () => ({
     register: vi.fn(),
-    isLoading: false,
+    isSubmitting: false,
     error: null,
     clearError: vi.fn(),
   }),

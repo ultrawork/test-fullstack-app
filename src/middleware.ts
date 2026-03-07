@@ -8,7 +8,9 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
   if (!isProtected) {
-    return NextResponse.next();
+    const headers = new Headers(request.headers);
+    headers.delete("x-user-id");
+    return NextResponse.next({ request: { headers } });
   }
 
   const token = request.cookies.get("access_token")?.value;

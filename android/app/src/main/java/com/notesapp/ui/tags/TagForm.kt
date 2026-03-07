@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,8 +57,10 @@ fun TagForm(
     onCancel: () -> Unit,
 ) {
     val context = LocalContext.current
-    var name by remember { mutableStateOf(initialName) }
-    var color by remember { mutableStateOf(initialColor) }
+    val currentInitialName by rememberUpdatedState(initialName)
+    val currentInitialColor by rememberUpdatedState(initialColor)
+    var name by remember(currentInitialName) { mutableStateOf(currentInitialName) }
+    var color by remember(currentInitialColor) { mutableStateOf(currentInitialColor) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     Column(

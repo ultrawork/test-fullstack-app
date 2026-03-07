@@ -1,7 +1,7 @@
 import Foundation
 
 /// Represents a tag that can be attached to notes.
-struct Tag: Codable, Identifiable, Hashable {
+struct Tag: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let name: String
     let color: String
@@ -10,7 +10,7 @@ struct Tag: Codable, Identifiable, Hashable {
 }
 
 /// Tag with associated note count from the API.
-struct TagWithNoteCount: Codable, Identifiable, Hashable {
+struct TagWithNoteCount: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let name: String
     let color: String
@@ -23,33 +23,33 @@ struct TagWithNoteCount: Codable, Identifiable, Hashable {
         case count = "_count"
     }
 
-    struct NoteCount: Codable, Hashable {
+    struct NoteCount: Codable, Hashable, Sendable {
         let notes: Int
     }
 }
 
-struct CreateTagInput: Codable {
+struct CreateTagInput: Codable, Sendable {
     let name: String
     let color: String
 }
 
-struct UpdateTagInput: Codable {
+struct UpdateTagInput: Codable, Sendable {
     let name: String?
     let color: String?
 }
 
-struct AttachTagsInput: Codable {
+struct AttachTagsInput: Codable, Sendable {
     let tagIds: [String]
 }
 
-struct TagsResponse: Codable {
+struct TagsResponse: Codable, Sendable {
     let data: TagsData
 
-    struct TagsData: Codable {
+    struct TagsData: Codable, Sendable {
         let tags: [TagWithNoteCount]
     }
 }
 
-struct TagResponse: Codable {
+struct TagResponse: Codable, Sendable {
     let data: Tag
 }

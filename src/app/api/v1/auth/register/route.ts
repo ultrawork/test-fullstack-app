@@ -16,29 +16,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const body: unknown = await request.json();
     const data = registerSchema.parse(body);
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email: data.email },
-    });
-
-    if (existingUser) {
-      throw new ValidationError("Email already in use");
-    }
-
     const hashedPassword = await hashPassword(data.password);
 
-    const user = await prisma.user.create({
-      data: {
-        email: data.email,
-        name: data.name,
-        password: hashedPassword,
-      },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        createdAt: true,
-      },
-    });
+    let user;
+    try {
+      user = await prisma.user.create({
+        data: {
+          email: data.email,
+          name: data.name,
+          password: hashedPassword,
+        },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          createdAt: true,
+        },
+      });
+    } catch (err: unknown) {
+      const { Prisma } = await import("@prisma/client");
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === "P2002"
+      ) {
+        throw new ValidationError("Email already in use");
+      }
+      throw err;
+    }
 
     const jwtPayload = { userId: user.id, email: user.email };
     const accessToken = await generateAccessToken(jwtPayload);

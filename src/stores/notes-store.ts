@@ -6,7 +6,10 @@ import { apiClient } from "@/lib/api-client";
 interface NotesStore {
   notes: Note[];
   currentNote: Note | null;
-  isLoading: boolean;
+  isLoadingList: boolean;
+  isLoadingNote: boolean;
+  isSaving: boolean;
+  isDeleting: boolean;
   error: string | null;
   search: string;
   filterTagIds: string[];
@@ -17,19 +20,23 @@ interface NotesStore {
   deleteNote: (id: string) => Promise<void>;
   setSearch: (search: string) => void;
   setFilterTagIds: (tagIds: string[]) => void;
+  clearCurrentNote: () => void;
   clearError: () => void;
 }
 
 export const useNotesStore = create<NotesStore>((set, get) => ({
   notes: [],
   currentNote: null,
-  isLoading: false,
+  isLoadingList: false,
+  isLoadingNote: false,
+  isSaving: false,
+  isDeleting: false,
   error: null,
   search: "",
   filterTagIds: [],
 
   fetchNotes: async () => {
-    set({ isLoading: true, error: null });
+    set({ isLoadingList: true, error: null });
     try {
       const params = new URLSearchParams();
       const { search, filterTagIds } = get();
@@ -49,37 +56,37 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
           };
         }>
       >(`/notes${query ? `?${query}` : ""}`);
-      set({ notes: res.data.notes, isLoading: false });
+      set({ notes: res.data.notes, isLoadingList: false });
     } catch (err) {
       set({
-        isLoading: false,
+        isLoadingList: false,
         error: err instanceof Error ? err.message : "Failed to fetch notes",
       });
     }
   },
 
   fetchNote: async (id) => {
-    set({ isLoading: true, error: null });
+    set({ isLoadingNote: true, error: null });
     try {
       const res = await apiClient.get<ApiResponse<Note>>(`/notes/${id}`);
-      set({ currentNote: res.data, isLoading: false });
+      set({ currentNote: res.data, isLoadingNote: false });
     } catch (err) {
       set({
-        isLoading: false,
+        isLoadingNote: false,
         error: err instanceof Error ? err.message : "Failed to fetch note",
       });
     }
   },
 
   createNote: async (input) => {
-    set({ isLoading: true, error: null });
+    set({ isSaving: true, error: null });
     try {
       const res = await apiClient.post<ApiResponse<Note>>("/notes", input);
-      set((state) => ({ notes: [res.data, ...state.notes], isLoading: false }));
+      set((state) => ({ notes: [res.data, ...state.notes], isSaving: false }));
       return res.data;
     } catch (err) {
       set({
-        isLoading: false,
+        isSaving: false,
         error: err instanceof Error ? err.message : "Failed to create note",
       });
       throw err;
@@ -87,18 +94,18 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
   },
 
   updateNote: async (id, input) => {
-    set({ isLoading: true, error: null });
+    set({ isSaving: true, error: null });
     try {
       const res = await apiClient.put<ApiResponse<Note>>(`/notes/${id}`, input);
       set((state) => ({
         notes: state.notes.map((n) => (n.id === id ? res.data : n)),
         currentNote:
           state.currentNote?.id === id ? res.data : state.currentNote,
-        isLoading: false,
+        isSaving: false,
       }));
     } catch (err) {
       set({
-        isLoading: false,
+        isSaving: false,
         error: err instanceof Error ? err.message : "Failed to update note",
       });
       throw err;
@@ -106,17 +113,17 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
   },
 
   deleteNote: async (id) => {
-    set({ isLoading: true, error: null });
+    set({ isDeleting: true, error: null });
     try {
       await apiClient.delete(`/notes/${id}`);
       set((state) => ({
         notes: state.notes.filter((n) => n.id !== id),
         currentNote: state.currentNote?.id === id ? null : state.currentNote,
-        isLoading: false,
+        isDeleting: false,
       }));
     } catch (err) {
       set({
-        isLoading: false,
+        isDeleting: false,
         error: err instanceof Error ? err.message : "Failed to delete note",
       });
       throw err;
@@ -125,5 +132,6 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
 
   setSearch: (search) => set({ search }),
   setFilterTagIds: (tagIds) => set({ filterTagIds: tagIds }),
+  clearCurrentNote: () => set({ currentNote: null }),
   clearError: () => set({ error: null }),
 }));

@@ -21,7 +21,8 @@ describe("AuthStore", () => {
     useAuthStore.setState({
       user: null,
       isAuthenticated: false,
-      isLoading: false,
+      isCheckingAuth: false,
+      isSubmitting: false,
       error: null,
     });
   });
@@ -30,7 +31,8 @@ describe("AuthStore", () => {
     const state = useAuthStore.getState();
     expect(state.user).toBeNull();
     expect(state.isAuthenticated).toBe(false);
-    expect(state.isLoading).toBe(false);
+    expect(state.isCheckingAuth).toBe(false);
+    expect(state.isSubmitting).toBe(false);
     expect(state.error).toBeNull();
   });
 
@@ -51,7 +53,7 @@ describe("AuthStore", () => {
     const state = useAuthStore.getState();
     expect(state.user).toEqual(mockUser);
     expect(state.isAuthenticated).toBe(true);
-    expect(state.isLoading).toBe(false);
+    expect(state.isSubmitting).toBe(false);
   });
 
   it("should handle login error", async () => {

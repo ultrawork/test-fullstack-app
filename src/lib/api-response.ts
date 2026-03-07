@@ -42,9 +42,7 @@ export function handleApiError(error: unknown): NextResponse {
     error instanceof Prisma.PrismaClientKnownRequestError &&
     error.code === "P2002"
   ) {
-    const target = (error.meta?.target as string[]) ?? [];
-    const field = target[target.length - 1] ?? "field";
-    return errorResponse(`A record with this ${field} already exists`, 400);
+    return errorResponse("A record with this value already exists", 409);
   }
 
   console.error("Unhandled error:", error);

@@ -48,7 +48,7 @@ class TagViewModel(application: Application, private val tagApi: TagApi) : Andro
         }
     }
 
-    fun createTag(name: String, color: String, onSuccess: ((Tag) -> Unit)? = null) {
+    fun createTag(name: String, color: String, onComplete: (() -> Unit)? = null) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
@@ -66,7 +66,6 @@ class TagViewModel(application: Application, private val tagApi: TagApi) : Andro
                             count = TagWithNoteCount.NoteCount(notes = 0),
                         )
                         _tags.value = _tags.value + newTagWithCount
-                        onSuccess?.invoke(tag)
                     }
                 } else {
                     _errorMessage.value = context.getString(R.string.tag_error_create_failed, response.code())
@@ -75,11 +74,12 @@ class TagViewModel(application: Application, private val tagApi: TagApi) : Andro
                 _errorMessage.value = e.message ?: context.getString(R.string.tag_error_create_generic)
             } finally {
                 _isLoading.value = false
+                onComplete?.invoke()
             }
         }
     }
 
-    fun updateTag(id: String, name: String?, color: String?, onSuccess: ((Tag) -> Unit)? = null) {
+    fun updateTag(id: String, name: String?, color: String?, onComplete: (() -> Unit)? = null) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
@@ -102,7 +102,6 @@ class TagViewModel(application: Application, private val tagApi: TagApi) : Andro
                                 existing
                             }
                         }
-                        onSuccess?.invoke(updatedTag)
                     }
                 } else {
                     _errorMessage.value = context.getString(R.string.tag_error_update_failed, response.code())
@@ -111,6 +110,7 @@ class TagViewModel(application: Application, private val tagApi: TagApi) : Andro
                 _errorMessage.value = e.message ?: context.getString(R.string.tag_error_update_generic)
             } finally {
                 _isLoading.value = false
+                onComplete?.invoke()
             }
         }
     }

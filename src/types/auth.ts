@@ -19,7 +19,8 @@ export interface RegisterInput {
 export interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  isLoading: boolean;
+  isCheckingAuth: boolean;
+  isSubmitting: boolean;
 }
 
 export interface JwtPayload {
