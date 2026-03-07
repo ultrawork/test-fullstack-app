@@ -94,6 +94,8 @@ export default function TagForm({
             value={color}
             onChange={(e) => setColor(e.target.value)}
             className="h-10 w-10 cursor-pointer rounded border border-gray-300"
+            aria-invalid={errors.color ? "true" : undefined}
+            aria-describedby={errors.color ? "tag-color-error" : undefined}
           />
           <div className="flex flex-wrap gap-1">
             {DEFAULT_COLORS.map((c) => (
@@ -109,7 +111,7 @@ export default function TagForm({
           </div>
         </div>
         {errors.color && (
-          <p className="text-sm text-red-600" role="alert">
+          <p id="tag-color-error" className="text-sm text-red-600" role="alert">
             {errors.color}
           </p>
         )}

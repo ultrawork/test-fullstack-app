@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- TagBadge -->
+    <string name="tag_badge_label">Tag: %1$s</string>
+    <string name="tag_badge_remove">Remove tag %1$s</string>
+
+    <!-- TagSelector -->
+    <string name="tag_selector_title">Tags</string>
+    <string name="tag_selector_search_placeholder">Search or create tags…</string>
+    <string name="tag_selector_create">Create \"%1$s\"</string>
+
+    <!-- TagFilter -->
+    <string name="tag_filter_group">Filter by tags</string>
+    <string name="tag_filter_toggle">Filter by tag %1$s</string>
+    <string name="tag_filter_active">Active</string>
+    <string name="tag_filter_inactive">Inactive</string>
+    <string name="tag_filter_clear">Clear</string>
+    <string name="tag_filter_clear_all">Clear all tag filters</string>
+
+    <!-- TagForm -->
+    <string name="tag_form_name_label">Tag name</string>
+    <string name="tag_form_name_placeholder">Enter tag name</string>
+    <string name="tag_form_name_input_a11y">Tag name input</string>
+    <string name="tag_form_color_label">Color</string>
+    <string name="tag_form_select_color">Select color %1$s</string>
+    <string name="tag_form_preview">Preview</string>
+    <string name="tag_form_cancel">Cancel</string>
+    <string name="tag_form_cancel_a11y">Cancel tag editing</string>
+    <string name="tag_form_create">Create Tag</string>
+    <string name="tag_form_update">Update Tag</string>
+    <string name="tag_form_submit_create_a11y">Create tag</string>
+    <string name="tag_form_submit_update_a11y">Update tag</string>
+    <string name="tag_form_error_name_required">Tag name is required</string>
+    <string name="tag_form_error_name_too_long">Tag name must be at most 50 characters</string>
+    <string name="tag_form_error_invalid_color">Invalid color format</string>
+
+    <!-- TagSelector -->
+    <string name="tag_selector_search_a11y">Search tags</string>
+    <string name="tag_selector_selected">Selected</string>
+    <string name="tag_selector_not_selected">Not selected</string>
+    <string name="tag_selector_toggle">Toggle tag %1$s</string>
+    <string name="tag_selector_create_a11y">Create tag %1$s</string>
+
+    <!-- TagManager -->
+    <string name="tag_manager_title">Manage Tags</string>
+    <string name="tag_manager_empty_title">No tags yet. Create your first tag!</string>
+    <string name="tag_manager_note_count">%1$d notes</string>
+    <string name="tag_manager_tag_summary">%1$s, %2$d notes</string>
+    <string name="tag_manager_delete_title">Delete Tag</string>
+    <string name="tag_manager_delete_message">Are you sure you want to delete \"%1$s\"?</string>
+    <string name="tag_manager_delete_confirm">Delete</string>
+    <string name="tag_manager_delete_cancel">Cancel</string>
+    <string name="tag_manager_confirm_delete_a11y">Confirm delete tag</string>
+    <string name="tag_manager_cancel_delete_a11y">Cancel delete tag</string>
+    <string name="tag_manager_create_new_a11y">Create new tag</string>
+    <string name="tag_manager_loading_a11y">Loading tags</string>
+    <string name="tag_manager_edit_tag_a11y">Edit tag %1$s</string>
+    <string name="tag_manager_delete_tag_a11y">Delete tag %1$s</string>
+
+    <!-- ViewModel error messages -->
+    <string name="tag_error_fetch_failed">Failed to fetch tags: %1$d</string>
+    <string name="tag_error_fetch_generic">Failed to fetch tags</string>
+    <string name="tag_error_create_failed">Failed to create tag: %1$d</string>
+    <string name="tag_error_create_generic">Failed to create tag</string>
+    <string name="tag_error_update_failed">Failed to update tag: %1$d</string>
+    <string name="tag_error_update_generic">Failed to update tag</string>
+    <string name="tag_error_delete_failed">Failed to delete tag: %1$d</string>
+    <string name="tag_error_delete_generic">Failed to delete tag</string>
+    <string name="tag_error_attach_generic">Failed to attach tags</string>
+</resources>
