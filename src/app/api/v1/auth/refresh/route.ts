@@ -41,14 +41,21 @@ export async function POST(request: NextRequest): Promise<Response> {
       user.email,
     );
 
-    await prisma.refreshToken.delete({ where: { token: refreshToken } });
-    await prisma.refreshToken.create({
-      data: {
-        token: newRefreshTokenValue,
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-      },
-    });
+    await prisma.$transaction([
+      prisma.refreshToken.delete({ where: { token: refreshToken } }),
+      prisma.refreshToken.create({
+        data: {
+          token: newRefreshTokenValue,
+          userId: user.id,
+          expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      }),
+    ]);
+
+    // Clean up expired refresh tokens (non-blocking)
+    prisma.refreshToken
+      .deleteMany({ where: { expiresAt: { lt: new Date() } } })
+      .catch(() => {});
 
     const response = successResponse({ message: "Token refreshed" });
     response.cookies.set("access_token", newAccessToken, {

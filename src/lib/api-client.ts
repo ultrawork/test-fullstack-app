@@ -2,6 +2,23 @@ import type { ApiResponse, PaginatedResponse } from "@/types/api";
 
 class ApiClient {
   private baseUrl = "/api/v1";
+  private refreshPromise: Promise<boolean> | null = null;
+
+  private async refreshTokens(): Promise<boolean> {
+    if (this.refreshPromise) {
+      return this.refreshPromise;
+    }
+
+    this.refreshPromise = fetch(`${this.baseUrl}/auth/refresh`, {
+      method: "POST",
+    })
+      .then((res) => res.ok)
+      .finally(() => {
+        this.refreshPromise = null;
+      });
+
+    return this.refreshPromise;
+  }
 
   private async fetchWithRetry(
     url: string,
@@ -10,11 +27,9 @@ class ApiClient {
     const response = await fetch(url, config);
 
     if (response.status === 401 && !url.includes("/auth/")) {
-      const refreshResponse = await fetch(`${this.baseUrl}/auth/refresh`, {
-        method: "POST",
-      });
+      const refreshed = await this.refreshTokens();
 
-      if (refreshResponse.ok) {
+      if (refreshed) {
         return fetch(url, config);
       }
 

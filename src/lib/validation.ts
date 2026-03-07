@@ -62,6 +62,8 @@ export const updateCategorySchema = z.object({
     .optional(),
 });
 
+export const uuidSchema = z.string().uuid("Invalid ID format");
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type CreateNoteInput = z.infer<typeof createNoteSchema>;

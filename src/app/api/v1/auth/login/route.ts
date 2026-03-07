@@ -35,6 +35,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     const accessToken = await generateAccessToken(user.id, user.email);
     const refreshTokenValue = await generateRefreshToken(user.id, user.email);
 
+    await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
     await prisma.refreshToken.create({
       data: {
         token: refreshTokenValue,

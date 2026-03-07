@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAccessToken } from "@/lib/auth";
-import { updateNoteSchema } from "@/lib/validation";
+import { updateNoteSchema, uuidSchema } from "@/lib/validation";
 import { successResponse, errorResponse } from "@/lib/api-response";
 
 interface RouteParams {
@@ -16,6 +16,10 @@ export async function GET(
 ): Promise<Response> {
   try {
     const { id } = await params;
+    if (!uuidSchema.safeParse(id).success) {
+      return errorResponse("Invalid note ID format", 400);
+    }
+
     const accessToken = request.cookies.get("access_token")?.value;
     if (!accessToken) return errorResponse("Unauthorized", 401);
 
@@ -43,6 +47,10 @@ export async function PUT(
 ): Promise<Response> {
   try {
     const { id } = await params;
+    if (!uuidSchema.safeParse(id).success) {
+      return errorResponse("Invalid note ID format", 400);
+    }
+
     const accessToken = request.cookies.get("access_token")?.value;
     if (!accessToken) return errorResponse("Unauthorized", 401);
 
@@ -93,6 +101,10 @@ export async function DELETE(
 ): Promise<Response> {
   try {
     const { id } = await params;
+    if (!uuidSchema.safeParse(id).success) {
+      return errorResponse("Invalid note ID format", 400);
+    }
+
     const accessToken = request.cookies.get("access_token")?.value;
     if (!accessToken) return errorResponse("Unauthorized", 401);
 
