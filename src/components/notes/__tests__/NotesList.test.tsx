@@ -51,7 +51,7 @@ describe("NotesList", () => {
   it("renders create note link in empty state", () => {
     render(<NotesList notes={[]} isLoading={false} />);
     expect(
-      screen.getByRole("button", { name: "Create Note" }),
+      screen.getByRole("link", { name: "Create Note" }),
     ).toBeInTheDocument();
   });
 });

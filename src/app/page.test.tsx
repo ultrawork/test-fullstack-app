@@ -35,10 +35,10 @@ describe("HomePage", () => {
   it("renders sign in and create account links", () => {
     render(<HomePage />);
     expect(
-      screen.getByRole("button", { name: "Sign In" }),
+      screen.getByRole("link", { name: "Sign In" }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: "Create Account" }),
+      screen.getByRole("link", { name: "Create Account" }),
     ).toBeInTheDocument();
   });
 

@@ -36,8 +36,11 @@ export default function NoteView({
           </div>
         </div>
         <div className="flex gap-2">
-          <Link href={`/dashboard/notes/${note.id}/edit`}>
-            <Button variant="secondary">Edit</Button>
+          <Link
+            href={`/dashboard/notes/${note.id}/edit`}
+            className="inline-flex items-center justify-center rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
+            Edit
           </Link>
           <Button
             variant="danger"

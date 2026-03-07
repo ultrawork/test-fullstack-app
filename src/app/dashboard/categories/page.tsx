@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useCategoriesStore } from "@/stores/categories-store";
 import CategoryForm from "@/components/categories/CategoryForm";
 import Badge from "@/components/ui/Badge";
@@ -15,7 +15,6 @@ export default function CategoriesPage(): React.ReactNode {
     createCategory,
     deleteCategory,
   } = useCategoriesStore();
-  const [editingId, setEditingId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -27,7 +26,6 @@ export default function CategoriesPage(): React.ReactNode {
 
   const handleDelete = async (id: string): Promise<void> => {
     await deleteCategory(id);
-    if (editingId === id) setEditingId(null);
   };
 
   if (isLoading && categories.length === 0) {
