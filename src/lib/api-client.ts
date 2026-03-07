@@ -18,6 +18,21 @@ async function handleResponse<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+let refreshPromise: Promise<boolean> | null = null;
+
+async function refreshToken(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = fetch('/api/v1/auth/refresh', { method: 'POST' })
+    .then((response) => response.ok)
+    .catch(() => false)
+    .finally(() => {
+      refreshPromise = null;
+    });
+
+  return refreshPromise;
+}
+
 async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(url, {
     ...options,
@@ -28,8 +43,8 @@ async function request<T>(url: string, options: RequestInit = {}): Promise<T> {
   });
 
   if (response.status === 401 && !url.includes('/auth/')) {
-    const refreshResponse = await fetch('/api/v1/auth/refresh', { method: 'POST' });
-    if (refreshResponse.ok) {
+    const refreshed = await refreshToken();
+    if (refreshed) {
       const retryResponse = await fetch(url, {
         ...options,
         headers: {

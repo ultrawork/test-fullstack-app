@@ -6,6 +6,7 @@ import type { ApiResponse } from '@/types/api';
 interface CategoriesStore {
   categories: Category[];
   isLoading: boolean;
+  error: string | null;
   fetchCategories: () => Promise<void>;
   createCategory: (input: CreateCategoryInput) => Promise<Category>;
   updateCategory: (id: string, input: UpdateCategoryInput) => Promise<Category>;
@@ -15,14 +16,16 @@ interface CategoriesStore {
 export const useCategoriesStore = create<CategoriesStore>((set) => ({
   categories: [],
   isLoading: false,
+  error: null,
 
   fetchCategories: async (): Promise<void> => {
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
     try {
       const response = await apiClient.get<ApiResponse<Category[]>>('/api/v1/categories');
       set({ categories: response.data, isLoading: false });
-    } catch {
-      set({ isLoading: false });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load categories';
+      set({ isLoading: false, error: message });
     }
   },
 

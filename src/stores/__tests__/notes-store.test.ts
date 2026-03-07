@@ -35,6 +35,7 @@ describe('notes-store', () => {
       selectedNote: null,
       filter: {},
       isLoading: false,
+      error: null,
       total: 0,
       page: 1,
     });

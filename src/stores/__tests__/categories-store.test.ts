@@ -28,7 +28,7 @@ const mockCategory = {
 describe('categories-store', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    useCategoriesStore.setState({ categories: [], isLoading: false });
+    useCategoriesStore.setState({ categories: [], isLoading: false, error: null });
   });
 
   it('has correct initial state', () => {

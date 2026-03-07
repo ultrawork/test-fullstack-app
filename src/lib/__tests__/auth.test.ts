@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
 import {
   hashPassword,
   verifyPassword,
@@ -8,6 +8,11 @@ import {
   verifyRefreshToken,
   hashToken,
 } from '../auth';
+
+beforeAll(() => {
+  process.env.JWT_SECRET = 'test-jwt-secret';
+  process.env.JWT_REFRESH_SECRET = 'test-jwt-refresh-secret';
+});
 
 describe('auth utilities', () => {
   describe('hashPassword', () => {

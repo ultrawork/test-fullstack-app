@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 
 export function NotesList(): ReactNode {
   const router = useRouter();
-  const { notes, isLoading, total, page, setPage, deleteNote } = useNotesStore();
+  const { notes, isLoading, error, total, page, setPage, deleteNote } = useNotesStore();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const noteToDelete = notes.find((n) => n.id === deleteId);
   const totalPages = Math.ceil(total / 20);
@@ -28,6 +28,17 @@ export function NotesList(): ReactNode {
       <div className="flex justify-center py-12">
         <Spinner />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <EmptyState
+        title="Failed to load notes"
+        description={error}
+        actionLabel="Retry"
+        onAction={() => useNotesStore.getState().fetchNotes()}
+      />
     );
   }
 

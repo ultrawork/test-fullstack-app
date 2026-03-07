@@ -8,6 +8,7 @@ interface NotesStore {
   selectedNote: Note | null;
   filter: NotesFilter;
   isLoading: boolean;
+  error: string | null;
   total: number;
   page: number;
   fetchNotes: () => Promise<void>;
@@ -24,11 +25,12 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
   selectedNote: null,
   filter: {},
   isLoading: false,
+  error: null,
   total: 0,
   page: 1,
 
   fetchNotes: async (): Promise<void> => {
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
     try {
       const { filter, page } = get();
       const params = new URLSearchParams();
@@ -41,18 +43,20 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
         `/api/v1/notes?${params.toString()}`,
       );
       set({ notes: response.data, total: response.total, isLoading: false });
-    } catch {
-      set({ isLoading: false });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load notes';
+      set({ isLoading: false, error: message });
     }
   },
 
   fetchNote: async (id: string): Promise<void> => {
-    set({ isLoading: true });
+    set({ isLoading: true, error: null });
     try {
       const response = await apiClient.get<ApiResponse<Note>>(`/api/v1/notes/${id}`);
       set({ selectedNote: response.data, isLoading: false });
-    } catch {
-      set({ isLoading: false });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to load note';
+      set({ isLoading: false, error: message });
     }
   },
 

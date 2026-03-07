@@ -66,6 +66,20 @@ describe('auth-store', () => {
     expect(state.isAuthenticated).toBe(false);
   });
 
+  it('logout clears user even when API fails', async () => {
+    useAuthStore.setState({
+      user: { id: '1', email: 'test@test.com', createdAt: '' },
+      isAuthenticated: true,
+    });
+    mockApiClient.post.mockRejectedValue(new Error('Network error'));
+
+    await useAuthStore.getState().logout();
+
+    const state = useAuthStore.getState();
+    expect(state.user).toBeNull();
+    expect(state.isAuthenticated).toBe(false);
+  });
+
   it('checkAuth sets user when authenticated', async () => {
     const mockUser = { id: '1', email: 'test@test.com', createdAt: '2024-01-01' };
     mockApiClient.get.mockResolvedValue({ data: { user: mockUser } });

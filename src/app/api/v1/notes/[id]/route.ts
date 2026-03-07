@@ -1,7 +1,10 @@
 import { NextRequest } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { updateNoteSchema } from '@/lib/validation';
 import { getCurrentUser, successResponse, errorResponse } from '@/lib/api-response';
+
+const uuidSchema = z.string().uuid();
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -15,6 +18,10 @@ export async function GET(request: NextRequest, { params }: RouteParams): Promis
     }
 
     const { id } = await params;
+    if (!uuidSchema.safeParse(id).success) {
+      return errorResponse('Invalid note ID', 400);
+    }
+
     const note = await prisma.note.findFirst({
       where: { id, userId: currentUser.id },
       include: { category: true },
@@ -38,6 +45,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
     }
 
     const { id } = await params;
+    if (!uuidSchema.safeParse(id).success) {
+      return errorResponse('Invalid note ID', 400);
+    }
+
     const existingNote = await prisma.note.findFirst({
       where: { id, userId: currentUser.id },
     });
@@ -89,6 +100,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams): Pro
     }
 
     const { id } = await params;
+    if (!uuidSchema.safeParse(id).success) {
+      return errorResponse('Invalid note ID', 400);
+    }
+
     const note = await prisma.note.findFirst({
       where: { id, userId: currentUser.id },
     });

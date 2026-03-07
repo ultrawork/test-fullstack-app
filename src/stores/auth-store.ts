@@ -36,7 +36,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   logout: async (): Promise<void> => {
-    await apiClient.post('/api/v1/auth/logout');
+    try {
+      await apiClient.post('/api/v1/auth/logout');
+    } catch {
+      // Always clear local state regardless of API result
+    }
     set({ user: null, isAuthenticated: false });
   },
 

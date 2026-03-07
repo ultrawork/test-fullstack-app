@@ -1,7 +1,10 @@
 import { NextRequest } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/prisma';
 import { updateCategorySchema } from '@/lib/validation';
 import { getCurrentUser, successResponse, errorResponse } from '@/lib/api-response';
+
+const uuidSchema = z.string().uuid();
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -15,6 +18,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams): Promis
     }
 
     const { id } = await params;
+    if (!uuidSchema.safeParse(id).success) {
+      return errorResponse('Invalid category ID', 400);
+    }
+
     const existing = await prisma.category.findFirst({
       where: { id, userId: currentUser.id },
     });
@@ -65,6 +72,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams): Pro
     }
 
     const { id } = await params;
+    if (!uuidSchema.safeParse(id).success) {
+      return errorResponse('Invalid category ID', 400);
+    }
+
     const category = await prisma.category.findFirst({
       where: { id, userId: currentUser.id },
     });
