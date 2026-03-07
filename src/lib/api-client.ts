@@ -23,8 +23,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
         ...options,
       });
       if (!retryRes.ok) {
-        const err = await retryRes.json();
-        throw new Error(err.error || "Request failed");
+        const err = await retryRes.json().catch(() => null);
+        throw new Error(err?.error || "Request failed");
       }
       return retryRes.json();
     }
@@ -32,8 +32,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.error || "Request failed");
+    const err = await response.json().catch(() => null);
+    throw new Error(err?.error || "Request failed");
   }
 
   return response.json();

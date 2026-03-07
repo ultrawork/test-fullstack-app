@@ -16,16 +16,12 @@ export async function PUT(
     const body: unknown = await request.json();
     const data = attachTagsSchema.parse(body);
 
-    const note = await prisma.note.findUnique({
-      where: { id },
+    const note = await prisma.note.findFirst({
+      where: { id, userId },
     });
 
     if (!note) {
       throw new NotFoundError("Note");
-    }
-
-    if (note.userId !== userId) {
-      throw new ForbiddenError();
     }
 
     const updatedNote = await prisma.$transaction(async (tx) => {

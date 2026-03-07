@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
+import { Prisma } from "@prisma/client";
 import { AppError } from "./errors";
 
 export function successResponse<T>(
@@ -35,6 +36,15 @@ export function handleApiError(error: unknown): NextResponse {
 
   if (error instanceof AppError) {
     return errorResponse(error.message, error.statusCode, error.details);
+  }
+
+  if (
+    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error.code === "P2002"
+  ) {
+    const target = (error.meta?.target as string[]) ?? [];
+    const field = target[target.length - 1] ?? "field";
+    return errorResponse(`A record with this ${field} already exists`, 400);
   }
 
   console.error("Unhandled error:", error);
