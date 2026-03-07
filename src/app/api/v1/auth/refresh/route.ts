@@ -22,10 +22,10 @@ export async function POST(request: NextRequest): Promise<Response> {
     }
 
     const storedToken = await prisma.refreshToken.findUnique({
-      where: { token: refreshToken },
+      where: { token: refreshToken, expiresAt: { gt: new Date() } },
     });
     if (!storedToken) {
-      return errorResponse("Refresh token revoked", 401);
+      return errorResponse("Refresh token revoked or expired", 401);
     }
 
     const user = await prisma.user.findUnique({
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       user.email,
     );
 
-    await prisma.refreshToken.deleteMany({ where: { userId: user.id } });
+    await prisma.refreshToken.delete({ where: { token: refreshToken } });
     await prisma.refreshToken.create({
       data: {
         token: newRefreshTokenValue,

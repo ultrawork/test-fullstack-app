@@ -52,12 +52,15 @@ export default function Modal({
 
   useEffect(() => {
     if (isOpen) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
       document.addEventListener("keydown", handleKeyDown);
       const prev = document.activeElement as HTMLElement | null;
       dialogRef.current
         ?.querySelector<HTMLElement>("button, [href], input, select, textarea")
         ?.focus();
       return () => {
+        document.body.style.overflow = prevOverflow;
         document.removeEventListener("keydown", handleKeyDown);
         prev?.focus();
       };

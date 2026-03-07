@@ -3,6 +3,28 @@ import type { ApiResponse, PaginatedResponse } from "@/types/api";
 class ApiClient {
   private baseUrl = "/api/v1";
 
+  private async fetchWithRetry(
+    url: string,
+    config: RequestInit,
+  ): Promise<Response> {
+    const response = await fetch(url, config);
+
+    if (response.status === 401 && !url.includes("/auth/")) {
+      const refreshResponse = await fetch(`${this.baseUrl}/auth/refresh`, {
+        method: "POST",
+      });
+
+      if (refreshResponse.ok) {
+        return fetch(url, config);
+      }
+
+      window.location.href = "/login";
+      throw new Error("Session expired");
+    }
+
+    return response;
+  }
+
   private async request<T>(
     endpoint: string,
     options: RequestInit = {},
@@ -16,23 +38,12 @@ class ApiClient {
       ...options,
     };
 
-    const response = await fetch(url, config);
-
-    if (response.status === 401 && !endpoint.includes("/auth/")) {
-      const refreshResponse = await fetch(`${this.baseUrl}/auth/refresh`, {
-        method: "POST",
-      });
-
-      if (refreshResponse.ok) {
-        const retryResponse = await fetch(url, config);
-        return retryResponse.json() as Promise<ApiResponse<T>>;
-      }
-
-      window.location.href = "/login";
-      return { success: false, error: "Session expired" };
+    try {
+      const response = await this.fetchWithRetry(url, config);
+      return response.json() as Promise<ApiResponse<T>>;
+    } catch {
+      return { success: false, error: "Network error" };
     }
-
-    return response.json() as Promise<ApiResponse<T>>;
   }
 
   async get<T>(endpoint: string): Promise<ApiResponse<T>> {
@@ -43,27 +54,16 @@ class ApiClient {
     endpoint: string,
   ): Promise<PaginatedResponse<T>> {
     const url = `${this.baseUrl}${endpoint}`;
-    const response = await fetch(url, { method: "GET" });
-
-    if (response.status === 401) {
-      const refreshResponse = await fetch(`${this.baseUrl}/auth/refresh`, {
-        method: "POST",
-      });
-
-      if (refreshResponse.ok) {
-        const retryResponse = await fetch(url, { method: "GET" });
-        return retryResponse.json() as Promise<PaginatedResponse<T>>;
-      }
-
-      window.location.href = "/login";
+    try {
+      const response = await this.fetchWithRetry(url, { method: "GET" });
+      return response.json() as Promise<PaginatedResponse<T>>;
+    } catch {
       return {
         success: false,
         data: [],
         pagination: { page: 1, limit: 10, total: 0, totalPages: 0 },
       };
     }
-
-    return response.json() as Promise<PaginatedResponse<T>>;
   }
 
   async post<T>(
