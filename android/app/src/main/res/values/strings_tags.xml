@@ -12,6 +12,10 @@
     <!-- TagFilter -->
     <string name="tag_filter_toggle">Filter by tag %1$s</string>
     <string name="tag_filter_clear">Clear</string>
+    <string name="tag_filter_section_a11y">Filter by tags</string>
+    <string name="tag_filter_state_active">Active</string>
+    <string name="tag_filter_state_inactive">Inactive</string>
+    <string name="tag_filter_clear_all_a11y">Clear all tag filters</string>
 
     <!-- TagForm -->
     <string name="tag_form_name_label">Tag name</string>
@@ -22,6 +26,20 @@
     <string name="tag_form_cancel">Cancel</string>
     <string name="tag_form_create">Create Tag</string>
     <string name="tag_form_update">Update Tag</string>
+    <string name="tag_form_name_input_a11y">Tag name input</string>
+    <string name="tag_form_cancel_a11y">Cancel tag editing</string>
+    <string name="tag_form_submit_update_a11y">Update tag</string>
+    <string name="tag_form_submit_create_a11y">Create tag</string>
+    <string name="tag_form_error_name_required">Tag name is required</string>
+    <string name="tag_form_error_name_too_long">Tag name must be at most 50 characters</string>
+    <string name="tag_form_error_invalid_color">Invalid color format</string>
+
+    <!-- TagSelector -->
+    <string name="tag_selector_search_a11y">Search tags</string>
+    <string name="tag_selector_state_selected">Selected</string>
+    <string name="tag_selector_state_not_selected">Not selected</string>
+    <string name="tag_selector_toggle_a11y">Toggle tag %1$s</string>
+    <string name="tag_selector_create_a11y">Create tag %1$s</string>
 
     <!-- TagManager -->
     <string name="tag_manager_title">Manage Tags</string>
@@ -33,4 +51,9 @@
     <string name="tag_manager_delete_cancel">Cancel</string>
     <string name="tag_manager_edit_tag_a11y">Edit tag %1$s</string>
     <string name="tag_manager_delete_tag_a11y">Delete tag %1$s</string>
+    <string name="tag_manager_confirm_delete_a11y">Confirm delete tag</string>
+    <string name="tag_manager_cancel_delete_a11y">Cancel delete tag</string>
+    <string name="tag_manager_create_new_a11y">Create new tag</string>
+    <string name="tag_manager_loading_a11y">Loading tags</string>
+    <string name="tag_manager_tag_row_a11y">%1$s, %2$d notes</string>
 </resources>

@@ -23,12 +23,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
@@ -54,9 +59,11 @@ fun TagForm(
     onSubmit: (name: String, color: String) -> Unit,
     onCancel: () -> Unit,
 ) {
-    var name by remember { mutableStateOf(initialName) }
-    var color by remember { mutableStateOf(initialColor) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    var name by rememberSaveable { mutableStateOf(initialName) }
+    var color by rememberSaveable { mutableStateOf(initialColor) }
+    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier.padding(16.dp),
@@ -73,8 +80,9 @@ fun TagForm(
             isError = errorMessage != null,
             modifier = Modifier
                 .fillMaxWidth()
+                .testTag("tag_form_name_input")
                 .semantics {
-                    contentDescription = "Tag name input"
+                    contentDescription = context.getString(R.string.tag_form_name_input_a11y)
                     if (errorMessage != null) error(errorMessage!!)
                 },
             singleLine = true,
@@ -101,10 +109,14 @@ fun TagForm(
                             if (isSelected) Modifier.border(2.dp, Color.Black, CircleShape)
                             else Modifier,
                         )
-                        .clickable { color = presetColor }
+                        .clickable {
+                            focusManager.clearFocus()
+                            color = presetColor
+                        }
+                        .testTag("tag_form_color_$presetColor")
                         .semantics {
                             contentDescription =
-                                stringResource(R.string.tag_form_select_color, presetColor)
+                                context.getString(R.string.tag_form_select_color, presetColor)
                         },
                 )
             }
@@ -131,7 +143,7 @@ fun TagForm(
             OutlinedButton(
                 onClick = onCancel,
                 modifier = Modifier.semantics {
-                    contentDescription = "Cancel tag editing"
+                    contentDescription = context.getString(R.string.tag_form_cancel_a11y)
                 },
             ) {
                 Text(stringResource(R.string.tag_form_cancel))
@@ -139,16 +151,17 @@ fun TagForm(
 
             Button(
                 onClick = {
+                    focusManager.clearFocus()
                     val trimmedName = name.trim()
                     when {
                         trimmedName.isEmpty() -> {
-                            errorMessage = "Tag name is required"
+                            errorMessage = context.getString(R.string.tag_form_error_name_required)
                         }
                         trimmedName.length > 50 -> {
-                            errorMessage = "Tag name must be at most 50 characters"
+                            errorMessage = context.getString(R.string.tag_form_error_name_too_long)
                         }
                         !HEX_COLOR_REGEX.matches(color) -> {
-                            errorMessage = "Invalid color format"
+                            errorMessage = context.getString(R.string.tag_form_error_invalid_color)
                         }
                         else -> {
                             errorMessage = null
@@ -157,9 +170,14 @@ fun TagForm(
                     }
                 },
                 enabled = !isSubmitting,
-                modifier = Modifier.semantics {
-                    contentDescription = if (isEditing) "Update tag" else "Create tag"
-                },
+                modifier = Modifier
+                    .testTag("tag_form_submit_button")
+                    .semantics {
+                        contentDescription = context.getString(
+                            if (isEditing) R.string.tag_form_submit_update_a11y
+                            else R.string.tag_form_submit_create_a11y,
+                        )
+                    },
             ) {
                 if (isSubmitting) {
                     CircularProgressIndicator(

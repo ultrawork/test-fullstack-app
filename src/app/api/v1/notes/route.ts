@@ -13,7 +13,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const { searchParams } = request.nextUrl;
 
     const search = searchParams.get("search") || undefined;
-    const tagIds = searchParams.getAll("tagIds");
+    const tagIds = [
+      ...searchParams.getAll("tagIds"),
+      ...searchParams.getAll("tagIds[]"),
+    ];
     const page = Math.max(
       1,
       parseInt(searchParams.get("page") || "1", 10) || 1,

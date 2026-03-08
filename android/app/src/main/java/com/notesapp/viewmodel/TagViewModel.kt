@@ -75,7 +75,13 @@ class TagViewModel(private val tagApi: TagApi) : ViewModel() {
         }
     }
 
-    fun updateTag(id: String, name: String?, color: String?) {
+    fun updateTag(
+        id: String,
+        name: String?,
+        color: String?,
+        onSuccess: (() -> Unit)? = null,
+        onComplete: (() -> Unit)? = null,
+    ) {
         viewModelScope.launch {
             _isLoading.value = true
             _errorMessage.value = null
@@ -98,6 +104,7 @@ class TagViewModel(private val tagApi: TagApi) : ViewModel() {
                                 existing
                             }
                         }
+                        onSuccess?.invoke()
                     }
                 } else {
                     _errorMessage.value = "Failed to update tag: ${response.code()}"
@@ -106,6 +113,7 @@ class TagViewModel(private val tagApi: TagApi) : ViewModel() {
                 _errorMessage.value = e.message ?: "Failed to update tag"
             } finally {
                 _isLoading.value = false
+                onComplete?.invoke()
             }
         }
     }

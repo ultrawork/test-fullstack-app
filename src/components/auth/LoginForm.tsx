@@ -9,9 +9,10 @@ import { useAuthStore } from "@/stores/auth-store";
 
 export default function LoginForm(): ReactNode {
   const router = useRouter();
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, error, clearError } = useAuthStore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: FormEvent): Promise<void> => {
@@ -27,11 +28,14 @@ export default function LoginForm(): ReactNode {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       await login(email, password);
       router.push("/dashboard");
     } catch {
       // error is set in the store
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -65,7 +69,7 @@ export default function LoginForm(): ReactNode {
         </p>
       )}
 
-      <Button type="submit" isLoading={isLoading}>
+      <Button type="submit" isLoading={isSubmitting}>
         Sign In
       </Button>
 

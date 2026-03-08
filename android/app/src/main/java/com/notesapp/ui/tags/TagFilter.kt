@@ -29,9 +29,10 @@ fun TagFilter(
 ) {
     if (tags.isEmpty()) return
 
+    val filterSectionDesc = stringResource(R.string.tag_filter_section_a11y)
     LazyRow(
         modifier = modifier.semantics {
-            contentDescription = "Filter by tags"
+            contentDescription = filterSectionDesc
         },
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -39,7 +40,8 @@ fun TagFilter(
             val isSelected = selectedIds.contains(tag.id)
             val tagColor = parseHexColor(tag.color)
             val textColor = contrastColor(tag.color)
-            val stateDesc = if (isSelected) "Active" else "Inactive"
+            val stateDesc = if (isSelected) stringResource(R.string.tag_filter_state_active) else stringResource(R.string.tag_filter_state_inactive)
+            val toggleDesc = stringResource(R.string.tag_filter_toggle, tag.name)
 
             FilterChip(
                 selected = isSelected,
@@ -49,14 +51,14 @@ fun TagFilter(
                         else selectedIds + tag.id,
                     )
                 },
-                label = { Text(tag.name, color = if (isSelected) textColor else textColor) },
+                label = { Text(tag.name, color = textColor) },
                 shape = CircleShape,
                 colors = FilterChipDefaults.filterChipColors(
                     containerColor = tagColor.copy(alpha = 0.7f),
                     selectedContainerColor = tagColor,
                 ),
                 modifier = Modifier.semantics {
-                    contentDescription = stringResource(R.string.tag_filter_toggle, tag.name)
+                    contentDescription = toggleDesc
                     stateDescription = stateDesc
                 },
             )
@@ -64,12 +66,13 @@ fun TagFilter(
 
         if (selectedIds.isNotEmpty()) {
             item {
+                val clearAllDesc = stringResource(R.string.tag_filter_clear_all_a11y)
                 TextButton(
                     onClick = { onSelectionChange(emptyList()) },
                     modifier = Modifier
                         .padding(start = 4.dp)
                         .semantics {
-                            contentDescription = "Clear all tag filters"
+                            contentDescription = clearAllDesc
                         },
                 ) {
                     Text(stringResource(R.string.tag_filter_clear))

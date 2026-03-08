@@ -29,10 +29,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -53,7 +55,7 @@ fun TagManagerScreen(
     val tags by viewModel.tags.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
 
-    var viewMode by remember { mutableStateOf(TagManagerViewMode.LIST) }
+    var viewMode by rememberSaveable { mutableStateOf(TagManagerViewMode.LIST) }
     var editingTag by remember { mutableStateOf<TagWithNoteCount?>(null) }
     var deletingTag by remember { mutableStateOf<TagWithNoteCount?>(null) }
     var isSubmitting by remember { mutableStateOf(false) }
@@ -70,15 +72,18 @@ fun TagManagerScreen(
                 Text(stringResource(R.string.tag_manager_delete_message, deletingTag!!.name))
             },
             confirmButton = {
+                val confirmDeleteDesc = stringResource(R.string.tag_manager_confirm_delete_a11y)
                 TextButton(
                     onClick = {
                         val id = deletingTag!!.id
                         deletingTag = null
                         viewModel.deleteTag(id)
                     },
-                    modifier = Modifier.semantics {
-                        contentDescription = "Confirm delete tag"
-                    },
+                    modifier = Modifier
+                        .testTag("tag_manager_confirm_delete")
+                        .semantics {
+                            contentDescription = confirmDeleteDesc
+                        },
                 ) {
                     Text(
                         stringResource(R.string.tag_manager_delete_confirm),
@@ -87,10 +92,11 @@ fun TagManagerScreen(
                 }
             },
             dismissButton = {
+                val cancelDeleteDesc = stringResource(R.string.tag_manager_cancel_delete_a11y)
                 TextButton(
                     onClick = { deletingTag = null },
                     modifier = Modifier.semantics {
-                        contentDescription = "Cancel delete tag"
+                        contentDescription = cancelDeleteDesc
                     },
                 ) {
                     Text(stringResource(R.string.tag_manager_delete_cancel))
@@ -103,11 +109,14 @@ fun TagManagerScreen(
         modifier = modifier,
         floatingActionButton = {
             if (viewMode == TagManagerViewMode.LIST) {
+                val createNewDesc = stringResource(R.string.tag_manager_create_new_a11y)
                 FloatingActionButton(
                     onClick = { viewMode = TagManagerViewMode.CREATE },
-                    modifier = Modifier.semantics {
-                        contentDescription = "Create new tag"
-                    },
+                    modifier = Modifier
+                        .testTag("tag_manager_create_fab")
+                        .semantics {
+                            contentDescription = createNewDesc
+                        },
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                 }
@@ -123,9 +132,10 @@ fun TagManagerScreen(
                             .padding(paddingValues),
                         contentAlignment = Alignment.Center,
                     ) {
+                        val loadingDesc = stringResource(R.string.tag_manager_loading_a11y)
                         CircularProgressIndicator(
                             modifier = Modifier.semantics {
-                                contentDescription = "Loading tags"
+                                contentDescription = loadingDesc
                             },
                         )
                     }
@@ -133,7 +143,8 @@ fun TagManagerScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(paddingValues),
+                            .padding(paddingValues)
+                            .testTag("tag_manager_empty_state"),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -146,7 +157,8 @@ fun TagManagerScreen(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(paddingValues),
+                            .padding(paddingValues)
+                            .testTag("tag_manager_list"),
                     ) {
                         items(tags, key = { it.id }) { tag ->
                             TagRow(
@@ -187,10 +199,16 @@ fun TagManagerScreen(
                         isSubmitting = isSubmitting,
                         onSubmit = { name, color ->
                             isSubmitting = true
-                            viewModel.updateTag(tag.id, name, color)
-                            isSubmitting = false
-                            editingTag = null
-                            viewMode = TagManagerViewMode.LIST
+                            viewModel.updateTag(
+                                tag.id, name, color,
+                                onSuccess = {
+                                    editingTag = null
+                                    viewMode = TagManagerViewMode.LIST
+                                },
+                                onComplete = {
+                                    isSubmitting = false
+                                },
+                            )
                         },
                         onCancel = {
                             editingTag = null
@@ -210,12 +228,15 @@ private fun TagRow(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val tagRowDesc = stringResource(R.string.tag_manager_tag_row_a11y, tag.name, tag.count.notes)
+    val editTagDesc = stringResource(R.string.tag_manager_edit_tag_a11y, tag.name)
+    val deleteTagDesc = stringResource(R.string.tag_manager_delete_tag_a11y, tag.name)
     Row(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .semantics {
-                contentDescription = "${tag.name}, ${tag.count.notes} notes"
+                contentDescription = tagRowDesc
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -232,9 +253,11 @@ private fun TagRow(
 
         IconButton(
             onClick = onEdit,
-            modifier = Modifier.semantics {
-                contentDescription = stringResource(R.string.tag_manager_edit_tag_a11y, tag.name)
-            },
+            modifier = Modifier
+                .testTag("tag_manager_edit_${tag.name}")
+                .semantics {
+                    contentDescription = editTagDesc
+                },
         ) {
             Icon(
                 Icons.Default.Edit,
@@ -245,9 +268,11 @@ private fun TagRow(
 
         IconButton(
             onClick = onDelete,
-            modifier = Modifier.semantics {
-                contentDescription = stringResource(R.string.tag_manager_delete_tag_a11y, tag.name)
-            },
+            modifier = Modifier
+                .testTag("tag_manager_delete_${tag.name}")
+                .semantics {
+                    contentDescription = deleteTagDesc
+                },
         ) {
             Icon(
                 Icons.Default.Delete,

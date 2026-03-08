@@ -77,6 +77,7 @@ fun TagSelector(
             }
         }
 
+        val searchDesc = stringResource(R.string.tag_selector_search_a11y)
         OutlinedTextField(
             value = searchText,
             onValueChange = { searchText = it },
@@ -84,8 +85,7 @@ fun TagSelector(
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics {
-                    contentDescription =
-                        "Search tags"
+                    contentDescription = searchDesc
                 },
             singleLine = true,
         )
@@ -95,8 +95,8 @@ fun TagSelector(
         ) {
             items(filteredTags, key = { it.id }) { tag ->
                 val isSelected = selectedIds.contains(tag.id)
-                val stateDesc = if (isSelected) "Selected" else "Not selected"
-                val toggleDesc = "Toggle tag ${tag.name}"
+                val stateDesc = if (isSelected) stringResource(R.string.tag_selector_state_selected) else stringResource(R.string.tag_selector_state_not_selected)
+                val toggleDesc = stringResource(R.string.tag_selector_toggle_a11y, tag.name)
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -123,13 +123,14 @@ fun TagSelector(
         }
 
         if (canCreate) {
+            val createDesc = stringResource(R.string.tag_selector_create_a11y, searchText.trim())
             TextButton(
                 onClick = {
                     onCreate?.invoke(searchText.trim())
                     searchText = ""
                 },
                 modifier = Modifier.semantics {
-                    contentDescription = "Create tag ${searchText.trim()}"
+                    contentDescription = createDesc
                 },
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)
