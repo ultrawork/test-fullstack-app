@@ -33,6 +33,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -77,9 +78,11 @@ fun TagManagerScreen(
                         deletingTag = null
                         viewModel.deleteTag(id)
                     },
-                    modifier = Modifier.semantics {
-                        contentDescription = confirmDeleteDesc
-                    },
+                    modifier = Modifier
+                        .testTag("tag_manager_confirm_delete")
+                        .semantics {
+                            contentDescription = confirmDeleteDesc
+                        },
                 ) {
                     Text(
                         stringResource(R.string.tag_manager_delete_confirm),
@@ -108,9 +111,11 @@ fun TagManagerScreen(
                 val createNewDesc = stringResource(R.string.tag_manager_create_new_a11y)
                 FloatingActionButton(
                     onClick = { viewMode = TagManagerViewMode.CREATE },
-                    modifier = Modifier.semantics {
-                        contentDescription = createNewDesc
-                    },
+                    modifier = Modifier
+                        .testTag("tag_manager_create_fab")
+                        .semantics {
+                            contentDescription = createNewDesc
+                        },
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
                 }
@@ -137,7 +142,8 @@ fun TagManagerScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(paddingValues),
+                            .padding(paddingValues)
+                            .testTag("tag_manager_empty_state"),
                         contentAlignment = Alignment.Center,
                     ) {
                         Text(
@@ -150,7 +156,8 @@ fun TagManagerScreen(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(paddingValues),
+                            .padding(paddingValues)
+                            .testTag("tag_manager_list"),
                     ) {
                         items(tags, key = { it.id }) { tag ->
                             TagRow(
@@ -245,9 +252,11 @@ private fun TagRow(
 
         IconButton(
             onClick = onEdit,
-            modifier = Modifier.semantics {
-                contentDescription = editTagDesc
-            },
+            modifier = Modifier
+                .testTag("tag_manager_edit_${tag.name}")
+                .semantics {
+                    contentDescription = editTagDesc
+                },
         ) {
             Icon(
                 Icons.Default.Edit,
@@ -258,9 +267,11 @@ private fun TagRow(
 
         IconButton(
             onClick = onDelete,
-            modifier = Modifier.semantics {
-                contentDescription = deleteTagDesc
-            },
+            modifier = Modifier
+                .testTag("tag_manager_delete_${tag.name}")
+                .semantics {
+                    contentDescription = deleteTagDesc
+                },
         ) {
             Icon(
                 Icons.Default.Delete,

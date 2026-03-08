@@ -51,6 +51,7 @@ struct TagManagerView: View {
                             Image(systemName: "plus")
                         }
                         .accessibilityLabel(NSLocalizedString("tag_manager_create_new", comment: "Create new tag"))
+                        .accessibilityIdentifier("tag_manager_create_button")
                     }
                 }
             }
@@ -93,12 +94,14 @@ struct TagManagerView: View {
             if viewModel.isLoading && viewModel.tags.isEmpty {
                 ProgressView()
                     .accessibilityLabel(NSLocalizedString("tag_manager_loading", comment: "Loading tags"))
+                    .accessibilityIdentifier("tag_manager_loading")
             } else if viewModel.tags.isEmpty {
                 ContentUnavailableView(
                     NSLocalizedString("tag_manager_empty_title", comment: "No tags title"),
                     systemImage: "tag",
                     description: Text(NSLocalizedString("tag_manager_empty_description", comment: "No tags description"))
                 )
+                .accessibilityIdentifier("tag_manager_empty_title")
             } else {
                 List {
                     ForEach(viewModel.tags) { tag in
@@ -141,6 +144,7 @@ struct TagManagerView: View {
                     tag.name
                 )
             )
+            .accessibilityIdentifier("tag_manager_delete_\(tag.name)")
         }
         .swipeActions(edge: .leading) {
             Button {
@@ -159,6 +163,7 @@ struct TagManagerView: View {
                     tag.name
                 )
             )
+            .accessibilityIdentifier("tag_manager_edit_\(tag.name)")
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(

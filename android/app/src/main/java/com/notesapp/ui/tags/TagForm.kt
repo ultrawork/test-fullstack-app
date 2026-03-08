@@ -29,10 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.notesapp.R
 
@@ -75,6 +76,7 @@ fun TagForm(
             isError = errorMessage != null,
             modifier = Modifier
                 .fillMaxWidth()
+                .testTag("tag_form_name_input")
                 .semantics {
                     contentDescription = context.getString(R.string.tag_form_name_input_a11y)
                     if (errorMessage != null) error(errorMessage!!)
@@ -104,6 +106,7 @@ fun TagForm(
                             else Modifier,
                         )
                         .clickable { color = presetColor }
+                        .testTag("tag_form_color_$presetColor")
                         .semantics {
                             contentDescription =
                                 context.getString(R.string.tag_form_select_color, presetColor)
@@ -159,12 +162,14 @@ fun TagForm(
                     }
                 },
                 enabled = !isSubmitting,
-                modifier = Modifier.semantics {
-                    contentDescription = context.getString(
-                        if (isEditing) R.string.tag_form_submit_update_a11y
-                        else R.string.tag_form_submit_create_a11y,
-                    )
-                },
+                modifier = Modifier
+                    .testTag("tag_form_submit_button")
+                    .semantics {
+                        contentDescription = context.getString(
+                            if (isEditing) R.string.tag_form_submit_update_a11y
+                            else R.string.tag_form_submit_create_a11y,
+                        )
+                    },
             ) {
                 if (isSubmitting) {
                     CircularProgressIndicator(

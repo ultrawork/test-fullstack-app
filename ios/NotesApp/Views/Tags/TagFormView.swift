@@ -44,6 +44,7 @@ struct TagFormView: View {
             )
             .textFieldStyle(.roundedBorder)
             .accessibilityLabel(NSLocalizedString("tag_form_name_a11y", comment: "Tag name input"))
+            .accessibilityIdentifier("tag_form_name_field")
         }
     }
 
@@ -80,6 +81,7 @@ struct TagFormView: View {
                                 presetColor
                             )
                         )
+                        .accessibilityIdentifier("tag_form_color_\(presetColor)")
                     }
                 }
             }
@@ -110,6 +112,7 @@ struct TagFormView: View {
             }
             .foregroundColor(.secondary)
             .accessibilityLabel(NSLocalizedString("tag_form_cancel_a11y", comment: "Cancel tag editing"))
+            .accessibilityIdentifier("tag_form_cancel_button")
 
             Spacer()
 
@@ -133,6 +136,7 @@ struct TagFormView: View {
                     ? NSLocalizedString("tag_form_update_a11y", comment: "Update tag accessibility")
                     : NSLocalizedString("tag_form_create_a11y", comment: "Create tag accessibility")
             )
+            .accessibilityIdentifier("tag_form_submit_button")
         }
     }
 
