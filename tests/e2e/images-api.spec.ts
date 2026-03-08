@@ -163,10 +163,6 @@ test.describe("API изображений", () => {
     const { noteId } = await setupNoteWithAuth(request);
 
     // Загружаем JPEG
-    const form = request.createFormData
-      ? undefined
-      : undefined;
-
     const uploadRes = await request.post(`/api/v1/notes/${noteId}/images`, {
       multipart: {
         images: {
