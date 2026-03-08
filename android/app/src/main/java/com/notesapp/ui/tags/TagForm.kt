@@ -23,11 +23,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -57,9 +60,10 @@ fun TagForm(
     onCancel: () -> Unit,
 ) {
     val context = LocalContext.current
-    var name by remember { mutableStateOf(initialName) }
-    var color by remember { mutableStateOf(initialColor) }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val focusManager = LocalFocusManager.current
+    var name by rememberSaveable { mutableStateOf(initialName) }
+    var color by rememberSaveable { mutableStateOf(initialColor) }
+    var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
 
     Column(
         modifier = modifier.padding(16.dp),
@@ -105,7 +109,10 @@ fun TagForm(
                             if (isSelected) Modifier.border(2.dp, Color.Black, CircleShape)
                             else Modifier,
                         )
-                        .clickable { color = presetColor }
+                        .clickable {
+                            focusManager.clearFocus()
+                            color = presetColor
+                        }
                         .testTag("tag_form_color_$presetColor")
                         .semantics {
                             contentDescription =
@@ -144,6 +151,7 @@ fun TagForm(
 
             Button(
                 onClick = {
+                    focusManager.clearFocus()
                     val trimmedName = name.trim()
                     when {
                         trimmedName.isEmpty() -> {
