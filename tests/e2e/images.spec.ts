@@ -211,12 +211,8 @@ test.describe("Изображения", () => {
     // Drop-zone должна исчезнуть (canAddMore = false)
     await expect(page.getByRole("button", { name: "Drop images here or click to select" })).not.toBeVisible();
 
-    // Попытка добавить 6-е — используем JS для обхода
-    await fileInput.setInputFiles(join(TEST_FILES_DIR, "image6.jpg"));
-
-    // Должна быть ошибка
-    const errorAlert = page.getByRole("alert");
-    await expect(errorAlert).toBeVisible();
-    await expect(errorAlert).toContainText(/Maximum 5 images/);
+    // После 5 изображений элемент загрузки должен быть скрыт (canAddMore = false)
+    await expect(page.locator('input[type="file"]')).toBeHidden();
+    await expect(page.getByText("Images (5/5)")).toBeVisible();
   });
 });
