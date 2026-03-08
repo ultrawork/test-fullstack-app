@@ -73,7 +73,7 @@ test.describe("Изображения", () => {
     await fileInput.setInputFiles(join(TEST_FILES_DIR, "test-image.jpg"));
 
     // Ожидаем появление pending-превью
-    await expect(page.getByAlt("Pending upload test-image.jpg")).toBeVisible();
+    await expect(page.getByAltText("Pending upload test-image.jpg")).toBeVisible();
 
     // Нажимаем Upload (immediateUpload = true для редактирования)
     await page.getByRole("button", { name: /Upload 1 image/ }).click();
@@ -106,8 +106,8 @@ test.describe("Изображения", () => {
     ]);
 
     // Проверяем что pending-превью отображаются
-    await expect(page.getByAlt("Pending upload test-image.jpg")).toBeVisible();
-    await expect(page.getByAlt("Pending upload test-image.png")).toBeVisible();
+    await expect(page.getByAltText("Pending upload test-image.jpg")).toBeVisible();
+    await expect(page.getByAltText("Pending upload test-image.png")).toBeVisible();
 
     // Создаём заметку (pendingImages загрузятся после создания)
     await page.getByRole("button", { name: "Create Note" }).click();
@@ -174,7 +174,7 @@ test.describe("Изображения", () => {
 
     // Должна появиться ошибка валидации или файл не будет добавлен
     const errorAlert = page.getByRole("alert");
-    const hasPending = page.getByAlt(/Pending upload/);
+    const hasPending = page.getByAltText(/Pending upload/);
 
     // Одно из двух: ошибка показана или файл не появился
     const errorVisible = await errorAlert.isVisible().catch(() => false);
