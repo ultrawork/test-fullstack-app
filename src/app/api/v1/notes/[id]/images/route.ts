@@ -105,6 +105,11 @@ export async function POST(
       for (const filename of savedFilenames) {
         await deleteImageFile(id, filename).catch(() => {});
       }
+      if (savedImages.length > 0) {
+        await prisma.noteImage.deleteMany({
+          where: { id: { in: savedImages.map((img) => img.id) } },
+        }).catch(() => {});
+      }
       throw error;
     }
 
