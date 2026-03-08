@@ -77,6 +77,7 @@ fun TagSelector(
             }
         }
 
+        val searchDesc = stringResource(R.string.tag_selector_search_a11y)
         OutlinedTextField(
             value = searchText,
             onValueChange = { searchText = it },
@@ -84,8 +85,7 @@ fun TagSelector(
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics {
-                    contentDescription =
-                        stringResource(R.string.tag_selector_search_a11y)
+                    contentDescription = searchDesc
                 },
             singleLine = true,
         )
@@ -123,13 +123,14 @@ fun TagSelector(
         }
 
         if (canCreate) {
+            val createDesc = stringResource(R.string.tag_selector_create_a11y, searchText.trim())
             TextButton(
                 onClick = {
                     onCreate?.invoke(searchText.trim())
                     searchText = ""
                 },
                 modifier = Modifier.semantics {
-                    contentDescription = stringResource(R.string.tag_selector_create_a11y, searchText.trim())
+                    contentDescription = createDesc
                 },
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)

@@ -76,7 +76,7 @@ fun TagForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics {
-                    contentDescription = stringResource(R.string.tag_form_name_input_a11y)
+                    contentDescription = context.getString(R.string.tag_form_name_input_a11y)
                     if (errorMessage != null) error(errorMessage!!)
                 },
             singleLine = true,
@@ -106,7 +106,7 @@ fun TagForm(
                         .clickable { color = presetColor }
                         .semantics {
                             contentDescription =
-                                stringResource(R.string.tag_form_select_color, presetColor)
+                                context.getString(R.string.tag_form_select_color, presetColor)
                         },
                 )
             }
@@ -133,7 +133,7 @@ fun TagForm(
             OutlinedButton(
                 onClick = onCancel,
                 modifier = Modifier.semantics {
-                    contentDescription = stringResource(R.string.tag_form_cancel_a11y)
+                    contentDescription = context.getString(R.string.tag_form_cancel_a11y)
                 },
             ) {
                 Text(stringResource(R.string.tag_form_cancel))
@@ -160,7 +160,7 @@ fun TagForm(
                 },
                 enabled = !isSubmitting,
                 modifier = Modifier.semantics {
-                    contentDescription = stringResource(
+                    contentDescription = context.getString(
                         if (isEditing) R.string.tag_form_submit_update_a11y
                         else R.string.tag_form_submit_create_a11y,
                     )
