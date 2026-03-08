@@ -5,6 +5,7 @@ import { getUserId } from "@/lib/get-user-id";
 import { createNoteSchema } from "@/lib/validation";
 import { successResponse, handleApiError } from "@/lib/api-response";
 import { ValidationError } from "@/lib/errors";
+import { formatNoteImage } from "@/lib/upload";
 import type { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -61,6 +62,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           tags: {
             include: { tag: true },
           },
+          images: {
+            orderBy: { order: "asc" },
+          },
         },
         orderBy: { updatedAt: "desc" },
         skip,
@@ -76,6 +80,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       createdAt: note.createdAt.toISOString(),
       updatedAt: note.updatedAt.toISOString(),
       tags: note.tags.map((nt) => nt.tag),
+      images: note.images.map(formatNoteImage),
     }));
 
     return successResponse({
@@ -135,6 +140,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         createdAt: note.createdAt.toISOString(),
         updatedAt: note.updatedAt.toISOString(),
         tags: note.tags.map((nt) => nt.tag),
+        images: [],
       },
       201,
     );

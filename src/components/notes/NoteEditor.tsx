@@ -1,11 +1,12 @@
 "use client";
 
-import { type ReactNode, type FormEvent, useState, useEffect } from "react";
+import { type ReactNode, type FormEvent, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/components/ui/Input";
 import TextArea from "@/components/ui/TextArea";
 import Button from "@/components/ui/Button";
 import TagSelector from "@/components/tags/TagSelector";
+import ImageUploader from "@/components/notes/ImageUploader";
 import { useNotesStore } from "@/stores/notes-store";
 import { useTagsStore } from "@/stores/tags-store";
 import type { Note } from "@/types/note";
@@ -16,7 +17,8 @@ interface NoteEditorProps {
 
 export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
   const router = useRouter();
-  const { createNote, updateNote } = useNotesStore();
+  const { createNote, updateNote, uploadImages, deleteImage } =
+    useNotesStore();
   const { tags, fetchTags, createTag } = useTagsStore();
   const [title, setTitle] = useState(note?.title ?? "");
   const [content, setContent] = useState(note?.content ?? "");
@@ -25,10 +27,31 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [pendingImages, setPendingImages] = useState<File[]>([]);
 
   useEffect(() => {
     void fetchTags();
   }, [fetchTags]);
+
+  const handleUpload = async (files: File[]): Promise<void> => {
+    if (!note) return;
+    setIsUploading(true);
+    try {
+      await uploadImages(note.id, files);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleDeleteImage = async (imageId: string): Promise<void> => {
+    if (!note) return;
+    await deleteImage(note.id, imageId);
+  };
+
+  const handlePendingChange = useCallback((files: File[]): void => {
+    setPendingImages(files);
+  }, []);
 
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
@@ -57,6 +80,15 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
           content,
           tagIds: selectedTagIds,
         });
+        if (pendingImages.length > 0) {
+          try {
+            await uploadImages(created.id, pendingImages);
+          } catch {
+            setErrors({ form: "Note created, but image upload failed" });
+            router.push(`/dashboard/notes/${created.id}`);
+            return;
+          }
+        }
         router.push(`/dashboard/notes/${created.id}`);
       }
     } catch {
@@ -97,6 +129,15 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
         selectedIds={selectedTagIds}
         onChange={setSelectedTagIds}
         onCreate={handleCreateTag}
+      />
+
+      <ImageUploader
+        existingImages={note?.images ?? []}
+        onUpload={handleUpload}
+        onDelete={handleDeleteImage}
+        onPendingChange={!note ? handlePendingChange : undefined}
+        isUploading={isUploading}
+        immediateUpload={!!note}
       />
 
       {errors.form && (

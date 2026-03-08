@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import type { Note } from "@/types/note";
 import TagBadge from "@/components/tags/TagBadge";
+import ImageThumbnail from "@/components/notes/ImageThumbnail";
 
 interface NoteCardProps {
   note: Note;
@@ -22,6 +23,7 @@ export default function NoteCard({ note }: NoteCardProps): ReactNode {
         <p className="mt-1 text-sm text-gray-600 line-clamp-2">
           {note.content}
         </p>
+        <ImageThumbnail images={note.images} />
       </Link>
       {note.tags.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1">

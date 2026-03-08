@@ -1,4 +1,5 @@
 import type { Tag } from "./tag";
+import type { NoteImage } from "./note-image";
 
 export interface Note {
   id: string;
@@ -7,6 +8,7 @@ export interface Note {
   createdAt: string;
   updatedAt: string;
   tags: Tag[];
+  images: NoteImage[];
 }
 
 export interface CreateNoteInput {

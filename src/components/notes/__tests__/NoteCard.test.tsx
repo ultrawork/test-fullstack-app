@@ -38,6 +38,7 @@ const mockNote: Note = {
       updatedAt: "",
     },
   ],
+  images: [],
 };
 
 describe("NoteCard", () => {

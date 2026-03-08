@@ -30,11 +30,28 @@ model Note {
   updatedAt DateTime @updatedAt
   userId    String
 
-  user User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tags NoteTag[]
+  user   User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tags   NoteTag[]
+  images NoteImage[]
 
   @@index([userId])
   @@map("notes")
+}
+
+model NoteImage {
+  id        String   @id @default(cuid())
+  filename  String   @db.VarChar(255)
+  path      String   @db.VarChar(500)
+  mimeType  String   @db.VarChar(50)
+  size      Int
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  noteId    String
+
+  note Note @relation(fields: [noteId], references: [id], onDelete: Cascade)
+
+  @@index([noteId])
+  @@map("note_images")
 }
 
 model Tag {

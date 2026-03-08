@@ -12,28 +12,20 @@ async function refreshToken(): Promise<boolean> {
   return refreshPromise;
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers as Record<string, string>),
-    },
-    ...options,
-  });
+async function withAuthRetry<T>(
+  fetchFn: () => Promise<Response>,
+  path: string,
+  errorMessage: string,
+): Promise<T> {
+  const response = await fetchFn();
 
   if (response.status === 401 && !path.includes("/auth/")) {
     const refreshed = await refreshToken();
     if (refreshed) {
-      const retryRes = await fetch(`${API_BASE}${path}`, {
-        headers: {
-          "Content-Type": "application/json",
-          ...(options.headers as Record<string, string>),
-        },
-        ...options,
-      });
+      const retryRes = await fetchFn();
       if (!retryRes.ok) {
         const err = await retryRes.json().catch(() => null);
-        throw new Error(err?.error || "Request failed");
+        throw new Error(err?.error || errorMessage);
       }
       return retryRes.json();
     }
@@ -42,10 +34,37 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   if (!response.ok) {
     const err = await response.json().catch(() => null);
-    throw new Error(err?.error || "Request failed");
+    throw new Error(err?.error || errorMessage);
   }
 
   return response.json();
+}
+
+async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  return withAuthRetry<T>(
+    () =>
+      fetch(`${API_BASE}${path}`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers as Record<string, string>),
+        },
+        ...options,
+      }),
+    path,
+    "Request failed",
+  );
+}
+
+async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
+  return withAuthRetry<T>(
+    () =>
+      fetch(`${API_BASE}${path}`, {
+        method: "POST",
+        body: formData,
+      }),
+    path,
+    "Upload failed",
+  );
 }
 
 export const apiClient = {
@@ -62,4 +81,6 @@ export const apiClient = {
     }),
   delete: <T>(path: string): Promise<T> =>
     request<T>(path, { method: "DELETE" }),
+  upload: <T>(path: string, formData: FormData): Promise<T> =>
+    uploadRequest<T>(path, formData),
 };
