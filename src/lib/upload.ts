@@ -47,14 +47,18 @@ export function validateImageFile(
   }
 
   const dotIndex = file.name.lastIndexOf(".");
-  if (dotIndex >= 0) {
-    const ext = file.name.substring(dotIndex).toLowerCase();
-    if (!IMAGE_CONSTRAINTS.ALLOWED_EXTENSIONS.includes(ext)) {
-      return {
-        valid: false,
-        error: `Invalid file extension: ${ext}. Allowed: .jpg, .jpeg, .png`,
-      };
-    }
+  if (dotIndex < 0) {
+    return {
+      valid: false,
+      error: "File has no extension. Allowed: .jpg, .jpeg, .png",
+    };
+  }
+  const ext = file.name.substring(dotIndex).toLowerCase();
+  if (!IMAGE_CONSTRAINTS.ALLOWED_EXTENSIONS.includes(ext)) {
+    return {
+      valid: false,
+      error: `Invalid file extension: ${ext}. Allowed: .jpg, .jpeg, .png`,
+    };
   }
 
   if (file.size > IMAGE_CONSTRAINTS.MAX_FILE_SIZE) {

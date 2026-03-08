@@ -148,9 +148,9 @@ export default function ImageUploader({
 
   return (
     <div className="flex flex-col gap-3">
-      <label className="text-sm font-medium text-gray-700">
+      <span className="text-sm font-medium text-gray-700">
         Images ({existingImages.length + pendingFiles.length}/{MAX_IMAGES})
-      </label>
+      </span>
 
       {existingImages.length > 0 && (
         <div className="flex flex-wrap gap-2">

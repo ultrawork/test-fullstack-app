@@ -52,6 +52,10 @@ export default function ImageLightbox({
       ref={dialogRef}
       className="fixed inset-0 m-0 flex h-full max-h-full w-full max-w-full items-center justify-center bg-black/90 p-0"
       aria-label={`Viewing image ${currentIndex + 1} of ${images.length}`}
+      onCancel={(e) => {
+        e.preventDefault();
+        onClose();
+      }}
       onClick={(e) => {
         if (e.target === dialogRef.current) onClose();
       }}

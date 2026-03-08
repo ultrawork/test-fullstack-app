@@ -81,7 +81,13 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
           tagIds: selectedTagIds,
         });
         if (pendingImages.length > 0) {
-          await uploadImages(created.id, pendingImages);
+          try {
+            await uploadImages(created.id, pendingImages);
+          } catch {
+            setErrors({ form: "Note created, but image upload failed" });
+            router.push(`/dashboard/notes/${created.id}`);
+            return;
+          }
         }
         router.push(`/dashboard/notes/${created.id}`);
       }
