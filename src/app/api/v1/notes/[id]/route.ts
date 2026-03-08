@@ -5,6 +5,7 @@ import { getUserId } from "@/lib/get-user-id";
 import { updateNoteSchema } from "@/lib/validation";
 import { successResponse, handleApiError } from "@/lib/api-response";
 import { NotFoundError, ValidationError } from "@/lib/errors";
+import { deleteNoteImagesDir } from "@/lib/upload";
 
 export async function GET(
   _request: NextRequest,
@@ -20,6 +21,9 @@ export async function GET(
         tags: {
           include: { tag: true },
         },
+        images: {
+          orderBy: { order: "asc" },
+        },
       },
     });
 
@@ -34,6 +38,15 @@ export async function GET(
       createdAt: note.createdAt.toISOString(),
       updatedAt: note.updatedAt.toISOString(),
       tags: note.tags.map((nt) => nt.tag),
+      images: note.images.map((img) => ({
+        id: img.id,
+        filename: img.filename,
+        path: img.path,
+        mimeType: img.mimeType,
+        size: img.size,
+        order: img.order,
+        createdAt: img.createdAt.toISOString(),
+      })),
     });
   } catch (error: unknown) {
     return handleApiError(error);
@@ -91,6 +104,9 @@ export async function PUT(
           tags: {
             include: { tag: true },
           },
+          images: {
+            orderBy: { order: "asc" },
+          },
         },
       });
     });
@@ -102,6 +118,15 @@ export async function PUT(
       createdAt: note.createdAt.toISOString(),
       updatedAt: note.updatedAt.toISOString(),
       tags: note.tags.map((nt) => nt.tag),
+      images: note.images.map((img) => ({
+        id: img.id,
+        filename: img.filename,
+        path: img.path,
+        mimeType: img.mimeType,
+        size: img.size,
+        order: img.order,
+        createdAt: img.createdAt.toISOString(),
+      })),
     });
   } catch (error: unknown) {
     return handleApiError(error);
@@ -126,6 +151,10 @@ export async function DELETE(
 
     await prisma.note.delete({
       where: { id },
+    });
+
+    await deleteNoteImagesDir(id).catch(() => {
+      // Silently ignore file cleanup errors
     });
 
     return successResponse({ message: "Note deleted successfully" });

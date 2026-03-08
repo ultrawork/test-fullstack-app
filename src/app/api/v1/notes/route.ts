@@ -61,6 +61,9 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           tags: {
             include: { tag: true },
           },
+          images: {
+            orderBy: { order: "asc" },
+          },
         },
         orderBy: { updatedAt: "desc" },
         skip,
@@ -76,6 +79,15 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       createdAt: note.createdAt.toISOString(),
       updatedAt: note.updatedAt.toISOString(),
       tags: note.tags.map((nt) => nt.tag),
+      images: note.images.map((img) => ({
+        id: img.id,
+        filename: img.filename,
+        path: img.path,
+        mimeType: img.mimeType,
+        size: img.size,
+        order: img.order,
+        createdAt: img.createdAt.toISOString(),
+      })),
     }));
 
     return successResponse({
@@ -135,6 +147,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         createdAt: note.createdAt.toISOString(),
         updatedAt: note.updatedAt.toISOString(),
         tags: note.tags.map((nt) => nt.tag),
+        images: [],
       },
       201,
     );

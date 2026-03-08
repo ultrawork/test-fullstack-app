@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import type { Note } from "@/types/note";
 import TagBadge from "@/components/tags/TagBadge";
+import ImageGallery from "@/components/notes/ImageGallery";
 import Button from "@/components/ui/Button";
 
 interface NoteViewProps {
@@ -41,6 +42,8 @@ export default function NoteView({
       <div className="prose max-w-none whitespace-pre-wrap text-gray-700">
         {note.content}
       </div>
+
+      <ImageGallery images={note.images} />
 
       <footer className="mt-6 flex gap-2 border-t border-gray-200 pt-4">
         <Link

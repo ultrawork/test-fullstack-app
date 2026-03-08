@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { Note, CreateNoteInput, UpdateNoteInput } from "@/types/note";
+import type { NoteImage } from "@/types/note-image";
 import type { ApiResponse } from "@/types/api";
 import { apiClient } from "@/lib/api-client";
 
@@ -15,6 +16,8 @@ interface NotesStore {
   createNote: (input: CreateNoteInput) => Promise<Note>;
   updateNote: (id: string, input: UpdateNoteInput) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
+  uploadImages: (noteId: string, files: File[]) => Promise<NoteImage[]>;
+  deleteImage: (noteId: string, imageId: string) => Promise<void>;
   setSearch: (search: string) => void;
   setFilterTagIds: (tagIds: string[]) => void;
   clearError: () => void;
@@ -118,6 +121,72 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
       set({
         isLoading: false,
         error: err instanceof Error ? err.message : "Failed to delete note",
+      });
+      throw err;
+    }
+  },
+
+  uploadImages: async (noteId, files) => {
+    try {
+      const formData = new FormData();
+      for (const file of files) {
+        formData.append("images", file);
+      }
+      const res = await apiClient.upload<ApiResponse<{ images: NoteImage[] }>>(
+        `/notes/${noteId}/images`,
+        formData,
+      );
+      const newImages = res.data.images;
+
+      set((state) => {
+        const updateImages = (note: Note): Note => ({
+          ...note,
+          images: [...note.images, ...newImages],
+        });
+        return {
+          notes: state.notes.map((n) =>
+            n.id === noteId ? updateImages(n) : n,
+          ),
+          currentNote:
+            state.currentNote?.id === noteId
+              ? updateImages(state.currentNote)
+              : state.currentNote,
+        };
+      });
+
+      return newImages;
+    } catch (err) {
+      set({
+        error:
+          err instanceof Error ? err.message : "Failed to upload images",
+      });
+      throw err;
+    }
+  },
+
+  deleteImage: async (noteId, imageId) => {
+    try {
+      await apiClient.delete(`/notes/${noteId}/images/${imageId}`);
+
+      set((state) => {
+        const removeImage = (note: Note): Note => ({
+          ...note,
+          images: note.images.filter((img) => img.id !== imageId),
+        });
+        return {
+          notes: state.notes.map((n) =>
+            n.id === noteId ? removeImage(n) : n,
+          ),
+          currentNote:
+            state.currentNote?.id === noteId
+              ? removeImage(state.currentNote)
+              : state.currentNote,
+        };
+      });
+    } catch (err) {
+      set({
+        error:
+          err instanceof Error ? err.message : "Failed to delete image",
       });
       throw err;
     }

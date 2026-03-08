@@ -7,6 +7,7 @@ vi.mock("@/lib/api-client", () => ({
     post: vi.fn(),
     put: vi.fn(),
     delete: vi.fn(),
+    upload: vi.fn(),
   },
 }));
 
@@ -23,6 +24,7 @@ const mockNote = {
   tags: [
     { id: "t1", name: "Work", color: "#FF0000", createdAt: "", updatedAt: "" },
   ],
+  images: [],
 };
 
 describe("NotesStore", () => {
@@ -123,5 +125,51 @@ describe("NotesStore", () => {
     await useNotesStore.getState().fetchNotes();
 
     expect(useNotesStore.getState().error).toBe("Network error");
+  });
+
+  it("should upload images", async () => {
+    const noteWithImages = { ...mockNote, images: [] };
+    useNotesStore.setState({ notes: [noteWithImages], currentNote: noteWithImages });
+
+    const mockImage = {
+      id: "img1",
+      filename: "test.jpg",
+      path: "/uploads/images/1/test.jpg",
+      mimeType: "image/jpeg",
+      size: 1024,
+      order: 0,
+      createdAt: "2024-01-01",
+    };
+    mockedApi.upload.mockResolvedValueOnce({
+      success: true,
+      data: { images: [mockImage] },
+    });
+
+    const file = new File(["test"], "test.jpg", { type: "image/jpeg" });
+    await useNotesStore.getState().uploadImages("1", [file]);
+
+    expect(useNotesStore.getState().notes[0].images).toContainEqual(mockImage);
+    expect(useNotesStore.getState().currentNote?.images).toContainEqual(mockImage);
+  });
+
+  it("should delete image", async () => {
+    const mockImage = {
+      id: "img1",
+      filename: "test.jpg",
+      path: "/uploads/images/1/test.jpg",
+      mimeType: "image/jpeg",
+      size: 1024,
+      order: 0,
+      createdAt: "2024-01-01",
+    };
+    const noteWithImage = { ...mockNote, images: [mockImage] };
+    useNotesStore.setState({ notes: [noteWithImage], currentNote: noteWithImage });
+
+    mockedApi.delete.mockResolvedValueOnce({ success: true, data: null });
+
+    await useNotesStore.getState().deleteImage("1", "img1");
+
+    expect(useNotesStore.getState().notes[0].images).toEqual([]);
+    expect(useNotesStore.getState().currentNote?.images).toEqual([]);
   });
 });

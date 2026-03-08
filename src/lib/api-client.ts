@@ -48,6 +48,36 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   return response.json();
 }
 
+async function uploadRequest<T>(path: string, formData: FormData): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (response.status === 401 && !path.includes("/auth/")) {
+    const refreshed = await refreshToken();
+    if (refreshed) {
+      const retryRes = await fetch(`${API_BASE}${path}`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!retryRes.ok) {
+        const err = await retryRes.json().catch(() => null);
+        throw new Error(err?.error || "Upload failed");
+      }
+      return retryRes.json();
+    }
+    throw new Error("Session expired");
+  }
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => null);
+    throw new Error(err?.error || "Upload failed");
+  }
+
+  return response.json();
+}
+
 export const apiClient = {
   get: <T>(path: string): Promise<T> => request<T>(path),
   post: <T>(path: string, body?: unknown): Promise<T> =>
@@ -62,4 +92,6 @@ export const apiClient = {
     }),
   delete: <T>(path: string): Promise<T> =>
     request<T>(path, { method: "DELETE" }),
+  upload: <T>(path: string, formData: FormData): Promise<T> =>
+    uploadRequest<T>(path, formData),
 };
