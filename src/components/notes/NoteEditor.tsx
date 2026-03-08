@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, type FormEvent, useState, useEffect } from "react";
+import { type ReactNode, type FormEvent, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Input from "@/components/ui/Input";
 import TextArea from "@/components/ui/TextArea";
@@ -35,10 +35,7 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
   }, [fetchTags]);
 
   const handleUpload = async (files: File[]): Promise<void> => {
-    if (!note) {
-      setPendingImages((prev) => [...prev, ...files]);
-      return;
-    }
+    if (!note) return;
     setIsUploading(true);
     try {
       await uploadImages(note.id, files);
@@ -51,6 +48,10 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
     if (!note) return;
     await deleteImage(note.id, imageId);
   };
+
+  const handlePendingChange = useCallback((files: File[]): void => {
+    setPendingImages(files);
+  }, []);
 
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
@@ -125,11 +126,12 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
       />
 
       <ImageUploader
-        noteId={note?.id}
         existingImages={note?.images ?? []}
         onUpload={handleUpload}
         onDelete={handleDeleteImage}
+        onPendingChange={!note ? handlePendingChange : undefined}
         isUploading={isUploading}
+        immediateUpload={!!note}
       />
 
       {errors.form && (

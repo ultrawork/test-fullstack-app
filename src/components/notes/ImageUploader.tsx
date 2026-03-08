@@ -8,6 +8,8 @@ import {
   useRef,
   useCallback,
   useId,
+  useEffect,
+  useMemo,
 } from "react";
 import type { NoteImage } from "@/types/note-image";
 
@@ -16,18 +18,21 @@ const MAX_IMAGES = 5;
 const ALLOWED_TYPES = ["image/jpeg", "image/png"];
 
 interface ImageUploaderProps {
-  noteId?: string;
   existingImages: NoteImage[];
   onUpload: (files: File[]) => Promise<void>;
   onDelete: (imageId: string) => Promise<void>;
+  onPendingChange?: (files: File[]) => void;
   isUploading?: boolean;
+  immediateUpload?: boolean;
 }
 
 export default function ImageUploader({
   existingImages,
   onUpload,
   onDelete,
+  onPendingChange,
   isUploading = false,
+  immediateUpload = true,
 }: ImageUploaderProps): ReactNode {
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -37,6 +42,21 @@ export default function ImageUploader({
 
   const totalCount = existingImages.length + pendingFiles.length;
   const canAddMore = totalCount < MAX_IMAGES;
+
+  const previewUrls = useMemo(
+    () => pendingFiles.map((file) => URL.createObjectURL(file)),
+    [pendingFiles],
+  );
+
+  useEffect(() => {
+    return () => {
+      previewUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [previewUrls]);
+
+  useEffect(() => {
+    onPendingChange?.(pendingFiles);
+  }, [pendingFiles, onPendingChange]);
 
   const validateFiles = useCallback(
     (files: File[]): { valid: File[]; error: string | null } => {
@@ -129,7 +149,7 @@ export default function ImageUploader({
   return (
     <div className="flex flex-col gap-3">
       <label className="text-sm font-medium text-gray-700">
-        Images ({existingImages.length}/{MAX_IMAGES})
+        Images ({existingImages.length + pendingFiles.length}/{MAX_IMAGES})
       </label>
 
       {existingImages.length > 0 && (
@@ -171,7 +191,7 @@ export default function ImageUploader({
             {pendingFiles.map((file, index) => (
               <div key={`pending-${index}`} className="group relative">
                 <img
-                  src={URL.createObjectURL(file)}
+                  src={previewUrls[index]}
                   alt={`Pending upload ${file.name}`}
                   className="h-20 w-20 rounded-md border-2 border-dashed border-blue-300 object-cover"
                 />
@@ -197,14 +217,16 @@ export default function ImageUploader({
               </div>
             ))}
           </div>
-          <button
-            type="button"
-            onClick={handleUploadPending}
-            disabled={isUploading}
-            className="self-start rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
-          >
-            {isUploading ? "Uploading..." : `Upload ${pendingFiles.length} image${pendingFiles.length > 1 ? "s" : ""}`}
-          </button>
+          {immediateUpload && (
+            <button
+              type="button"
+              onClick={handleUploadPending}
+              disabled={isUploading}
+              className="self-start rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+            >
+              {isUploading ? "Uploading..." : `Upload ${pendingFiles.length} image${pendingFiles.length > 1 ? "s" : ""}`}
+            </button>
+          )}
         </div>
       )}
 

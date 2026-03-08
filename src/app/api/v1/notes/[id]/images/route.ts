@@ -8,6 +8,8 @@ import {
   IMAGE_CONSTRAINTS,
   validateImageFile,
   saveImageFile,
+  deleteImageFile,
+  formatNoteImage,
 } from "@/lib/upload";
 
 export async function GET(
@@ -31,17 +33,7 @@ export async function GET(
       orderBy: { order: "asc" },
     });
 
-    const formattedImages = images.map((img) => ({
-      id: img.id,
-      filename: img.filename,
-      path: img.path,
-      mimeType: img.mimeType,
-      size: img.size,
-      order: img.order,
-      createdAt: img.createdAt.toISOString(),
-    }));
-
-    return successResponse({ images: formattedImages });
+    return successResponse({ images: images.map(formatNoteImage) });
   } catch (error: unknown) {
     return handleApiError(error);
   }
@@ -88,30 +80,32 @@ export async function POST(
     }
 
     const savedImages = [];
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const fileData = await saveImageFile(id, file);
+    const savedFilenames: string[] = [];
 
-      const image = await prisma.noteImage.create({
-        data: {
-          filename: fileData.filename,
-          path: fileData.path,
-          mimeType: fileData.mimeType,
-          size: fileData.size,
-          order: existingCount + i,
-          noteId: id,
-        },
-      });
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const fileData = await saveImageFile(id, file);
+        savedFilenames.push(fileData.filename);
 
-      savedImages.push({
-        id: image.id,
-        filename: image.filename,
-        path: image.path,
-        mimeType: image.mimeType,
-        size: image.size,
-        order: image.order,
-        createdAt: image.createdAt.toISOString(),
-      });
+        const image = await prisma.noteImage.create({
+          data: {
+            filename: fileData.filename,
+            path: fileData.path,
+            mimeType: fileData.mimeType,
+            size: fileData.size,
+            order: existingCount + i,
+            noteId: id,
+          },
+        });
+
+        savedImages.push(formatNoteImage(image));
+      }
+    } catch (error) {
+      for (const filename of savedFilenames) {
+        await deleteImageFile(id, filename).catch(() => {});
+      }
+      throw error;
     }
 
     return successResponse({ images: savedImages }, 201);

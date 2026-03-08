@@ -5,6 +5,7 @@ import { getUserId } from "@/lib/get-user-id";
 import { createNoteSchema } from "@/lib/validation";
 import { successResponse, handleApiError } from "@/lib/api-response";
 import { ValidationError } from "@/lib/errors";
+import { formatNoteImage } from "@/lib/upload";
 import type { Prisma } from "@prisma/client";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
@@ -79,15 +80,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       createdAt: note.createdAt.toISOString(),
       updatedAt: note.updatedAt.toISOString(),
       tags: note.tags.map((nt) => nt.tag),
-      images: note.images.map((img) => ({
-        id: img.id,
-        filename: img.filename,
-        path: img.path,
-        mimeType: img.mimeType,
-        size: img.size,
-        order: img.order,
-        createdAt: img.createdAt.toISOString(),
-      })),
+      images: note.images.map(formatNoteImage),
     }));
 
     return successResponse({
