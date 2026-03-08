@@ -77,7 +77,7 @@ fun TagManagerScreen(
                         viewModel.deleteTag(id)
                     },
                     modifier = Modifier.semantics {
-                        contentDescription = "Confirm delete tag"
+                        contentDescription = stringResource(R.string.tag_manager_confirm_delete_a11y)
                     },
                 ) {
                     Text(
@@ -90,7 +90,7 @@ fun TagManagerScreen(
                 TextButton(
                     onClick = { deletingTag = null },
                     modifier = Modifier.semantics {
-                        contentDescription = "Cancel delete tag"
+                        contentDescription = stringResource(R.string.tag_manager_cancel_delete_a11y)
                     },
                 ) {
                     Text(stringResource(R.string.tag_manager_delete_cancel))
@@ -106,7 +106,7 @@ fun TagManagerScreen(
                 FloatingActionButton(
                     onClick = { viewMode = TagManagerViewMode.CREATE },
                     modifier = Modifier.semantics {
-                        contentDescription = "Create new tag"
+                        contentDescription = stringResource(R.string.tag_manager_create_new_a11y)
                     },
                 ) {
                     Icon(Icons.Default.Add, contentDescription = null)
@@ -125,7 +125,7 @@ fun TagManagerScreen(
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.semantics {
-                                contentDescription = "Loading tags"
+                                contentDescription = stringResource(R.string.tag_manager_loading_a11y)
                             },
                         )
                     }
@@ -187,10 +187,11 @@ fun TagManagerScreen(
                         isSubmitting = isSubmitting,
                         onSubmit = { name, color ->
                             isSubmitting = true
-                            viewModel.updateTag(tag.id, name, color)
-                            isSubmitting = false
-                            editingTag = null
-                            viewMode = TagManagerViewMode.LIST
+                            viewModel.updateTag(tag.id, name, color) {
+                                isSubmitting = false
+                                editingTag = null
+                                viewMode = TagManagerViewMode.LIST
+                            }
                         },
                         onCancel = {
                             editingTag = null
@@ -215,7 +216,7 @@ private fun TagRow(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .semantics {
-                contentDescription = "${tag.name}, ${tag.count.notes} notes"
+                contentDescription = stringResource(R.string.tag_manager_tag_row_a11y, tag.name, tag.count.notes)
             },
         verticalAlignment = Alignment.CenterVertically,
     ) {

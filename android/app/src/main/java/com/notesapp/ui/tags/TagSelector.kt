@@ -85,7 +85,7 @@ fun TagSelector(
                 .fillMaxWidth()
                 .semantics {
                     contentDescription =
-                        "Search tags"
+                        stringResource(R.string.tag_selector_search_a11y)
                 },
             singleLine = true,
         )
@@ -95,8 +95,8 @@ fun TagSelector(
         ) {
             items(filteredTags, key = { it.id }) { tag ->
                 val isSelected = selectedIds.contains(tag.id)
-                val stateDesc = if (isSelected) "Selected" else "Not selected"
-                val toggleDesc = "Toggle tag ${tag.name}"
+                val stateDesc = if (isSelected) stringResource(R.string.tag_selector_state_selected) else stringResource(R.string.tag_selector_state_not_selected)
+                val toggleDesc = stringResource(R.string.tag_selector_toggle_a11y, tag.name)
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -129,7 +129,7 @@ fun TagSelector(
                     searchText = ""
                 },
                 modifier = Modifier.semantics {
-                    contentDescription = "Create tag ${searchText.trim()}"
+                    contentDescription = stringResource(R.string.tag_selector_create_a11y, searchText.trim())
                 },
             ) {
                 Icon(Icons.Default.Add, contentDescription = null)

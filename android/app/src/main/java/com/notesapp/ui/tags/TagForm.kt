@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.notesapp.R
 
@@ -54,6 +55,7 @@ fun TagForm(
     onSubmit: (name: String, color: String) -> Unit,
     onCancel: () -> Unit,
 ) {
+    val context = LocalContext.current
     var name by remember { mutableStateOf(initialName) }
     var color by remember { mutableStateOf(initialColor) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
@@ -74,7 +76,7 @@ fun TagForm(
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics {
-                    contentDescription = "Tag name input"
+                    contentDescription = stringResource(R.string.tag_form_name_input_a11y)
                     if (errorMessage != null) error(errorMessage!!)
                 },
             singleLine = true,
@@ -131,7 +133,7 @@ fun TagForm(
             OutlinedButton(
                 onClick = onCancel,
                 modifier = Modifier.semantics {
-                    contentDescription = "Cancel tag editing"
+                    contentDescription = stringResource(R.string.tag_form_cancel_a11y)
                 },
             ) {
                 Text(stringResource(R.string.tag_form_cancel))
@@ -142,13 +144,13 @@ fun TagForm(
                     val trimmedName = name.trim()
                     when {
                         trimmedName.isEmpty() -> {
-                            errorMessage = "Tag name is required"
+                            errorMessage = context.getString(R.string.tag_form_error_name_required)
                         }
                         trimmedName.length > 50 -> {
-                            errorMessage = "Tag name must be at most 50 characters"
+                            errorMessage = context.getString(R.string.tag_form_error_name_too_long)
                         }
                         !HEX_COLOR_REGEX.matches(color) -> {
-                            errorMessage = "Invalid color format"
+                            errorMessage = context.getString(R.string.tag_form_error_invalid_color)
                         }
                         else -> {
                             errorMessage = null
@@ -158,7 +160,10 @@ fun TagForm(
                 },
                 enabled = !isSubmitting,
                 modifier = Modifier.semantics {
-                    contentDescription = if (isEditing) "Update tag" else "Create tag"
+                    contentDescription = stringResource(
+                        if (isEditing) R.string.tag_form_submit_update_a11y
+                        else R.string.tag_form_submit_create_a11y,
+                    )
                 },
             ) {
                 if (isSubmitting) {

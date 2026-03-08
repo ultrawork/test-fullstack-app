@@ -79,14 +79,6 @@ struct TagFilterView: View {
     }
 
     private func contrastColor(for hex: String) -> Color {
-        let cleaned = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
-        guard cleaned.count == 6,
-              let r = UInt8(cleaned.prefix(2), radix: 16),
-              let g = UInt8(cleaned.dropFirst(2).prefix(2), radix: 16),
-              let b = UInt8(cleaned.dropFirst(4).prefix(2), radix: 16) else {
-            return .white
-        }
-        let luminance = (0.299 * Double(r) + 0.587 * Double(g) + 0.114 * Double(b)) / 255.0
-        return luminance > 0.5 ? .black : .white
+        .contrastColor(for: hex)
     }
 }
