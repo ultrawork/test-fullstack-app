@@ -147,8 +147,8 @@ test.describe("Заметки", () => {
     // Ждём debounce
     await page.waitForTimeout(500);
 
-    await expect(page.getByText("Рецепт торта")).toBeVisible();
-    await expect(page.getByText("Рецепт пиццы")).toBeVisible();
+    await expect(page.getByText("Рецепт торта").first()).toBeVisible();
+    await expect(page.getByText("Рецепт пиццы").first()).toBeVisible();
     await expect(page.getByText("Список покупок")).not.toBeVisible();
   });
 

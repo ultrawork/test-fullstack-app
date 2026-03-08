@@ -9,10 +9,11 @@ import { useAuthStore } from "@/stores/auth-store";
 
 export default function RegisterForm(): ReactNode {
   const router = useRouter();
-  const { register, isLoading, error, clearError } = useAuthStore();
+  const { register, error, clearError } = useAuthStore();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const handleSubmit = async (e: FormEvent): Promise<void> => {
@@ -30,11 +31,14 @@ export default function RegisterForm(): ReactNode {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       await register(email, name, password);
       router.push("/dashboard");
     } catch {
       // error is set in the store
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -79,7 +83,7 @@ export default function RegisterForm(): ReactNode {
         </p>
       )}
 
-      <Button type="submit" isLoading={isLoading}>
+      <Button type="submit" isLoading={isSubmitting}>
         Create Account
       </Button>
 

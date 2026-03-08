@@ -78,7 +78,7 @@ test.describe("Теги", () => {
     // Редактируем
     await modal.getByLabel("Tag name").fill("Личное");
     await modal
-      .getByRole("button", { name: "Select color #22C55E" })
+      .getByRole("button", { name: "Select color #10B981" })
       .first()
       .click();
     await modal.getByRole("button", { name: "Update Tag" }).click();
@@ -107,8 +107,8 @@ test.describe("Теги", () => {
     const deleteDialog = page.getByRole("dialog").last();
     await deleteDialog.getByRole("button", { name: "Delete" }).click();
 
-    // Тег должен исчезнуть
-    await expect(modal.getByText("Личное")).not.toBeVisible();
+    // Ждём закрытия диалога подтверждения и проверяем что тег исчез
+    await expect(page.getByRole("dialog").getByRole("button", { name: "Delete tag Личное" })).not.toBeVisible();
   });
 
   // SC-024: Создание тега с дублирующим именем (API тест)
@@ -140,12 +140,12 @@ test.describe("Теги", () => {
   });
 
   // SC-025: Страница управления тегами (/dashboard/tags)
-  test("SC-025: страница управления тегами", async ({ page, request }) => {
-    // Создаём теги через API
-    await request.post("/api/v1/tags", {
+  test("SC-025: страница управления тегами", async ({ page }) => {
+    // Создаём теги через API (используем page.request для общих cookies)
+    await page.request.post("/api/v1/tags", {
       data: { name: "Работа", color: "#3B82F6" },
     });
-    await request.post("/api/v1/tags", {
+    await page.request.post("/api/v1/tags", {
       data: { name: "Срочно", color: "#EF4444" },
     });
 

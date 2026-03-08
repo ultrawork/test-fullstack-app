@@ -171,7 +171,7 @@ test.describe("API тесты", () => {
 
     // Фильтруем по тегу
     const filterRes = await request.get(
-      `/api/v1/notes?tagIds[]=${tagId}`,
+      `/api/v1/notes?tagIds=${tagId}`,
     );
     expect(filterRes.status()).toBe(200);
     const filtered = await filterRes.json();
