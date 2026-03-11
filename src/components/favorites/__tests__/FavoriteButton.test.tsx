@@ -30,19 +30,28 @@ describe("FavoriteButton", () => {
   it("renders with aria-pressed=true when is favorite", () => {
     act(() => {
       useFavoritesStore.setState({
-        favorites: [{ id: "1", title: "Test", createdAt: "2024-01-01T00:00:00.000Z" }],
+        favorites: [
+          { id: "1", title: "Test", createdAt: "2024-01-01T00:00:00.000Z" },
+        ],
       });
     });
 
     render(<FavoriteButton id="1" title="Test" />);
     const button = screen.getByRole("button");
     expect(button).toHaveAttribute("aria-pressed", "true");
-    expect(button).toHaveAttribute("aria-label", 'Удалить "Test" из избранного');
+    expect(button).toHaveAttribute(
+      "aria-label",
+      'Удалить "Test" из избранного',
+    );
   });
 
   it("toggles favorite on click", async () => {
     const user = userEvent.setup();
-    const mockItem = { id: "1", title: "Test", createdAt: "2024-01-01T00:00:00.000Z" };
+    const mockItem = {
+      id: "1",
+      title: "Test",
+      createdAt: "2024-01-01T00:00:00.000Z",
+    };
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ data: mockItem }),
@@ -53,8 +62,11 @@ describe("FavoriteButton", () => {
 
     await user.click(button);
 
-    expect(mockFetch).toHaveBeenCalledWith("/api/v1/favorites", expect.objectContaining({
-      method: "POST",
-    }));
+    expect(mockFetch).toHaveBeenCalledWith(
+      "/api/v1/favorites",
+      expect.objectContaining({
+        method: "POST",
+      }),
+    );
   });
 });

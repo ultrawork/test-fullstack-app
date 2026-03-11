@@ -15,12 +15,21 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <nav className="bg-white border-b border-gray-200" aria-label="Главная навигация">
+        <nav
+          className="bg-white border-b border-gray-200"
+          aria-label="Главная навигация"
+        >
           <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-6">
-            <Link href="/" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">
+            <Link
+              href="/"
+              className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+            >
               Главная
             </Link>
-            <Link href="/favorites" className="text-gray-700 hover:text-gray-900 font-medium transition-colors">
+            <Link
+              href="/favorites"
+              className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+            >
               Избранное
             </Link>
           </div>

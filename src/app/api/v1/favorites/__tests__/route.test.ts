@@ -17,8 +17,16 @@ describe("GET /api/v1/favorites", () => {
   });
 
   it("returns all favorites", async () => {
-    favoritesMap.set("1", { id: "1", title: "Note 1", createdAt: "2024-01-01T00:00:00.000Z" });
-    favoritesMap.set("2", { id: "2", title: "Note 2", createdAt: "2024-01-02T00:00:00.000Z" });
+    favoritesMap.set("1", {
+      id: "1",
+      title: "Note 1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+    });
+    favoritesMap.set("2", {
+      id: "2",
+      title: "Note 2",
+      createdAt: "2024-01-02T00:00:00.000Z",
+    });
 
     const response = GET();
     const json = await response.json();
@@ -45,7 +53,11 @@ describe("POST /api/v1/favorites", () => {
   });
 
   it("returns 409 for duplicate", async () => {
-    favoritesMap.set("1", { id: "1", title: "Existing", createdAt: "2024-01-01T00:00:00.000Z" });
+    favoritesMap.set("1", {
+      id: "1",
+      title: "Existing",
+      createdAt: "2024-01-01T00:00:00.000Z",
+    });
 
     const request = new Request("http://localhost/api/v1/favorites", {
       method: "POST",
@@ -98,13 +110,19 @@ describe("POST /api/v1/favorites", () => {
 
 describe("DELETE /api/v1/favorites/[id]", () => {
   it("deletes an existing favorite", async () => {
-    favoritesMap.set("1", { id: "1", title: "To Delete", createdAt: "2024-01-01T00:00:00.000Z" });
+    favoritesMap.set("1", {
+      id: "1",
+      title: "To Delete",
+      createdAt: "2024-01-01T00:00:00.000Z",
+    });
 
     const request = new Request("http://localhost/api/v1/favorites/1", {
       method: "DELETE",
     });
 
-    const response = await DELETE(request, { params: Promise.resolve({ id: "1" }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: "1" }),
+    });
     const json = await response.json();
     expect(response.status).toBe(200);
     expect(json.success).toBe(true);
@@ -117,7 +135,9 @@ describe("DELETE /api/v1/favorites/[id]", () => {
       method: "DELETE",
     });
 
-    const response = await DELETE(request, { params: Promise.resolve({ id: "999" }) });
+    const response = await DELETE(request, {
+      params: Promise.resolve({ id: "999" }),
+    });
     const json = await response.json();
     expect(response.status).toBe(404);
     expect(json.success).toBe(false);

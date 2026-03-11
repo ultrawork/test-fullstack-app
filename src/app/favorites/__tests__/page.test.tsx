@@ -54,7 +54,9 @@ describe("FavoritesPage", () => {
   it("shows clear button when favorites exist", () => {
     act(() => {
       useFavoritesStore.setState({
-        favorites: [{ id: "1", title: "Note 1", createdAt: "2024-01-01T00:00:00.000Z" }],
+        favorites: [
+          { id: "1", title: "Note 1", createdAt: "2024-01-01T00:00:00.000Z" },
+        ],
       });
     });
 

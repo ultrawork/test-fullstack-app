@@ -7,7 +7,9 @@ interface FavoriteCardProps {
   item: FavoriteItem;
 }
 
-export default function FavoriteCard({ item }: FavoriteCardProps): React.ReactElement {
+export default function FavoriteCard({
+  item,
+}: FavoriteCardProps): React.ReactElement {
   const removeFavorite = useFavoritesStore((state) => state.removeFavorite);
 
   const handleRemove = async (): Promise<void> => {
@@ -37,7 +39,11 @@ export default function FavoriteCard({ item }: FavoriteCardProps): React.ReactEl
           className="w-5 h-5"
           aria-hidden="true"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M6 18L18 6M6 6l12 12"
+          />
         </svg>
       </button>
     </article>

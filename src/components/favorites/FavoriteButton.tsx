@@ -7,7 +7,10 @@ interface FavoriteButtonProps {
   title: string;
 }
 
-export default function FavoriteButton({ id, title }: FavoriteButtonProps): React.ReactElement {
+export default function FavoriteButton({
+  id,
+  title,
+}: FavoriteButtonProps): React.ReactElement {
   const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
   const active = isFavorite(id);
 
@@ -24,7 +27,11 @@ export default function FavoriteButton({ id, title }: FavoriteButtonProps): Reac
       type="button"
       onClick={handleClick}
       aria-pressed={active}
-      aria-label={active ? `Удалить "${title}" из избранного` : `Добавить "${title}" в избранное`}
+      aria-label={
+        active
+          ? `Удалить "${title}" из избранного`
+          : `Добавить "${title}" в избранное`
+      }
       className={`p-2 rounded-full transition-colors ${
         active
           ? "text-red-500 hover:text-red-600"

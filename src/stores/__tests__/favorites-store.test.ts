@@ -19,7 +19,11 @@ describe("useFavoritesStore", () => {
   });
 
   it("adds a favorite via API", async () => {
-    const mockItem = { id: "1", title: "Test", createdAt: "2024-01-01T00:00:00.000Z" };
+    const mockItem = {
+      id: "1",
+      title: "Test",
+      createdAt: "2024-01-01T00:00:00.000Z",
+    };
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ data: mockItem }),
@@ -37,7 +41,9 @@ describe("useFavoritesStore", () => {
   it("does not add duplicate favorites", async () => {
     act(() => {
       useFavoritesStore.setState({
-        favorites: [{ id: "1", title: "Existing", createdAt: "2024-01-01T00:00:00.000Z" }],
+        favorites: [
+          { id: "1", title: "Existing", createdAt: "2024-01-01T00:00:00.000Z" },
+        ],
       });
     });
 
@@ -52,7 +58,13 @@ describe("useFavoritesStore", () => {
   it("removes a favorite via API", async () => {
     act(() => {
       useFavoritesStore.setState({
-        favorites: [{ id: "1", title: "To Remove", createdAt: "2024-01-01T00:00:00.000Z" }],
+        favorites: [
+          {
+            id: "1",
+            title: "To Remove",
+            createdAt: "2024-01-01T00:00:00.000Z",
+          },
+        ],
       });
     });
 
@@ -68,7 +80,9 @@ describe("useFavoritesStore", () => {
   it("checks if item is favorite", () => {
     act(() => {
       useFavoritesStore.setState({
-        favorites: [{ id: "1", title: "Fav", createdAt: "2024-01-01T00:00:00.000Z" }],
+        favorites: [
+          { id: "1", title: "Fav", createdAt: "2024-01-01T00:00:00.000Z" },
+        ],
       });
     });
 

@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import type { FavoriteItem, AddFavoriteInput, ApiResponse } from "@/types/favorite";
+import type {
+  FavoriteItem,
+  AddFavoriteInput,
+  ApiResponse,
+} from "@/types/favorite";
 import { favoritesMap as favorites } from "@/lib/favorites-storage";
 
 export function GET(): NextResponse<ApiResponse<FavoriteItem[]>> {
@@ -23,21 +27,33 @@ export async function POST(
 
   if (!body.id || typeof body.id !== "string") {
     return NextResponse.json(
-      { success: false, data: {} as FavoriteItem, error: "Field 'id' is required and must be a string" },
+      {
+        success: false,
+        data: {} as FavoriteItem,
+        error: "Field 'id' is required and must be a string",
+      },
       { status: 400 },
     );
   }
 
   if (!body.title || typeof body.title !== "string") {
     return NextResponse.json(
-      { success: false, data: {} as FavoriteItem, error: "Field 'title' is required and must be a string" },
+      {
+        success: false,
+        data: {} as FavoriteItem,
+        error: "Field 'title' is required and must be a string",
+      },
       { status: 400 },
     );
   }
 
   if (favorites.has(body.id)) {
     return NextResponse.json(
-      { success: false, data: {} as FavoriteItem, error: "Item already in favorites" },
+      {
+        success: false,
+        data: {} as FavoriteItem,
+        error: "Item already in favorites",
+      },
       { status: 409 },
     );
   }
