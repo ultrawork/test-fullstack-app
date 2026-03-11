@@ -98,7 +98,7 @@ test("SC-014: поиск находит совпадения в нескольк
 
   await expect(notesList.locator("article")).toHaveCount(5);
 
-  // «заметк» — встречается в заголовках и контенте нескольких заметок
+  // «заметк» — встречается в заголовке «Заметка о встрече» и контенте «Добро пожаловать» (всего 2)
   await searchInput.fill("заметк");
-  await expect(notesList.locator("article")).toHaveCount(3, { timeout: 5000 });
+  await expect(notesList.locator("article")).toHaveCount(2, { timeout: 5000 });
 });
