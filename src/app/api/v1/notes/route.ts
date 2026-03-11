@@ -7,8 +7,14 @@ export function GET(): NextResponse {
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const body = await request.json();
-  const { title, content } = body;
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const { title, content } = body as { title?: string; content?: string };
 
   if (!title || typeof title !== "string") {
     return NextResponse.json(

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { Note } from "@/types/note";
+import { sortNotes } from "@/lib/notes-utils";
 
 interface NotesState {
   notes: Note[];
@@ -9,15 +10,6 @@ interface NotesState {
   addNote: (title: string, content: string) => Promise<void>;
   deleteNote: (id: string) => Promise<void>;
   togglePin: (id: string) => Promise<void>;
-}
-
-function sortNotes(notes: Note[]): Note[] {
-  return [...notes].sort((a, b) => {
-    if (a.isPinned !== b.isPinned) {
-      return a.isPinned ? -1 : 1;
-    }
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-  });
 }
 
 export const useNotesStore = create<NotesState>((set, get) => ({
@@ -67,7 +59,6 @@ export const useNotesStore = create<NotesState>((set, get) => ({
         method: "DELETE",
       });
       if (!response.ok) {
-        set({ notes: previousNotes });
         throw new Error("Failed to delete note");
       }
     } catch (error) {
@@ -95,7 +86,6 @@ export const useNotesStore = create<NotesState>((set, get) => ({
         method: "PATCH",
       });
       if (!response.ok) {
-        set({ notes: previousNotes });
         throw new Error("Failed to toggle pin");
       }
       const updated: Note = await response.json();

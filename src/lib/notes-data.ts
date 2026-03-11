@@ -1,14 +1,10 @@
 import { Note } from "@/types/note";
+import { sortNotes } from "./notes-utils";
 
 const notes: Note[] = [];
 
 export function getAllNotes(): Note[] {
-  return [...notes].sort((a, b) => {
-    if (a.isPinned !== b.isPinned) {
-      return a.isPinned ? -1 : 1;
-    }
-    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-  });
+  return sortNotes(notes);
 }
 
 export function getNoteById(id: string): Note | undefined {

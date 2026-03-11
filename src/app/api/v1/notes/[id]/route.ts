@@ -22,7 +22,14 @@ export async function PUT(
   { params }: RouteParams,
 ): Promise<NextResponse> {
   const { id } = await params;
-  const body = await request.json();
+
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
   const updated = updateNote(id, body);
   if (!updated) {
     return NextResponse.json({ error: "Note not found" }, { status: 404 });
