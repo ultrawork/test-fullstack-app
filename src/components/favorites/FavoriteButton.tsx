@@ -43,7 +43,7 @@ export default function FavoriteButton({
           ? `Удалить "${title}" из избранного`
           : `Добавить "${title}" в избранное`
       }
-      className={`p-2 rounded-full transition-colors ${
+      className={`min-w-[44px] min-h-[44px] p-2 rounded-full transition-colors flex items-center justify-center ${
         active
           ? "text-red-500 hover:text-red-600"
           : "text-gray-400 hover:text-red-400"
@@ -55,7 +55,7 @@ export default function FavoriteButton({
         fill={active ? "currentColor" : "none"}
         stroke="currentColor"
         strokeWidth={2}
-        className="w-6 h-6"
+        className="w-6 h-6 shrink-0"
         aria-hidden="true"
       >
         <path

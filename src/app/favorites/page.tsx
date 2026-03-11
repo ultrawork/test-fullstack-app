@@ -30,7 +30,7 @@ export default function FavoritesPage(): React.ReactElement {
               type="button"
               onClick={handleClear}
               disabled={clearing}
-              className={`text-sm text-red-500 hover:text-red-600 transition-colors ${clearing ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`min-h-[44px] px-3 py-2 text-sm text-red-500 hover:text-red-600 transition-colors ${clearing ? "opacity-50 cursor-not-allowed" : ""}`}
               data-testid="clear-all-button"
               aria-label="Очистить все избранные записи"
             >

@@ -38,7 +38,7 @@ export default function FavoriteCard({
         disabled={loading}
         data-testid={`remove-favorite-${item.id}`}
         aria-label={`Удалить "${item.title}" из избранного`}
-        className={`p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+        className={`min-w-[44px] min-h-[44px] p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full flex items-center justify-center ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -46,7 +46,7 @@ export default function FavoriteCard({
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
-          className="w-5 h-5"
+          className="w-5 h-5 shrink-0"
           aria-hidden="true"
         >
           <path

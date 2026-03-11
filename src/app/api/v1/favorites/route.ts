@@ -17,7 +17,14 @@ export async function POST(
   let body: AddFavoriteInput;
 
   try {
-    body = (await request.json()) as AddFavoriteInput;
+    const parsed: unknown = await request.json();
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      return NextResponse.json(
+        { success: false, error: "Invalid JSON body" },
+        { status: 400 },
+      );
+    }
+    body = parsed as AddFavoriteInput;
   } catch {
     return NextResponse.json(
       { success: false, error: "Invalid JSON body" },
