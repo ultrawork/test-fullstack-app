@@ -18,7 +18,11 @@ export async function POST(
 
   try {
     const parsed: unknown = await request.json();
-    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      Array.isArray(parsed)
+    ) {
       return NextResponse.json(
         { success: false, error: "Invalid JSON body" },
         { status: 400 },

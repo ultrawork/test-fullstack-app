@@ -76,13 +76,10 @@ test("SC-104: POST с невалидными данными возвращает
   const apiUrl = getApiUrl(baseURL);
 
   // Невалидный JSON
-  const invalidJsonResponse = await request.post(
-    `${apiUrl}/api/v1/favorites`,
-    {
-      data: "not json",
-      headers: { "Content-Type": "text/plain" },
-    },
-  );
+  const invalidJsonResponse = await request.post(`${apiUrl}/api/v1/favorites`, {
+    data: "not json",
+    headers: { "Content-Type": "text/plain" },
+  });
   expect(invalidJsonResponse.status()).toBe(400);
   const invalidJsonBody = await invalidJsonResponse.json();
   expect(invalidJsonBody).toEqual({

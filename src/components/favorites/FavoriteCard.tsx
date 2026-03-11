@@ -25,7 +25,10 @@ export default function FavoriteCard({
   };
 
   return (
-    <article data-testid={`favorite-card-${item.id}`} className="flex items-center justify-between bg-white rounded-lg p-4 shadow-sm">
+    <article
+      data-testid={`favorite-card-${item.id}`}
+      className="flex items-center justify-between bg-white rounded-lg p-4 shadow-sm"
+    >
       <div>
         <h3 className="text-lg font-medium text-gray-900">{item.title}</h3>
         <time className="text-sm text-gray-500" dateTime={item.createdAt}>

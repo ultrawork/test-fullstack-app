@@ -24,7 +24,12 @@ export default function FavoritesPage(): React.ReactElement {
     <main className="min-h-screen bg-[#F5F5F5]">
       <header className="bg-white shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900" data-testid="favorites-title">Избранное</h1>
+          <h1
+            className="text-2xl font-bold text-gray-900"
+            data-testid="favorites-title"
+          >
+            Избранное
+          </h1>
           {favorites.length > 0 && (
             <button
               type="button"

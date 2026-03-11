@@ -1,6 +1,9 @@
 export default function EmptyFavorites(): React.ReactElement {
   return (
-    <section data-testid="empty-favorites" className="flex flex-col items-center justify-center py-16 text-center">
+    <section
+      data-testid="empty-favorites"
+      className="flex flex-col items-center justify-center py-16 text-center"
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
