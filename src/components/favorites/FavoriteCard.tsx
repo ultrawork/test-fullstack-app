@@ -25,7 +25,7 @@ export default function FavoriteCard({
   };
 
   return (
-    <article className="flex items-center justify-between bg-white rounded-lg p-4 shadow-sm">
+    <article data-testid={`favorite-card-${item.id}`} className="flex items-center justify-between bg-white rounded-lg p-4 shadow-sm">
       <div>
         <h3 className="text-lg font-medium text-gray-900">{item.title}</h3>
         <time className="text-sm text-gray-500" dateTime={item.createdAt}>
@@ -36,6 +36,7 @@ export default function FavoriteCard({
         type="button"
         onClick={handleRemove}
         disabled={loading}
+        data-testid={`remove-favorite-${item.id}`}
         aria-label={`Удалить "${item.title}" из избранного`}
         className={`p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
       >

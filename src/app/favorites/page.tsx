@@ -24,13 +24,14 @@ export default function FavoritesPage(): React.ReactElement {
     <main className="min-h-screen bg-[#F5F5F5]">
       <header className="bg-white shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-6 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Избранное</h1>
+          <h1 className="text-2xl font-bold text-gray-900" data-testid="favorites-title">Избранное</h1>
           {favorites.length > 0 && (
             <button
               type="button"
               onClick={handleClear}
               disabled={clearing}
               className={`text-sm text-red-500 hover:text-red-600 transition-colors ${clearing ? "opacity-50 cursor-not-allowed" : ""}`}
+              data-testid="clear-all-button"
               aria-label="Очистить все избранные записи"
             >
               Очистить всё
@@ -42,7 +43,7 @@ export default function FavoritesPage(): React.ReactElement {
         {favorites.length === 0 ? (
           <EmptyFavorites />
         ) : (
-          <ul className="space-y-3">
+          <ul className="space-y-3" data-testid="favorites-list">
             {favorites.map((item) => (
               <li key={item.id}>
                 <FavoriteCard item={item} />

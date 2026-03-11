@@ -36,6 +36,7 @@ export default function FavoriteButton({
       type="button"
       onClick={handleClick}
       disabled={loading}
+      data-testid={`favorite-button-${id}`}
       aria-pressed={active}
       aria-label={
         active
