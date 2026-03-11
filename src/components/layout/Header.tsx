@@ -40,6 +40,13 @@ export default function Header(): ReactNode {
               Tags
             </button>
 
+            <Link
+              href="/dashboard/categories"
+              className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Categories
+            </Link>
+
             {user && <span className="text-sm text-gray-600">{user.name}</span>}
 
             <button

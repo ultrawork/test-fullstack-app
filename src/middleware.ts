@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const protectedPaths = ["/api/v1/notes", "/api/v1/tags"];
+const protectedPaths = ["/api/v1/notes", "/api/v1/tags", "/api/v1/categories"];
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;
@@ -42,5 +42,9 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 }
 
 export const config = {
-  matcher: ["/api/v1/notes/:path*", "/api/v1/tags/:path*"],
+  matcher: [
+    "/api/v1/notes/:path*",
+    "/api/v1/tags/:path*",
+    "/api/v1/categories/:path*",
+  ],
 };

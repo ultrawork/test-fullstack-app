@@ -14,6 +14,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     const search = searchParams.get("search") || undefined;
     const tagIds = searchParams.getAll("tagIds");
+    const categoryId = searchParams.get("categoryId") || undefined;
     const page = Math.max(
       1,
       parseInt(searchParams.get("page") || "1", 10) || 1,
@@ -49,6 +50,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           },
         },
       }),
+      ...(categoryId && { categoryId }),
     };
 
     const [notes, total] = await Promise.all([
@@ -58,6 +60,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           tags: {
             include: { tag: true },
           },
+          category: true,
         },
         orderBy: { updatedAt: "desc" },
         skip,
@@ -73,6 +76,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       createdAt: note.createdAt.toISOString(),
       updatedAt: note.updatedAt.toISOString(),
       tags: note.tags.map((nt) => nt.tag),
+      categoryId: note.categoryId,
+      category: note.category,
     }));
 
     return successResponse({
@@ -105,11 +110,21 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       }
     }
 
+    if (data.categoryId) {
+      const category = await prisma.category.findFirst({
+        where: { id: data.categoryId, userId },
+      });
+      if (!category) {
+        throw new ValidationError("Invalid category");
+      }
+    }
+
     const note = await prisma.note.create({
       data: {
         title: data.title,
         content: data.content,
         userId,
+        ...(data.categoryId && { categoryId: data.categoryId }),
         ...(data.tagIds &&
           data.tagIds.length > 0 && {
             tags: {
@@ -121,6 +136,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         tags: {
           include: { tag: true },
         },
+        category: true,
       },
     });
 
@@ -132,6 +148,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         createdAt: note.createdAt.toISOString(),
         updatedAt: note.updatedAt.toISOString(),
         tags: note.tags.map((nt) => nt.tag),
+        categoryId: note.categoryId,
+        category: note.category,
       },
       201,
     );

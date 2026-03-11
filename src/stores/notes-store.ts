@@ -10,6 +10,7 @@ interface NotesStore {
   error: string | null;
   search: string;
   filterTagIds: string[];
+  filterCategoryId: string | null;
   fetchNotes: () => Promise<void>;
   fetchNote: (id: string) => Promise<void>;
   createNote: (input: CreateNoteInput) => Promise<Note>;
@@ -17,6 +18,8 @@ interface NotesStore {
   deleteNote: (id: string) => Promise<void>;
   setSearch: (search: string) => void;
   setFilterTagIds: (tagIds: string[]) => void;
+  setFilterCategoryId: (categoryId: string | null) => void;
+  resetAllFilters: () => void;
   clearError: () => void;
 }
 
@@ -27,16 +30,18 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
   error: null,
   search: "",
   filterTagIds: [],
+  filterCategoryId: null,
 
   fetchNotes: async () => {
     set({ isLoading: true, error: null });
     try {
       const params = new URLSearchParams();
-      const { search, filterTagIds } = get();
+      const { search, filterTagIds, filterCategoryId } = get();
       if (search) params.set("search", search);
       for (const id of filterTagIds) {
         params.append("tagIds", id);
       }
+      if (filterCategoryId) params.set("categoryId", filterCategoryId);
       const query = params.toString();
       const res = await apiClient.get<
         ApiResponse<{
@@ -125,5 +130,10 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
 
   setSearch: (search) => set({ search }),
   setFilterTagIds: (tagIds) => set({ filterTagIds: tagIds }),
+  setFilterCategoryId: (categoryId) => set({ filterCategoryId: categoryId }),
+  resetAllFilters: () => {
+    set({ search: "", filterTagIds: [], filterCategoryId: null });
+    void get().fetchNotes();
+  },
   clearError: () => set({ error: null }),
 }));

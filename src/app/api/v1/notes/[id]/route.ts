@@ -20,6 +20,7 @@ export async function GET(
         tags: {
           include: { tag: true },
         },
+        category: true,
       },
     });
 
@@ -34,6 +35,8 @@ export async function GET(
       createdAt: note.createdAt.toISOString(),
       updatedAt: note.updatedAt.toISOString(),
       tags: note.tags.map((nt) => nt.tag),
+      categoryId: note.categoryId,
+      category: note.category,
     });
   } catch (error: unknown) {
     return handleApiError(error);
@@ -56,6 +59,15 @@ export async function PUT(
 
     if (!existingNote) {
       throw new NotFoundError("Note");
+    }
+
+    if (data.categoryId) {
+      const category = await prisma.category.findFirst({
+        where: { id: data.categoryId, userId },
+      });
+      if (!category) {
+        throw new ValidationError("Invalid category");
+      }
     }
 
     const note = await prisma.$transaction(async (tx) => {
@@ -86,11 +98,15 @@ export async function PUT(
         data: {
           ...(data.title !== undefined && { title: data.title }),
           ...(data.content !== undefined && { content: data.content }),
+          ...(data.categoryId !== undefined && {
+            categoryId: data.categoryId,
+          }),
         },
         include: {
           tags: {
             include: { tag: true },
           },
+          category: true,
         },
       });
     });
@@ -102,6 +118,8 @@ export async function PUT(
       createdAt: note.createdAt.toISOString(),
       updatedAt: note.updatedAt.toISOString(),
       tags: note.tags.map((nt) => nt.tag),
+      categoryId: note.categoryId,
+      category: note.category,
     });
   } catch (error: unknown) {
     return handleApiError(error);

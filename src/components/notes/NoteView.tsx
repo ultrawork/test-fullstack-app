@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import type { Note } from "@/types/note";
 import TagBadge from "@/components/tags/TagBadge";
+import CategoryBadge from "@/components/categories/CategoryBadge";
 import Button from "@/components/ui/Button";
 
 interface NoteViewProps {
@@ -29,8 +30,14 @@ export default function NoteView({
             Updated: {new Date(note.updatedAt).toLocaleDateString()}
           </time>
         </div>
-        {note.tags.length > 0 && (
+        {(note.category || note.tags.length > 0) && (
           <div className="mt-3 flex flex-wrap gap-1">
+            {note.category && (
+              <CategoryBadge
+                name={note.category.name}
+                color={note.category.color}
+              />
+            )}
             {note.tags.map((tag) => (
               <TagBadge key={tag.id} name={tag.name} color={tag.color} />
             ))}

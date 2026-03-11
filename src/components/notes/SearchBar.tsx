@@ -14,11 +14,19 @@ export default function SearchBar({
   debounceMs = 300,
 }: SearchBarProps): ReactNode {
   const [localValue, setLocalValue] = useState(value);
+  const [prevValue, setPrevValue] = useState(value);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  useEffect(() => {
+  // Sync from props DURING RENDER (not in useEffect) to clear debounce
+  // timer synchronously before any macrotask (like a pending setTimeout) fires.
+  if (value !== prevValue) {
+    setPrevValue(value);
     setLocalValue(value);
-  }, [value]);
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  }
 
   const handleChange = (newValue: string): void => {
     setLocalValue(newValue);

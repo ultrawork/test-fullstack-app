@@ -23,6 +23,8 @@ const mockNote = {
   tags: [
     { id: "t1", name: "Work", color: "#FF0000", createdAt: "", updatedAt: "" },
   ],
+  categoryId: null,
+  category: null,
 };
 
 describe("NotesStore", () => {
