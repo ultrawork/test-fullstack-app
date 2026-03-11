@@ -9,7 +9,11 @@ export function GET(): NextResponse {
 export async function POST(request: NextRequest): Promise<NextResponse> {
   let body: Record<string, unknown>;
   try {
-    body = await request.json();
+    const parsed = await request.json();
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
+      return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    }
+    body = parsed;
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
