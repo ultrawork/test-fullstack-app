@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import type { Note } from "@/types/note";
 import TagBadge from "@/components/tags/TagBadge";
+import CategoryBadge from "@/components/categories/CategoryBadge";
 
 interface NoteCardProps {
   note: Note;
@@ -23,8 +24,15 @@ export default function NoteCard({ note }: NoteCardProps): ReactNode {
           {note.content}
         </p>
       </Link>
-      {note.tags.length > 0 && (
+      {(note.category || note.tags.length > 0) && (
         <div className="mt-3 flex flex-wrap gap-1">
+          {note.category && (
+            <CategoryBadge
+              name={note.category.name}
+              color={note.category.color}
+              size="sm"
+            />
+          )}
           {note.tags.map((tag) => (
             <TagBadge
               key={tag.id}

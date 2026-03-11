@@ -38,6 +38,14 @@ const mockNote: Note = {
       updatedAt: "",
     },
   ],
+  categoryId: "c1",
+  category: {
+    id: "c1",
+    name: "Projects",
+    color: "#10B981",
+    createdAt: "",
+    updatedAt: "",
+  },
 };
 
 describe("NoteCard", () => {
@@ -64,8 +72,28 @@ describe("NoteCard", () => {
   });
 
   it("should render without tags", () => {
-    const noteWithoutTags = { ...mockNote, tags: [] };
+    const noteWithoutTags = {
+      ...mockNote,
+      tags: [],
+      categoryId: null,
+      category: null,
+    };
     render(<NoteCard note={noteWithoutTags} />);
     expect(screen.getByText("Test Note")).toBeInTheDocument();
+  });
+
+  it("should render category badge", () => {
+    render(<NoteCard note={mockNote} />);
+    expect(screen.getByText("Projects")).toBeInTheDocument();
+  });
+
+  it("should render without category", () => {
+    const noteWithoutCategory = {
+      ...mockNote,
+      categoryId: null,
+      category: null,
+    };
+    render(<NoteCard note={noteWithoutCategory} />);
+    expect(screen.queryByText("Projects")).not.toBeInTheDocument();
   });
 });

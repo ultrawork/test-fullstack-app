@@ -6,8 +6,10 @@ import Input from "@/components/ui/Input";
 import TextArea from "@/components/ui/TextArea";
 import Button from "@/components/ui/Button";
 import TagSelector from "@/components/tags/TagSelector";
+import CategorySelect from "@/components/categories/CategorySelect";
 import { useNotesStore } from "@/stores/notes-store";
 import { useTagsStore } from "@/stores/tags-store";
+import { useCategoriesStore } from "@/stores/categories-store";
 import type { Note } from "@/types/note";
 
 interface NoteEditorProps {
@@ -18,17 +20,22 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
   const router = useRouter();
   const { createNote, updateNote } = useNotesStore();
   const { tags, fetchTags, createTag } = useTagsStore();
+  const { categories, fetchCategories } = useCategoriesStore();
   const [title, setTitle] = useState(note?.title ?? "");
   const [content, setContent] = useState(note?.content ?? "");
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(
     note?.tags.map((t) => t.id) ?? [],
+  );
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
+    note?.categoryId ?? null,
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     void fetchTags();
-  }, [fetchTags]);
+    void fetchCategories();
+  }, [fetchTags, fetchCategories]);
 
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
@@ -49,6 +56,7 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
           title,
           content,
           tagIds: selectedTagIds,
+          categoryId: selectedCategoryId,
         });
         router.push(`/dashboard/notes/${note.id}`);
       } else {
@@ -56,6 +64,7 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
           title,
           content,
           tagIds: selectedTagIds,
+          categoryId: selectedCategoryId ?? undefined,
         });
         router.push(`/dashboard/notes/${created.id}`);
       }
@@ -90,6 +99,12 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
         placeholder="Write your note..."
         error={errors.content}
         required
+      />
+
+      <CategorySelect
+        categories={categories}
+        selectedId={selectedCategoryId}
+        onChange={setSelectedCategoryId}
       />
 
       <TagSelector

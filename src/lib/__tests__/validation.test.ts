@@ -6,6 +6,8 @@ import {
   createTagSchema,
   updateTagSchema,
   attachTagsSchema,
+  createCategorySchema,
+  updateCategorySchema,
 } from "../validation";
 
 describe("Validation schemas", () => {
@@ -152,9 +154,80 @@ describe("Validation schemas", () => {
     });
   });
 
+  describe("createNoteSchema with categoryId", () => {
+    it("should accept with categoryId", () => {
+      const result = createNoteSchema.safeParse({
+        title: "Test",
+        content: "Content",
+        categoryId: "clxxxxxxxxxxxxxxxxx",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("should accept null categoryId", () => {
+      const result = createNoteSchema.safeParse({
+        title: "Test",
+        content: "Content",
+        categoryId: null,
+      });
+      expect(result.success).toBe(true);
+    });
+  });
+
   describe("attachTagsSchema", () => {
     it("should validate array of cuid strings", () => {
       const result = attachTagsSchema.safeParse({ tagIds: [] });
+      expect(result.success).toBe(true);
+    });
+  });
+
+  describe("createCategorySchema", () => {
+    it("should validate correct input", () => {
+      const result = createCategorySchema.safeParse({
+        name: "Work",
+        color: "#FF0000",
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("should reject empty name", () => {
+      const result = createCategorySchema.safeParse({
+        name: "",
+        color: "#FF0000",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject invalid color", () => {
+      const result = createCategorySchema.safeParse({
+        name: "Work",
+        color: "red",
+      });
+      expect(result.success).toBe(false);
+    });
+
+    it("should reject name longer than 50 chars", () => {
+      const result = createCategorySchema.safeParse({
+        name: "a".repeat(51),
+        color: "#FF0000",
+      });
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe("updateCategorySchema", () => {
+    it("should validate partial update with name only", () => {
+      const result = updateCategorySchema.safeParse({ name: "Updated" });
+      expect(result.success).toBe(true);
+    });
+
+    it("should validate partial update with color only", () => {
+      const result = updateCategorySchema.safeParse({ color: "#00FF00" });
+      expect(result.success).toBe(true);
+    });
+
+    it("should validate empty object", () => {
+      const result = updateCategorySchema.safeParse({});
       expect(result.success).toBe(true);
     });
   });
