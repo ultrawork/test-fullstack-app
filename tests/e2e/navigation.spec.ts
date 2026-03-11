@@ -60,9 +60,7 @@ test("SC-003: главная страница содержит все основ
 });
 
 // SC-004: Ссылка «Перейти в Архив» на главной странице
-test("SC-004: ссылка «Перейти в Архив» ведёт на /archive", async ({
-  page,
-}) => {
+test("SC-004: ссылка «Перейти в Архив» ведёт на /archive", async ({ page }) => {
   await page.goto("/");
 
   await page.getByTestId("home-archive-link").click();
