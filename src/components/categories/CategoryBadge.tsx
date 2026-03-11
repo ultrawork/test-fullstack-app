@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { getContrastColor } from "@/components/tags/TagBadge";
+import { getContrastColor } from "@/lib/color-utils";
 
 interface CategoryBadgeProps {
   name: string;

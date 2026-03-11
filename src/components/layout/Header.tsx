@@ -5,13 +5,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import TagManagerModal from "@/components/tags/TagManagerModal";
-import CategoryManagerModal from "@/components/categories/CategoryManagerModal";
 
 export default function Header(): ReactNode {
   const router = useRouter();
   const { user, logout } = useAuthStore();
   const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
-  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
 
   const handleLogout = async (): Promise<void> => {
     await logout();
@@ -42,14 +40,12 @@ export default function Header(): ReactNode {
               Tags
             </button>
 
-            <button
-              type="button"
-              onClick={() => setIsCategoryManagerOpen(true)}
+            <Link
+              href="/dashboard/categories"
               className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              aria-label="Manage categories"
             >
               Categories
-            </button>
+            </Link>
 
             {user && <span className="text-sm text-gray-600">{user.name}</span>}
 
@@ -67,11 +63,6 @@ export default function Header(): ReactNode {
       <TagManagerModal
         isOpen={isTagManagerOpen}
         onClose={() => setIsTagManagerOpen(false)}
-      />
-
-      <CategoryManagerModal
-        isOpen={isCategoryManagerOpen}
-        onClose={() => setIsCategoryManagerOpen(false)}
       />
     </>
   );

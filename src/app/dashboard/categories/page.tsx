@@ -87,6 +87,7 @@ export default function CategoriesPage(): ReactNode {
       {showForm && (
         <section className="mb-6 rounded-lg border border-gray-200 bg-white p-4">
           <CategoryForm
+            key={editingCategory?.id ?? "new"}
             initialName={editingCategory?.name}
             initialColor={editingCategory?.color}
             onSubmit={editingCategory ? handleUpdate : handleCreate}

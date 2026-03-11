@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { CategoryWithNoteCount } from "@/types/category";
-import { getContrastColor } from "@/components/tags/TagBadge";
+import { getContrastColor } from "@/lib/color-utils";
 
 interface CategoryFilterProps {
   categories: CategoryWithNoteCount[];
