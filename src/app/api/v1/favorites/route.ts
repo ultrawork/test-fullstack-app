@@ -20,7 +20,7 @@ export async function POST(
     body = (await request.json()) as AddFavoriteInput;
   } catch {
     return NextResponse.json(
-      { success: false, data: {} as FavoriteItem, error: "Invalid JSON body" },
+      { success: false, error: "Invalid JSON body" },
       { status: 400 },
     );
   }
@@ -29,7 +29,6 @@ export async function POST(
     return NextResponse.json(
       {
         success: false,
-        data: {} as FavoriteItem,
         error: "Field 'id' is required and must be a string",
       },
       { status: 400 },
@@ -40,7 +39,6 @@ export async function POST(
     return NextResponse.json(
       {
         success: false,
-        data: {} as FavoriteItem,
         error: "Field 'title' is required and must be a string",
       },
       { status: 400 },
@@ -51,7 +49,6 @@ export async function POST(
     return NextResponse.json(
       {
         success: false,
-        data: {} as FavoriteItem,
         error: "Item already in favorites",
       },
       { status: 409 },
@@ -67,4 +64,9 @@ export async function POST(
   favorites.set(item.id, item);
 
   return NextResponse.json({ success: true, data: item }, { status: 201 });
+}
+
+export function DELETE(): NextResponse<ApiResponse<null>> {
+  favorites.clear();
+  return NextResponse.json({ success: true, data: null });
 }

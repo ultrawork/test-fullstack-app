@@ -5,7 +5,8 @@ import FavoriteCard from "@/components/favorites/FavoriteCard";
 import EmptyFavorites from "@/components/favorites/EmptyFavorites";
 
 export default function FavoritesPage(): React.ReactElement {
-  const { favorites, clearFavorites } = useFavoritesStore();
+  const favorites = useFavoritesStore((s) => s.favorites);
+  const clearFavorites = useFavoritesStore((s) => s.clearFavorites);
 
   return (
     <main className="min-h-screen bg-[#F5F5F5]">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useFavoritesStore } from "@/stores/favorites-store";
 import type { FavoriteItem } from "@/types/favorite";
 
@@ -11,9 +12,16 @@ export default function FavoriteCard({
   item,
 }: FavoriteCardProps): React.ReactElement {
   const removeFavorite = useFavoritesStore((state) => state.removeFavorite);
+  const [loading, setLoading] = useState(false);
 
   const handleRemove = async (): Promise<void> => {
-    await removeFavorite(item.id);
+    if (loading) return;
+    setLoading(true);
+    try {
+      await removeFavorite(item.id);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -27,8 +35,9 @@ export default function FavoriteCard({
       <button
         type="button"
         onClick={handleRemove}
+        disabled={loading}
         aria-label={`Удалить "${item.title}" из избранного`}
-        className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full"
+        className={`p-2 text-gray-400 hover:text-red-500 transition-colors rounded-full ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

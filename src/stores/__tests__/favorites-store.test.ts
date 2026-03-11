@@ -90,7 +90,7 @@ describe("useFavoritesStore", () => {
     expect(useFavoritesStore.getState().isFavorite("2")).toBe(false);
   });
 
-  it("clears all favorites", () => {
+  it("clears all favorites via API", async () => {
     act(() => {
       useFavoritesStore.setState({
         favorites: [
@@ -100,10 +100,61 @@ describe("useFavoritesStore", () => {
       });
     });
 
-    act(() => {
-      useFavoritesStore.getState().clearFavorites();
+    mockFetch.mockResolvedValueOnce({ ok: true });
+
+    await act(async () => {
+      await useFavoritesStore.getState().clearFavorites();
     });
 
+    expect(mockFetch).toHaveBeenCalledWith("/api/v1/favorites", {
+      method: "DELETE",
+    });
     expect(useFavoritesStore.getState().favorites).toEqual([]);
+  });
+
+  it("handles network error in addFavorite gracefully", async () => {
+    mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+    await act(async () => {
+      await useFavoritesStore.getState().addFavorite("1", "Test");
+    });
+
+    expect(useFavoritesStore.getState().favorites).toHaveLength(0);
+  });
+
+  it("handles network error in removeFavorite gracefully", async () => {
+    act(() => {
+      useFavoritesStore.setState({
+        favorites: [
+          { id: "1", title: "Keep", createdAt: "2024-01-01T00:00:00.000Z" },
+        ],
+      });
+    });
+
+    mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+    await act(async () => {
+      await useFavoritesStore.getState().removeFavorite("1");
+    });
+
+    expect(useFavoritesStore.getState().favorites).toHaveLength(1);
+  });
+
+  it("handles network error in clearFavorites gracefully", async () => {
+    act(() => {
+      useFavoritesStore.setState({
+        favorites: [
+          { id: "1", title: "Keep", createdAt: "2024-01-01T00:00:00.000Z" },
+        ],
+      });
+    });
+
+    mockFetch.mockRejectedValueOnce(new Error("Network error"));
+
+    await act(async () => {
+      await useFavoritesStore.getState().clearFavorites();
+    });
+
+    expect(useFavoritesStore.getState().favorites).toHaveLength(1);
   });
 });

@@ -9,7 +9,7 @@ interface FavoritesState {
   addFavorite: (id: string, title: string) => Promise<void>;
   removeFavorite: (id: string) => Promise<void>;
   isFavorite: (id: string) => boolean;
-  clearFavorites: () => void;
+  clearFavorites: () => Promise<void>;
 }
 
 export const useFavoritesStore = create<FavoritesState>()(
@@ -20,29 +20,37 @@ export const useFavoritesStore = create<FavoritesState>()(
       addFavorite: async (id: string, title: string): Promise<void> => {
         if (get().favorites.some((f) => f.id === id)) return;
 
-        const response = await fetch("/api/v1/favorites", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, title }),
-        });
+        try {
+          const response = await fetch("/api/v1/favorites", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, title }),
+          });
 
-        if (response.ok) {
-          const json = (await response.json()) as { data: FavoriteItem };
-          set((state) => ({
-            favorites: [...state.favorites, json.data],
-          }));
+          if (response.ok) {
+            const json = (await response.json()) as { data: FavoriteItem };
+            set((state) => ({
+              favorites: [...state.favorites, json.data],
+            }));
+          }
+        } catch (error) {
+          console.error("Failed to add favorite:", error);
         }
       },
 
       removeFavorite: async (id: string): Promise<void> => {
-        const response = await fetch(`/api/v1/favorites/${id}`, {
-          method: "DELETE",
-        });
+        try {
+          const response = await fetch(`/api/v1/favorites/${id}`, {
+            method: "DELETE",
+          });
 
-        if (response.ok) {
-          set((state) => ({
-            favorites: state.favorites.filter((f) => f.id !== id),
-          }));
+          if (response.ok) {
+            set((state) => ({
+              favorites: state.favorites.filter((f) => f.id !== id),
+            }));
+          }
+        } catch (error) {
+          console.error("Failed to remove favorite:", error);
         }
       },
 
@@ -50,8 +58,18 @@ export const useFavoritesStore = create<FavoritesState>()(
         return get().favorites.some((f) => f.id === id);
       },
 
-      clearFavorites: (): void => {
-        set({ favorites: [] });
+      clearFavorites: async (): Promise<void> => {
+        try {
+          const response = await fetch("/api/v1/favorites", {
+            method: "DELETE",
+          });
+
+          if (response.ok) {
+            set({ favorites: [] });
+          }
+        } catch (error) {
+          console.error("Failed to clear favorites:", error);
+        }
       },
     }),
     {

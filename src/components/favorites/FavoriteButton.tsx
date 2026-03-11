@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useFavoritesStore } from "@/stores/favorites-store";
 
 interface FavoriteButtonProps {
@@ -11,14 +12,22 @@ export default function FavoriteButton({
   id,
   title,
 }: FavoriteButtonProps): React.ReactElement {
-  const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
-  const active = isFavorite(id);
+  const addFavorite = useFavoritesStore((s) => s.addFavorite);
+  const removeFavorite = useFavoritesStore((s) => s.removeFavorite);
+  const active = useFavoritesStore((s) => s.favorites.some((f) => f.id === id));
+  const [loading, setLoading] = useState(false);
 
   const handleClick = async (): Promise<void> => {
-    if (active) {
-      await removeFavorite(id);
-    } else {
-      await addFavorite(id, title);
+    if (loading) return;
+    setLoading(true);
+    try {
+      if (active) {
+        await removeFavorite(id);
+      } else {
+        await addFavorite(id, title);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -26,6 +35,7 @@ export default function FavoriteButton({
     <button
       type="button"
       onClick={handleClick}
+      disabled={loading}
       aria-pressed={active}
       aria-label={
         active
@@ -36,7 +46,7 @@ export default function FavoriteButton({
         active
           ? "text-red-500 hover:text-red-600"
           : "text-gray-400 hover:text-red-400"
-      }`}
+      } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

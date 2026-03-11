@@ -5,14 +5,14 @@ import { favoritesMap as favorites } from "@/lib/favorites-storage";
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
-): Promise<NextResponse<ApiResponse<FavoriteItem | null>>> {
+): Promise<NextResponse<ApiResponse<FavoriteItem>>> {
   const { id } = await params;
 
   const item = favorites.get(id);
 
   if (!item) {
     return NextResponse.json(
-      { success: false, data: null, error: "Item not found in favorites" },
+      { success: false, error: "Item not found in favorites" },
       { status: 404 },
     );
   }

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { GET, POST } from "../route";
+import { GET, POST, DELETE as DELETE_ALL } from "../route";
 import { favoritesMap } from "@/lib/favorites-storage";
 import { DELETE } from "../[id]/route";
 
@@ -105,6 +105,34 @@ describe("POST /api/v1/favorites", () => {
     expect(response.status).toBe(400);
     const json = await response.json();
     expect(json.error).toBe("Invalid JSON body");
+  });
+});
+
+describe("DELETE /api/v1/favorites (clear all)", () => {
+  it("clears all favorites", async () => {
+    favoritesMap.set("1", {
+      id: "1",
+      title: "Note 1",
+      createdAt: "2024-01-01T00:00:00.000Z",
+    });
+    favoritesMap.set("2", {
+      id: "2",
+      title: "Note 2",
+      createdAt: "2024-01-02T00:00:00.000Z",
+    });
+
+    const response = DELETE_ALL();
+    const json = await response.json();
+    expect(response.status).toBe(200);
+    expect(json.success).toBe(true);
+    expect(favoritesMap.size).toBe(0);
+  });
+
+  it("succeeds even when no favorites exist", async () => {
+    const response = DELETE_ALL();
+    const json = await response.json();
+    expect(response.status).toBe(200);
+    expect(json.success).toBe(true);
   });
 });
 
