@@ -25,9 +25,7 @@ export default function ArchiveCard({
   };
 
   const truncatedContent =
-    item.content.length > 100
-      ? item.content.slice(0, 100) + "…"
-      : item.content;
+    item.content.length > 100 ? item.content.slice(0, 100) + "…" : item.content;
 
   return (
     <article

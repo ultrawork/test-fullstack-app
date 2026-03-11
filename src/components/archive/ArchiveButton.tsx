@@ -43,9 +43,7 @@ export default function ArchiveButton({
       data-testid={`archive-button-${id}`}
       aria-pressed={active}
       aria-label={
-        active
-          ? `Восстановить "${title}" из архива`
-          : `Архивировать "${title}"`
+        active ? `Восстановить "${title}" из архива` : `Архивировать "${title}"`
       }
       className={`p-2 rounded-full transition-colors ${
         active

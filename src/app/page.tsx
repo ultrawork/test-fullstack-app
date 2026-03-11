@@ -14,12 +14,13 @@ export default function HomePage(): React.ReactElement {
       >
         Перейти в Архив
       </Link>
-      <div
-        className="flex items-center gap-2 mt-4"
-        data-testid="demo-section"
-      >
+      <div className="flex items-center gap-2 mt-4" data-testid="demo-section">
         <span className="text-gray-600">Демо:</span>
-        <ArchiveButton id="demo-1" title="Демо запись" content="Содержимое демо записи" />
+        <ArchiveButton
+          id="demo-1"
+          title="Демо запись"
+          content="Содержимое демо записи"
+        />
       </div>
     </main>
   );

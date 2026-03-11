@@ -32,8 +32,7 @@ export const useArchiveStore = create<ArchiveState>()(
           });
 
           if (response.ok) {
-            const json =
-              (await response.json()) as ApiResponse<ArchivedNote>;
+            const json = (await response.json()) as ApiResponse<ArchivedNote>;
             if (json.success) {
               set((state) => ({
                 archivedNotes: [...state.archivedNotes, json.data],
@@ -70,8 +69,7 @@ export const useArchiveStore = create<ArchiveState>()(
           const response = await fetch("/api/v1/notes/archived");
 
           if (response.ok) {
-            const json =
-              (await response.json()) as ApiResponse<ArchivedNote[]>;
+            const json = (await response.json()) as ApiResponse<ArchivedNote[]>;
             if (json.success) {
               set({ archivedNotes: json.data });
             }
