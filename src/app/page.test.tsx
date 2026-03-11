@@ -1,9 +1,16 @@
 import { render, screen, cleanup } from "@testing-library/react";
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi, beforeEach } from "vitest";
 import HomePage from "./page";
+
+beforeEach(() => {
+  vi.spyOn(globalThis, "fetch").mockResolvedValue(
+    new Response(JSON.stringify([]), { status: 200 }),
+  );
+});
 
 afterEach(() => {
   cleanup();
+  vi.restoreAllMocks();
 });
 
 describe("HomePage", () => {
