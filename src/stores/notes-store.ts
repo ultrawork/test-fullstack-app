@@ -131,7 +131,9 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
   setSearch: (search) => set({ search }),
   setFilterTagIds: (tagIds) => set({ filterTagIds: tagIds }),
   setFilterCategoryId: (categoryId) => set({ filterCategoryId: categoryId }),
-  resetAllFilters: () =>
-    set({ search: "", filterTagIds: [], filterCategoryId: null }),
+  resetAllFilters: () => {
+    set({ search: "", filterTagIds: [], filterCategoryId: null });
+    void get().fetchNotes();
+  },
   clearError: () => set({ error: null }),
 }));
