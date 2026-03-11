@@ -22,14 +22,14 @@ export function NotesList(): React.ReactElement {
 
   if (!error && notes.length === 0) {
     return (
-      <p className="text-center text-gray-500">
+      <p className="text-center text-gray-500" data-testid="empty-notes-message">
         No notes yet. Create your first note!
       </p>
     );
   }
 
   return (
-    <section aria-label="Notes list">
+    <section aria-label="Notes list" data-testid="notes-list">
       {error && (
         <p className="mb-4 text-center text-red-500" role="alert">
           Error: {error}

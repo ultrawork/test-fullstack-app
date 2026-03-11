@@ -1,0 +1,13 @@
+import { defineConfig } from "@playwright/test";
+
+export default defineConfig({
+  testDir: "./tests/e2e",
+  fullyParallel: false,
+  retries: 2,
+  timeout: 30000,
+  use: {
+    baseURL: process.env.BASE_URL || "http://localhost:3000",
+    trace: "on-first-retry",
+  },
+  reporter: [["junit", { outputFile: "test-results/results.xml" }]],
+});

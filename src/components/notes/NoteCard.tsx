@@ -16,6 +16,7 @@ export function NoteCard({
 }: NoteCardProps): React.ReactElement {
   return (
     <article
+      data-testid="note-card"
       className={`rounded-lg p-4 shadow-sm transition-colors ${
         note.isPinned
           ? "border-2 border-blue-300 bg-blue-50"
@@ -23,7 +24,7 @@ export function NoteCard({
       }`}
     >
       <header className="flex items-start justify-between gap-2">
-        <h3 className="text-lg font-semibold text-gray-900 break-words min-w-0">
+        <h3 className="text-lg font-semibold text-gray-900 break-words min-w-0" data-testid="note-title">
           {note.title}
         </h3>
         <div className="flex items-center gap-1 shrink-0">
