@@ -26,7 +26,7 @@ describe("useFavoritesStore", () => {
     };
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({ data: mockItem }),
+      json: () => Promise.resolve({ success: true, data: mockItem }),
     });
 
     await act(async () => {
@@ -69,6 +69,28 @@ describe("useFavoritesStore", () => {
     });
 
     mockFetch.mockResolvedValueOnce({ ok: true });
+
+    await act(async () => {
+      await useFavoritesStore.getState().removeFavorite("1");
+    });
+
+    expect(useFavoritesStore.getState().favorites).toHaveLength(0);
+  });
+
+  it("removes a favorite when server returns 404", async () => {
+    act(() => {
+      useFavoritesStore.setState({
+        favorites: [
+          {
+            id: "1",
+            title: "To Remove",
+            createdAt: "2024-01-01T00:00:00.000Z",
+          },
+        ],
+      });
+    });
+
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 404 });
 
     await act(async () => {
       await useFavoritesStore.getState().removeFavorite("1");

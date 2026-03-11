@@ -2,7 +2,7 @@
 
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { FavoriteItem } from "@/types/favorite";
+import type { FavoriteItem, ApiResponse } from "@/types/favorite";
 
 interface FavoritesState {
   favorites: FavoriteItem[];
@@ -28,10 +28,12 @@ export const useFavoritesStore = create<FavoritesState>()(
           });
 
           if (response.ok) {
-            const json = (await response.json()) as { data: FavoriteItem };
-            set((state) => ({
-              favorites: [...state.favorites, json.data],
-            }));
+            const json = (await response.json()) as ApiResponse<FavoriteItem>;
+            if (json.success) {
+              set((state) => ({
+                favorites: [...state.favorites, json.data],
+              }));
+            }
           }
         } catch (error) {
           console.error("Failed to add favorite:", error);
@@ -44,7 +46,7 @@ export const useFavoritesStore = create<FavoritesState>()(
             method: "DELETE",
           });
 
-          if (response.ok) {
+          if (response.ok || response.status === 404) {
             set((state) => ({
               favorites: state.favorites.filter((f) => f.id !== id),
             }));

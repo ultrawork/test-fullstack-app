@@ -54,7 +54,7 @@ describe("FavoriteButton", () => {
     };
     mockFetch.mockResolvedValueOnce({
       ok: true,
-      json: () => Promise.resolve({ data: mockItem }),
+      json: () => Promise.resolve({ success: true, data: mockItem }),
     });
 
     render(<FavoriteButton id="1" title="Test" />);
