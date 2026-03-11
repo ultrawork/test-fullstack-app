@@ -5,7 +5,7 @@ test("SC-001: главная страница отображает список 
   await page.goto("/");
 
   // Проверяем заголовок
-  await expect(page.getByRole("heading", { name: "Notes App" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Notes App", exact: true })).toBeVisible();
 
   // Проверяем поле поиска
   await expect(page.getByTestId("search-input")).toBeVisible();
