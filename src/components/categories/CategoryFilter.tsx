@@ -8,12 +8,14 @@ interface CategoryFilterProps {
   categories: CategoryWithNoteCount[];
   selectedId: string | null;
   onChange: (categoryId: string | null) => void;
+  onResetAll?: () => void;
 }
 
 export default function CategoryFilter({
   categories,
   selectedId,
   onChange,
+  onResetAll,
 }: CategoryFilterProps): ReactNode {
   if (categories.length === 0) return null;
 
@@ -25,7 +27,7 @@ export default function CategoryFilter({
     >
       <button
         type="button"
-        onClick={() => onChange(null)}
+        onClick={() => (onResetAll ? onResetAll() : onChange(null))}
         className={`inline-flex items-center rounded px-3 py-1 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1 ${
           selectedId === null
             ? "bg-gray-900 text-white"

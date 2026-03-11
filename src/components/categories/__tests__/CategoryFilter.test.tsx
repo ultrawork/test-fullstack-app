@@ -101,6 +101,22 @@ describe("CategoryFilter", () => {
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
+  it("should call onResetAll instead of onChange when 'All' clicked and onResetAll provided", () => {
+    const onChange = vi.fn();
+    const onResetAll = vi.fn();
+    render(
+      <CategoryFilter
+        categories={mockCategories}
+        selectedId="c1"
+        onChange={onChange}
+        onResetAll={onResetAll}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "All" }));
+    expect(onResetAll).toHaveBeenCalled();
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
   it("should set aria-pressed on selected category", () => {
     render(
       <CategoryFilter
