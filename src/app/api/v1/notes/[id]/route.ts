@@ -30,7 +30,24 @@ export async function PUT(
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
   }
 
-  const updated = updateNote(id, body);
+  const title = body.title !== undefined ? body.title : undefined;
+  const content = body.content !== undefined ? body.content : undefined;
+
+  if (title !== undefined && typeof title !== "string") {
+    return NextResponse.json(
+      { error: "Title must be a string" },
+      { status: 400 },
+    );
+  }
+
+  if (content !== undefined && typeof content !== "string") {
+    return NextResponse.json(
+      { error: "Content must be a string" },
+      { status: 400 },
+    );
+  }
+
+  const updated = updateNote(id, { title, content });
   if (!updated) {
     return NextResponse.json({ error: "Note not found" }, { status: 404 });
   }

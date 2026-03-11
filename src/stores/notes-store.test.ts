@@ -117,6 +117,22 @@ describe("notes-store", () => {
   });
 
   describe("deleteNote", () => {
+    it("successfully deletes a note", async () => {
+      useNotesStore.setState({ notes: [{ ...mockNote }] });
+
+      vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+        new Response(JSON.stringify({ success: true }), { status: 200 }),
+      );
+
+      await act(async () => {
+        await useNotesStore.getState().deleteNote("1");
+      });
+
+      const { notes, error } = useNotesStore.getState();
+      expect(notes).toHaveLength(0);
+      expect(error).toBeNull();
+    });
+
     it("optimistically deletes and rolls back on failure", async () => {
       useNotesStore.setState({ notes: [{ ...mockNote }] });
 

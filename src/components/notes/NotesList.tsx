@@ -20,15 +20,7 @@ export function NotesList(): React.ReactElement {
     );
   }
 
-  if (error) {
-    return (
-      <p className="text-center text-red-500" role="alert">
-        Error: {error}
-      </p>
-    );
-  }
-
-  if (notes.length === 0) {
+  if (!error && notes.length === 0) {
     return (
       <p className="text-center text-gray-500">
         No notes yet. Create your first note!
@@ -38,6 +30,11 @@ export function NotesList(): React.ReactElement {
 
   return (
     <section aria-label="Notes list">
+      {error && (
+        <p className="mb-4 text-center text-red-500" role="alert">
+          Error: {error}
+        </p>
+      )}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {notes.map((note) => (
           <li key={note.id}>

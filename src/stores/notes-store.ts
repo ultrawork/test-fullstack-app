@@ -33,6 +33,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
   },
 
   addNote: async (title: string, content: string) => {
+    set({ error: null });
     try {
       const response = await fetch("/api/v1/notes", {
         method: "POST",
@@ -53,6 +54,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
     const previousNotes = get().notes;
     set((state) => ({
       notes: state.notes.filter((n) => n.id !== id),
+      error: null,
     }));
     try {
       const response = await fetch(`/api/v1/notes/${id}`, {
@@ -74,6 +76,7 @@ export const useNotesStore = create<NotesState>((set, get) => ({
 
     // Optimistic update
     set((state) => ({
+      error: null,
       notes: sortNotes(
         state.notes.map((note) =>
           note.id === id ? { ...note, isPinned: !note.isPinned } : note,
