@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -12,8 +13,31 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="ru">
+      <body>
+        <nav
+          className="bg-white border-b border-gray-200"
+          aria-label="Главная навигация"
+        >
+          <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-6">
+            <Link
+              href="/"
+              data-testid="nav-home"
+              className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+            >
+              Главная
+            </Link>
+            <Link
+              href="/archive"
+              data-testid="nav-archive"
+              className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+            >
+              Архив
+            </Link>
+          </div>
+        </nav>
+        {children}
+      </body>
     </html>
   );
 }
