@@ -37,7 +37,7 @@ export function NotesList(): React.ReactElement {
       )}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {notes.map((note) => (
-          <li key={note.id}>
+          <li key={note.id} data-testid="note-card">
             <NoteCard
               note={note}
               onTogglePin={togglePin}

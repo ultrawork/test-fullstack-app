@@ -16,7 +16,6 @@ export function NoteCard({
 }: NoteCardProps): React.ReactElement {
   return (
     <article
-      data-testid="note-card"
       className={`rounded-lg p-4 shadow-sm transition-colors ${
         note.isPinned
           ? "border-2 border-blue-300 bg-blue-50"
