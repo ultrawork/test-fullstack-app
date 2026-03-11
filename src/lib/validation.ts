@@ -23,8 +23,8 @@ export const createNoteSchema = z.object({
     .min(1, "Title is required")
     .max(255, "Title must be at most 255 characters"),
   content: z.string().min(1, "Content is required"),
-  tagIds: z.array(z.string().cuid()).optional(),
-  categoryId: z.string().cuid().optional().nullable(),
+  tagIds: z.array(z.string().min(1)).optional(),
+  categoryId: z.string().min(1).optional().nullable(),
 });
 
 export const updateNoteSchema = z.object({
@@ -34,8 +34,8 @@ export const updateNoteSchema = z.object({
     .max(255, "Title must be at most 255 characters")
     .optional(),
   content: z.string().min(1, "Content is required").optional(),
-  tagIds: z.array(z.string().cuid()).optional(),
-  categoryId: z.string().cuid().optional().nullable(),
+  tagIds: z.array(z.string().min(1)).optional(),
+  categoryId: z.string().min(1).optional().nullable(),
 });
 
 const hexColorRegex = /^#[0-9A-Fa-f]{6}$/;

@@ -57,6 +57,7 @@ const mockFetchNotes = vi.fn();
 const mockSetSearch = vi.fn();
 const mockSetFilterTagIds = vi.fn();
 const mockSetFilterCategoryId = vi.fn();
+const mockResetAllFilters = vi.fn();
 
 let mockNotesStoreState = {
   notes: mockNotes,
@@ -68,6 +69,7 @@ let mockNotesStoreState = {
   setSearch: mockSetSearch,
   setFilterTagIds: mockSetFilterTagIds,
   setFilterCategoryId: mockSetFilterCategoryId,
+  resetAllFilters: mockResetAllFilters,
 };
 
 vi.mock("@/stores/notes-store", () => ({
@@ -139,6 +141,7 @@ afterEach(() => {
     setSearch: mockSetSearch,
     setFilterTagIds: mockSetFilterTagIds,
     setFilterCategoryId: mockSetFilterCategoryId,
+    resetAllFilters: mockResetAllFilters,
   };
 });
 
@@ -190,10 +193,10 @@ describe("NotesList", () => {
     expect(mockSetFilterCategoryId).toHaveBeenCalledWith("c1");
   });
 
-  it("should call setFilterCategoryId with null when All clicked", () => {
+  it("should call resetAllFilters when All clicked", () => {
     render(<NotesList />);
     fireEvent.click(screen.getByRole("button", { name: "All" }));
-    expect(mockSetFilterCategoryId).toHaveBeenCalledWith(null);
+    expect(mockResetAllFilters).toHaveBeenCalled();
   });
 
   it("should show category note counts", () => {

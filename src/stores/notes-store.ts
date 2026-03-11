@@ -19,6 +19,7 @@ interface NotesStore {
   setSearch: (search: string) => void;
   setFilterTagIds: (tagIds: string[]) => void;
   setFilterCategoryId: (categoryId: string | null) => void;
+  resetAllFilters: () => void;
   clearError: () => void;
 }
 
@@ -130,5 +131,7 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
   setSearch: (search) => set({ search }),
   setFilterTagIds: (tagIds) => set({ filterTagIds: tagIds }),
   setFilterCategoryId: (categoryId) => set({ filterCategoryId: categoryId }),
+  resetAllFilters: () =>
+    set({ search: "", filterTagIds: [], filterCategoryId: null }),
   clearError: () => set({ error: null }),
 }));

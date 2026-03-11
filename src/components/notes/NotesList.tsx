@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useCallback, useEffect } from "react";
+import { type ReactNode, useEffect } from "react";
 import NoteCard from "./NoteCard";
 import TagFilter from "@/components/tags/TagFilter";
 import CategoryFilter from "@/components/categories/CategoryFilter";
@@ -23,15 +23,10 @@ export default function NotesList(): ReactNode {
     setSearch,
     setFilterTagIds,
     setFilterCategoryId,
+    resetAllFilters,
   } = useNotesStore();
   const { tags, fetchTags } = useTagsStore();
   const { categories, fetchCategories } = useCategoriesStore();
-
-  const handleResetAll = useCallback((): void => {
-    setFilterCategoryId(null);
-    setFilterTagIds([]);
-    setSearch("");
-  }, [setFilterCategoryId, setFilterTagIds, setSearch]);
 
   useEffect(() => {
     void fetchTags();
@@ -53,7 +48,7 @@ export default function NotesList(): ReactNode {
         categories={categories}
         selectedId={filterCategoryId}
         onChange={setFilterCategoryId}
-        onResetAll={handleResetAll}
+        onResetAll={resetAllFilters}
       />
       <TagFilter
         tags={tags}
