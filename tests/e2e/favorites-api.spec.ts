@@ -120,6 +120,9 @@ test("SC-105: DELETE /api/v1/favorites/:id удаляет запись", async (
 }) => {
   const apiUrl = getApiUrl(baseURL);
 
+  // Очищаем серверное хранилище перед тестом (предусловие: хранилище пустое)
+  await request.delete(`${apiUrl}/api/v1/favorites`);
+
   // Добавляем запись
   await request.post(`${apiUrl}/api/v1/favorites`, {
     data: { id: "del-1", title: "Удаляемая" },
