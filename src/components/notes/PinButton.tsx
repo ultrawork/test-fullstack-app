@@ -5,7 +5,10 @@ interface PinButtonProps {
   onToggle: () => void;
 }
 
-export function PinButton({ isPinned, onToggle }: PinButtonProps): React.ReactElement {
+export function PinButton({
+  isPinned,
+  onToggle,
+}: PinButtonProps): React.ReactElement {
   function handleClick(e: React.MouseEvent): void {
     e.stopPropagation();
     onToggle();

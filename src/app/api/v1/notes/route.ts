@@ -17,10 +17,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const { title, content } = body as { title?: string; content?: string };
 
   if (!title || typeof title !== "string") {
-    return NextResponse.json(
-      { error: "Title is required" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Title is required" }, { status: 400 });
   }
 
   const note = createNote(title, content ?? "");

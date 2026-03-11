@@ -22,9 +22,12 @@ describe("PATCH /api/v1/notes/[id]/pin", () => {
     const note = createNote("Test", "Content");
     expect(note.isPinned).toBe(false);
 
-    const request = new NextRequest("http://localhost/api/v1/notes/" + note.id + "/pin", {
-      method: "PATCH",
-    });
+    const request = new NextRequest(
+      "http://localhost/api/v1/notes/" + note.id + "/pin",
+      {
+        method: "PATCH",
+      },
+    );
     const response = await PATCH(request, createMockParams(note.id));
     const body = await response.json();
 
@@ -37,15 +40,21 @@ describe("PATCH /api/v1/notes/[id]/pin", () => {
     const note = createNote("Test", "Content");
 
     // First toggle: false -> true
-    const req1 = new NextRequest("http://localhost/api/v1/notes/" + note.id + "/pin", {
-      method: "PATCH",
-    });
+    const req1 = new NextRequest(
+      "http://localhost/api/v1/notes/" + note.id + "/pin",
+      {
+        method: "PATCH",
+      },
+    );
     await PATCH(req1, createMockParams(note.id));
 
     // Second toggle: true -> false
-    const req2 = new NextRequest("http://localhost/api/v1/notes/" + note.id + "/pin", {
-      method: "PATCH",
-    });
+    const req2 = new NextRequest(
+      "http://localhost/api/v1/notes/" + note.id + "/pin",
+      {
+        method: "PATCH",
+      },
+    );
     const response = await PATCH(req2, createMockParams(note.id));
     const body = await response.json();
 

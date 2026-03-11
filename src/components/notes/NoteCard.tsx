@@ -59,10 +59,7 @@ export function NoteCard({
         <p className="mt-2 text-gray-600 break-words">{note.content}</p>
       )}
       <footer className="mt-3">
-        <time
-          dateTime={note.updatedAt}
-          className="text-xs text-gray-400"
-        >
+        <time dateTime={note.updatedAt} className="text-xs text-gray-400">
           {new Date(note.updatedAt).toLocaleDateString()}
         </time>
       </footer>
