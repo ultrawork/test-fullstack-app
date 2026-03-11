@@ -34,6 +34,18 @@ export const useFavoritesStore = create<FavoritesState>()(
                 favorites: [...state.favorites, json.data],
               }));
             }
+          } else if (response.status === 409) {
+            // Элемент уже существует на сервере — синхронизируем локальное состояние
+            set((state) =>
+              state.favorites.some((f) => f.id === id)
+                ? state
+                : {
+                    favorites: [
+                      ...state.favorites,
+                      { id, title, createdAt: new Date().toISOString() },
+                    ],
+                  },
+            );
           }
         } catch (error) {
           console.error("Failed to add favorite:", error);
