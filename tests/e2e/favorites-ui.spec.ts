@@ -1,7 +1,8 @@
 import { test, expect } from "@playwright/test";
 
-// Очищаем localStorage перед каждым тестом
-test.beforeEach(async ({ page }) => {
+// Очищаем серверное хранилище и localStorage перед каждым тестом
+test.beforeEach(async ({ page, request }) => {
+  await request.delete("/api/v1/favorites");
   await page.goto("/");
   await page.evaluate(() => localStorage.clear());
 });
