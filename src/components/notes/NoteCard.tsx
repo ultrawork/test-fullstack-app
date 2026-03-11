@@ -24,14 +24,9 @@ function truncateContent(content: string): string {
 export function NoteCard({ note }: NoteCardProps): React.JSX.Element {
   return (
     <article className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
-      <h2 className="mb-2 text-lg font-semibold text-gray-900">
-        {note.title}
-      </h2>
+      <h2 className="mb-2 text-lg font-semibold text-gray-900">{note.title}</h2>
       <p className="mb-3 text-gray-600">{truncateContent(note.content)}</p>
-      <time
-        dateTime={note.updatedAt}
-        className="text-sm text-gray-400"
-      >
+      <time dateTime={note.updatedAt} className="text-sm text-gray-400">
         {formatDate(note.updatedAt)}
       </time>
     </article>

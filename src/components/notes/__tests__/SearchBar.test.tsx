@@ -1,4 +1,10 @@
-import { render, screen, cleanup, fireEvent, act } from "@testing-library/react";
+import {
+  render,
+  screen,
+  cleanup,
+  fireEvent,
+  act,
+} from "@testing-library/react";
 import { describe, it, expect, afterEach, vi, beforeEach } from "vitest";
 import { SearchBar } from "../SearchBar";
 import { useNotesStore } from "@/stores/notes-store";
@@ -108,8 +114,6 @@ describe("SearchBar", () => {
 
   it("has placeholder text", () => {
     render(<SearchBar />);
-    expect(
-      screen.getByPlaceholderText("Поиск заметок..."),
-    ).toBeInTheDocument();
+    expect(screen.getByPlaceholderText("Поиск заметок...")).toBeInTheDocument();
   });
 });

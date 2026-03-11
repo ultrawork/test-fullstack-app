@@ -21,9 +21,7 @@ describe("NoteCard", () => {
     expect(
       screen.getByRole("heading", { level: 2, name: "Тестовая заметка" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByText("Содержимое тестовой заметки"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Содержимое тестовой заметки")).toBeInTheDocument();
   });
 
   it("renders as article element", () => {

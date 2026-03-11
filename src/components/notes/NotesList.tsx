@@ -13,7 +13,11 @@ export function NotesList(): React.JSX.Element {
 
   if (isLoading) {
     return (
-      <div data-testid="notes-list" aria-live="polite" className="py-12 text-center">
+      <div
+        data-testid="notes-list"
+        aria-live="polite"
+        className="py-12 text-center"
+      >
         <p className="text-gray-500">Загрузка...</p>
       </div>
     );
@@ -21,7 +25,11 @@ export function NotesList(): React.JSX.Element {
 
   if (error) {
     return (
-      <div data-testid="notes-list" aria-live="polite" className="py-12 text-center">
+      <div
+        data-testid="notes-list"
+        aria-live="polite"
+        className="py-12 text-center"
+      >
         <p className="text-red-500">{error}</p>
       </div>
     );
@@ -29,7 +37,11 @@ export function NotesList(): React.JSX.Element {
 
   if (notes.length === 0 && searchQuery) {
     return (
-      <div data-testid="notes-list" aria-live="polite" className="py-12 text-center">
+      <div
+        data-testid="notes-list"
+        aria-live="polite"
+        className="py-12 text-center"
+      >
         <p className="text-gray-500">Ничего не найдено</p>
       </div>
     );
@@ -37,7 +49,11 @@ export function NotesList(): React.JSX.Element {
 
   if (notes.length === 0) {
     return (
-      <div data-testid="notes-list" aria-live="polite" className="py-12 text-center">
+      <div
+        data-testid="notes-list"
+        aria-live="polite"
+        className="py-12 text-center"
+      >
         <p className="text-gray-500">Нет заметок</p>
       </div>
     );
