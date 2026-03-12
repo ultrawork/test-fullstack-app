@@ -71,6 +71,7 @@ export function NoteEditor({ note }: NoteEditorProps): ReactNode {
           ...(categoryId ? { categoryId } : {}),
         });
       }
+      await fetchCategories();
       router.push('/dashboard');
     } catch {
       setErrors({ title: 'Failed to save note' });
