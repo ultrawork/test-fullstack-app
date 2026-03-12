@@ -16,6 +16,7 @@ export default function ExportButton({
     <button
       type="button"
       onClick={handleClick}
+      data-testid="export-button"
       aria-label="Export note as text file"
       className="inline-flex items-center gap-1 rounded bg-gray-100 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-200"
     >
