@@ -7,7 +7,7 @@ export default defineConfig({
   timeout: 30000,
   globalSetup: './tests/e2e/global-setup.ts',
   use: {
-    baseURL: 'http://localhost:4000',
+    baseURL: process.env.BASE_URL || 'http://localhost:4000',
     trace: 'on-first-retry',
   },
   reporter: [['junit', { outputFile: 'test-results/results.xml' }]],
