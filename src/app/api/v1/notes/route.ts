@@ -23,7 +23,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       return errorResponse('Invalid filter parameters', 400);
     }
 
-    const { search, categoryId, page, limit } = filterResult.data;
+    const { search, categoryId, sortBy, sortOrder, page, limit } = filterResult.data;
 
     const where: Prisma.NoteWhereInput = { userId: currentUser.id };
 
@@ -38,11 +38,18 @@ export async function GET(request: NextRequest): Promise<Response> {
       ];
     }
 
+    const orderBy: Prisma.NoteOrderByWithRelationInput[] = [
+      { [sortBy]: sortOrder },
+    ];
+    if (sortBy === 'title') {
+      orderBy.push({ createdAt: 'desc' });
+    }
+
     const [notes, total] = await Promise.all([
       prisma.note.findMany({
         where,
         include: { category: true },
-        orderBy: { updatedAt: 'desc' },
+        orderBy,
         skip: (page - 1) * limit,
         take: limit,
       }),

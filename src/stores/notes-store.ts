@@ -23,7 +23,7 @@ interface NotesStore {
 export const useNotesStore = create<NotesStore>((set, get) => ({
   notes: [],
   selectedNote: null,
-  filter: {},
+  filter: { sortBy: 'createdAt', sortOrder: 'desc' },
   isLoading: false,
   error: null,
   total: 0,
@@ -36,6 +36,8 @@ export const useNotesStore = create<NotesStore>((set, get) => ({
       const params = new URLSearchParams();
       if (filter.search) params.set('search', filter.search);
       if (filter.categoryId) params.set('categoryId', filter.categoryId);
+      if (filter.sortBy) params.set('sortBy', filter.sortBy);
+      if (filter.sortOrder) params.set('sortOrder', filter.sortOrder);
       params.set('page', String(page));
       params.set('limit', String(filter.limit || 20));
 
