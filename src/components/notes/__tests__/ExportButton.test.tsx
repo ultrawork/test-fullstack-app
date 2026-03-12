@@ -26,7 +26,9 @@ afterEach(() => {
 describe("ExportButton", () => {
   it("renders with accessible label", () => {
     render(<ExportButton note={mockNote} />);
-    const button = screen.getByRole("button", { name: "Export note as text file" });
+    const button = screen.getByRole("button", {
+      name: "Export note as text file",
+    });
     expect(button).toBeInTheDocument();
   });
 
@@ -39,7 +41,9 @@ describe("ExportButton", () => {
     const user = userEvent.setup();
     render(<ExportButton note={mockNote} />);
 
-    const button = screen.getByRole("button", { name: "Export note as text file" });
+    const button = screen.getByRole("button", {
+      name: "Export note as text file",
+    });
     await user.click(button);
 
     expect(downloadNoteAsTextFile).toHaveBeenCalledWith(mockNote);

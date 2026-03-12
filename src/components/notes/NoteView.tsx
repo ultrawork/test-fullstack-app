@@ -33,7 +33,9 @@ export default function NoteView({ note }: NoteViewProps): React.ReactElement {
         )}
       </header>
 
-      <section className="prose mb-6 whitespace-pre-wrap">{note.content}</section>
+      <section className="prose mb-6 whitespace-pre-wrap">
+        {note.content}
+      </section>
 
       <footer className="flex gap-2">
         <ExportButton note={note} />

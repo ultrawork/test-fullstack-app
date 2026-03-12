@@ -3,12 +3,14 @@ import type { Note } from "@/types/note";
 const BOM = "\uFEFF";
 
 export function sanitizeFilename(name: string): string {
-  return name
-    .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
-    .replace(/\s+/g, "_")
-    .replace(/_+/g, "_")
-    .replace(/^_|_$/g, "")
-    .slice(0, 200) || "note";
+  return (
+    name
+      .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+      .replace(/\s+/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "")
+      .slice(0, 200) || "note"
+  );
 }
 
 export function formatNoteAsText(note: Note): string {

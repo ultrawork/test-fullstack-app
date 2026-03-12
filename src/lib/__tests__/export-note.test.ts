@@ -86,12 +86,20 @@ describe("downloadNoteAsTextFile", () => {
 
   it("creates a link and triggers download", () => {
     const clickSpy = vi.fn();
-    const appendChildSpy = vi.spyOn(document.body, "appendChild").mockImplementation((node) => node);
-    const removeChildSpy = vi.spyOn(document.body, "removeChild").mockImplementation((node) => node);
+    const appendChildSpy = vi
+      .spyOn(document.body, "appendChild")
+      .mockImplementation((node) => node);
+    const removeChildSpy = vi
+      .spyOn(document.body, "removeChild")
+      .mockImplementation((node) => node);
 
     vi.spyOn(document, "createElement").mockReturnValue({
-      set href(_: string) { /* noop */ },
-      set download(_: string) { /* noop */ },
+      set href(_: string) {
+        /* noop */
+      },
+      set download(_: string) {
+        /* noop */
+      },
       click: clickSpy,
     } as unknown as HTMLAnchorElement);
 

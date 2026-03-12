@@ -5,7 +5,9 @@ interface ExportButtonProps {
   note: Note;
 }
 
-export default function ExportButton({ note }: ExportButtonProps): React.ReactElement {
+export default function ExportButton({
+  note,
+}: ExportButtonProps): React.ReactElement {
   function handleClick(): void {
     downloadNoteAsTextFile(note);
   }
