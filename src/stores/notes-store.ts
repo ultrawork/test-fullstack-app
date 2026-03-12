@@ -23,7 +23,7 @@ interface NotesStore {
 export const useNotesStore = create<NotesStore>((set, get) => ({
   notes: [],
   selectedNote: null,
-  filter: { sortBy: 'createdAt', sortOrder: 'desc' },
+  filter: { sortBy: 'updatedAt', sortOrder: 'desc' },
   isLoading: false,
   error: null,
   total: 0,

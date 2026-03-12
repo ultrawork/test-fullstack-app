@@ -4,7 +4,7 @@ import { describe, it, expect, afterEach, vi } from 'vitest';
 import { SortSelector } from '../SortSelector';
 
 const mockSetFilter = vi.fn();
-let mockFilter = { sortBy: 'createdAt' as const, sortOrder: 'desc' as const };
+let mockFilter = { sortBy: 'updatedAt' as const, sortOrder: 'desc' as const };
 
 vi.mock('@/stores/notes-store', () => ({
   useNotesStore: (
@@ -18,7 +18,7 @@ vi.mock('@/stores/notes-store', () => ({
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
-  mockFilter = { sortBy: 'createdAt', sortOrder: 'desc' };
+  mockFilter = { sortBy: 'updatedAt', sortOrder: 'desc' };
 });
 
 describe('SortSelector', () => {
@@ -32,9 +32,10 @@ describe('SortSelector', () => {
     render(<SortSelector />);
     const select = screen.getByTestId('sort-select');
     const options = select.querySelectorAll('option');
-    expect(options).toHaveLength(2);
-    expect(options[0]).toHaveTextContent('Date created');
-    expect(options[1]).toHaveTextContent('Title');
+    expect(options).toHaveLength(3);
+    expect(options[0]).toHaveTextContent('Date updated');
+    expect(options[1]).toHaveTextContent('Date created');
+    expect(options[2]).toHaveTextContent('Title');
   });
 
   it('calls setFilter when sort field changes', async () => {
@@ -65,7 +66,7 @@ describe('SortSelector', () => {
   });
 
   it('shows ascending label when sortOrder is asc', () => {
-    mockFilter = { sortBy: 'createdAt', sortOrder: 'asc' };
+    mockFilter = { sortBy: 'updatedAt', sortOrder: 'asc' };
     render(<SortSelector />);
     expect(screen.getByTestId('sort-order-button')).toHaveAttribute(
       'aria-label',

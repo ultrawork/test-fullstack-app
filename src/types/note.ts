@@ -22,7 +22,7 @@ export interface UpdateNoteInput {
   categoryId?: string | null;
 }
 
-export type SortByField = 'createdAt' | 'title';
+export type SortByField = 'createdAt' | 'updatedAt' | 'title';
 export type SortOrder = 'asc' | 'desc';
 
 export interface NotesFilter {

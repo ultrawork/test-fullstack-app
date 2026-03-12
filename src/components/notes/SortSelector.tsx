@@ -4,15 +4,23 @@ import { type ReactNode } from 'react';
 import { useNotesStore } from '@/stores/notes-store';
 import type { SortByField, SortOrder } from '@/types/note';
 
+const VALID_SORT_FIELDS: SortByField[] = ['createdAt', 'updatedAt', 'title'];
+
+function isSortByField(value: string): value is SortByField {
+  return (VALID_SORT_FIELDS as string[]).includes(value);
+}
+
 export function SortSelector(): ReactNode {
   const filter = useNotesStore((s) => s.filter);
   const setFilter = useNotesStore((s) => s.setFilter);
 
-  const sortBy = filter.sortBy ?? 'createdAt';
+  const sortBy = filter.sortBy ?? 'updatedAt';
   const sortOrder = filter.sortOrder ?? 'desc';
 
   function handleSortByChange(value: string): void {
-    setFilter({ sortBy: value as SortByField });
+    if (isSortByField(value)) {
+      setFilter({ sortBy: value });
+    }
   }
 
   function toggleSortOrder(): void {
@@ -32,6 +40,7 @@ export function SortSelector(): ReactNode {
         onChange={(e) => handleSortByChange(e.target.value)}
         className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
+        <option value="updatedAt">Date updated</option>
         <option value="createdAt">Date created</option>
         <option value="title">Title</option>
       </select>

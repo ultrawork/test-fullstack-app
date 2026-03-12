@@ -8,6 +8,7 @@ import {
   paginatedResponse,
 } from '@/lib/api-response';
 import type { Prisma } from '@prisma/client';
+import { buildOrderBy } from '@/lib/notes-utils';
 
 export async function GET(request: NextRequest): Promise<Response> {
   try {
@@ -38,12 +39,7 @@ export async function GET(request: NextRequest): Promise<Response> {
       ];
     }
 
-    const orderBy: Prisma.NoteOrderByWithRelationInput[] = [
-      { [sortBy]: sortOrder },
-    ];
-    if (sortBy === 'title') {
-      orderBy.push({ createdAt: 'desc' });
-    }
+    const orderBy = buildOrderBy(sortBy, sortOrder);
 
     const [notes, total] = await Promise.all([
       prisma.note.findMany({

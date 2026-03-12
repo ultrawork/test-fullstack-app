@@ -20,7 +20,7 @@ describe('notes-store sort', () => {
     useNotesStore.setState({
       notes: [],
       selectedNote: null,
-      filter: { sortBy: 'createdAt', sortOrder: 'desc' },
+      filter: { sortBy: 'updatedAt', sortOrder: 'desc' },
       isLoading: false,
       error: null,
       total: 0,
@@ -30,7 +30,7 @@ describe('notes-store sort', () => {
 
   it('has default sortBy and sortOrder in filter', () => {
     const state = useNotesStore.getState();
-    expect(state.filter.sortBy).toBe('createdAt');
+    expect(state.filter.sortBy).toBe('updatedAt');
     expect(state.filter.sortOrder).toBe('desc');
   });
 
@@ -70,7 +70,7 @@ describe('notes-store sort', () => {
     await useNotesStore.getState().fetchNotes();
 
     const url = mockApiClient.get.mock.calls[0][0] as string;
-    expect(url).toContain('sortBy=createdAt');
+    expect(url).toContain('sortBy=updatedAt');
     expect(url).toContain('sortOrder=desc');
   });
 });

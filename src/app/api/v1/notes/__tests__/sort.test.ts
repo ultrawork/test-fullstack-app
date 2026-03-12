@@ -1,25 +1,14 @@
 import { describe, it, expect } from 'vitest';
 import { notesFilterSchema } from '@/lib/validation';
-import type { Prisma } from '@prisma/client';
-
-function buildOrderBy(
-  sortBy: string,
-  sortOrder: string,
-): Prisma.NoteOrderByWithRelationInput[] {
-  const orderBy: Prisma.NoteOrderByWithRelationInput[] = [{ [sortBy]: sortOrder }];
-  if (sortBy === 'title') {
-    orderBy.push({ createdAt: 'desc' });
-  }
-  return orderBy;
-}
+import { buildOrderBy } from '@/lib/notes-utils';
 
 describe('notes sort API', () => {
   describe('notesFilterSchema sort params', () => {
-    it('defaults sortBy to createdAt', () => {
+    it('defaults sortBy to updatedAt', () => {
       const result = notesFilterSchema.safeParse({});
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.sortBy).toBe('createdAt');
+        expect(result.data.sortBy).toBe('updatedAt');
       }
     });
 
@@ -39,6 +28,22 @@ describe('notes sort API', () => {
       }
     });
 
+    it('accepts sortBy=createdAt', () => {
+      const result = notesFilterSchema.safeParse({ sortBy: 'createdAt' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.sortBy).toBe('createdAt');
+      }
+    });
+
+    it('accepts sortBy=updatedAt', () => {
+      const result = notesFilterSchema.safeParse({ sortBy: 'updatedAt' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.sortBy).toBe('updatedAt');
+      }
+    });
+
     it('accepts sortOrder=asc', () => {
       const result = notesFilterSchema.safeParse({ sortOrder: 'asc' });
       expect(result.success).toBe(true);
@@ -48,7 +53,7 @@ describe('notes sort API', () => {
     });
 
     it('rejects invalid sortBy value', () => {
-      const result = notesFilterSchema.safeParse({ sortBy: 'updatedAt' });
+      const result = notesFilterSchema.safeParse({ sortBy: 'random' });
       expect(result.success).toBe(false);
     });
 
@@ -73,6 +78,11 @@ describe('notes sort API', () => {
   });
 
   describe('orderBy construction', () => {
+    it('creates single orderBy for updatedAt desc', () => {
+      const orderBy = buildOrderBy('updatedAt', 'desc');
+      expect(orderBy).toEqual([{ updatedAt: 'desc' }]);
+    });
+
     it('creates single orderBy for createdAt desc', () => {
       const orderBy = buildOrderBy('createdAt', 'desc');
       expect(orderBy).toEqual([{ createdAt: 'desc' }]);
