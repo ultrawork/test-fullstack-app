@@ -1,3 +1,5 @@
+"use client";
+
 import type { Note } from "@/types/note";
 import { downloadNoteAsTextFile } from "@/lib/export-note";
 
