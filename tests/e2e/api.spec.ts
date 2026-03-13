@@ -255,27 +255,28 @@ test.describe("API тесты", () => {
 
   // SC-046: Валидация данных тега через API
   test("SC-046: валидация данных тега через API", async ({ request }) => {
-    const { cookies } = await getAuthContext(request);
-    const headers = { cookie: cookies };
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
-    // Пустое имя
+    // Пустое имя (cookies auto-carried by request context)
     const emptyName = await request.post("/api/v1/tags", {
       data: { name: "", color: "#FF0000" },
-      headers,
     });
     expect(emptyName.status()).toBe(400);
 
     // Имя > 50 символов
     const longName = await request.post("/api/v1/tags", {
       data: { name: "a".repeat(51), color: "#FF0000" },
-      headers,
     });
     expect(longName.status()).toBe(400);
 
     // Невалидный цвет
     const badColor = await request.post("/api/v1/tags", {
       data: { name: "Valid Name", color: "not-a-color" },
-      headers,
     });
     expect(badColor.status()).toBe(400);
   });
