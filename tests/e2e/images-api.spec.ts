@@ -177,12 +177,21 @@ test.describe("API изображений", () => {
 
   // SC-024: API изображений — загрузка и удаление
   test("SC-024: API изображений — загрузка и удаление", async ({ request }) => {
-    const { noteId, cookies } = await setupNoteWithAuth(request);
-    const headers = { cookie: cookies };
+    const email = uniqueEmail("img-api");
+    // Register — cookies auto-carried by Playwright request context
+    await request.post("/api/v1/auth/register", {
+      data: { email, name: "Image API User", password: "password12345" },
+    });
 
-    // Загружаем JPEG
+    // Создаём заметку (cookies auto-carried)
+    const noteRes = await request.post("/api/v1/notes", {
+      data: { title: "Note for images", content: "Image test content" },
+    });
+    const noteData = await noteRes.json();
+    const noteId = noteData.data.id;
+
+    // Загружаем JPEG (cookies auto-carried)
     const uploadRes = await request.post(`/api/v1/notes/${noteId}/images`, {
-      headers,
       multipart: {
         images: {
           name: "test-image.jpg",
@@ -203,16 +212,16 @@ test.describe("API изображений", () => {
     expect(image).toHaveProperty("size");
     expect(image).toHaveProperty("order");
 
-    // Проверяем что файл доступен
-    const fileRes = await request.get(image.path, { headers });
+    // Проверяем что файл доступен (cookies auto-carried)
+    const fileRes = await request.get(image.path);
     expect(fileRes.status()).toBe(200);
 
-    // Удаляем изображение
-    const deleteRes = await request.delete(`/api/v1/notes/${noteId}/images/${image.id}`, { headers });
+    // Удаляем изображение (cookies auto-carried)
+    const deleteRes = await request.delete(`/api/v1/notes/${noteId}/images/${image.id}`);
     expect(deleteRes.status()).toBe(200);
 
-    // Файл должен быть недоступен
-    const fileAfterDelete = await request.get(image.path, { headers });
+    // Файл должен быть недоступен (cookies auto-carried)
+    const fileAfterDelete = await request.get(image.path);
     expect(fileAfterDelete.status()).toBe(404);
   });
 
