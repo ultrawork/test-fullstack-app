@@ -8,7 +8,7 @@ export default defineConfig({
   timeout: 30000,
   reporter: [["junit", { outputFile: "test-results/results.xml" }]],
   use: {
-    baseURL: "http://localhost:4000",
+    baseURL: process.env.BASE_URL || "http://localhost:4000",
     trace: "on-first-retry",
   },
   projects: [
