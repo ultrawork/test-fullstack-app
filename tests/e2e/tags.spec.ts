@@ -132,26 +132,37 @@ test.describe("Теги", () => {
 
   // SC-023: Удаление тега
   test("SC-023: удаление тега", async ({ page }) => {
+    // Wait for auth hydration and dashboard to be fully ready
+    await page.waitForLoadState("networkidle");
+
     // Создаём тег
     await page.getByRole("button", { name: "Manage tags" }).click();
     const modal = page.getByRole("dialog");
+    await expect(modal).toBeVisible({ timeout: 10000 });
 
     await modal.getByRole("button", { name: "Create New Tag" }).click();
-    await modal.getByLabel("Tag name").fill("Личное");
+
+    // Wait for form to be fully rendered
+    const nameInput = modal.getByLabel("Tag name");
+    await expect(nameInput).toBeVisible({ timeout: 5000 });
+    await nameInput.fill("Личное");
     await modal.getByRole("button", { name: "Create Tag" }).click();
-    await expect(modal.getByText("Личное")).toBeVisible();
+
+    // Wait for tag to appear in list after creation
+    await expect(modal.getByText("Личное")).toBeVisible({ timeout: 10000 });
 
     // Удаляем
-    await modal
-      .getByRole("button", { name: "Delete tag Личное" })
-      .click();
+    const deleteButton = modal.getByRole("button", { name: "Delete tag Личное" });
+    await expect(deleteButton).toBeVisible({ timeout: 5000 });
+    await deleteButton.click();
 
     // Подтверждаем удаление в диалоге подтверждения
-    const deleteDialog = page.getByRole("dialog").last();
-    await deleteDialog.getByRole("button", { name: "Delete" }).click();
+    const confirmDeleteButton = page.getByRole("button", { name: "Delete" }).last();
+    await expect(confirmDeleteButton).toBeVisible({ timeout: 5000 });
+    await confirmDeleteButton.click();
 
     // Ждём закрытия диалога подтверждения и проверяем что тег исчез
-    await expect(page.getByRole("dialog").getByRole("button", { name: "Delete tag Личное" })).not.toBeVisible();
+    await expect(modal.getByText("Личное")).not.toBeVisible({ timeout: 10000 });
   });
 
   // SC-024: Создание тега с дублирующим именем (API тест)
