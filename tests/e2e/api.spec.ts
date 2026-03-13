@@ -165,37 +165,40 @@ test.describe("API тесты", () => {
   test("SC-043: фильтрация заметок по тегам через API", async ({
     request,
   }) => {
-    const { cookies } = await getAuthContext(request);
-    const headers = { cookie: cookies };
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
-    // Создаём тег
+    // Создаём тег (cookies auto-carried by request context)
     const tagRes = await request.post("/api/v1/tags", {
       data: { name: "FilterTag", color: "#FF0000" },
-      headers,
     });
+    expect(tagRes.status()).toBe(201);
     const tag = await tagRes.json();
     const tagId = tag.data.id;
 
     // Создаём заметку с тегом
-    await request.post("/api/v1/notes", {
+    const noteWithTagRes = await request.post("/api/v1/notes", {
       data: {
         title: "Note With Tag",
         content: "Has tag",
         tagIds: [tagId],
       },
-      headers,
     });
+    expect(noteWithTagRes.status()).toBe(201);
 
     // Создаём заметку без тега
-    await request.post("/api/v1/notes", {
+    const noteWithoutTagRes = await request.post("/api/v1/notes", {
       data: { title: "Note Without Tag", content: "No tag" },
-      headers,
     });
+    expect(noteWithoutTagRes.status()).toBe(201);
 
     // Фильтруем по тегу
     const filterRes = await request.get(
       `/api/v1/notes?tagIds=${tagId}`,
-      { headers },
     );
     expect(filterRes.status()).toBe(200);
     const filtered = await filterRes.json();
