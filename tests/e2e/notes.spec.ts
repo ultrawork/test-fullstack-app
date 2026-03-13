@@ -216,11 +216,15 @@ test.describe("Заметки", () => {
   // SC-018: Отмена создания заметки
   test("SC-018: отмена создания заметки", async ({ page }) => {
     await page.getByRole("link", { name: "New Note" }).click();
+    await page.waitForURL("**/dashboard/notes/new");
+    // Wait for auth hydration — AuthGuard fetches /auth/me before rendering the form
+    await expect(page.getByRole("heading", { name: "Create Note" })).toBeVisible({ timeout: 15000 });
+
     await page.getByLabel("Title").fill("Черновик");
     await page.getByRole("button", { name: "Cancel" }).click();
 
     // Должны вернуться на dashboard
-    await page.waitForURL("**/dashboard");
+    await page.waitForURL("**/dashboard", { timeout: 15000 });
     await expect(page.getByText("Черновик")).not.toBeVisible();
   });
 });
