@@ -1,16 +1,32 @@
 import { test, expect } from "@playwright/test";
-import { registerAndLogin, uniqueEmail } from "./helpers";
+import { uniqueEmail } from "./helpers";
 
 test.describe("Счётчик символов в редакторе заметок", () => {
   const password = "securePassword123";
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
     const email = uniqueEmail("charcounter");
-    await registerAndLogin(page, {
-      name: "CharCounter User",
-      email,
-      password,
-    });
+
+    // Register via API with retries for reliability
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const res = await request.post("/api/v1/auth/register", {
+        data: { name: "CharCounter User", email, password },
+      });
+      if (res.status() === 201) break;
+      if (res.status() === 400) {
+        const body = await res.json();
+        if (body.error && body.error.includes("Email already in use")) break;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+
+    // Login via UI
+    await page.goto("/login");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill(password);
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await page.waitForURL("**/dashboard", { timeout: 15000 });
+    await page.waitForLoadState("networkidle");
   });
 
   // SC-050: Счётчик показывает "0 characters" при пустом содержимом
