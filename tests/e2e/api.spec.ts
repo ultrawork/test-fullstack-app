@@ -103,21 +103,25 @@ test.describe("API тесты", () => {
 
   // SC-042: Привязка тегов к заметке
   test("SC-042: привязка тегов к заметке через API", async ({ request }) => {
-    const { cookies } = await getAuthContext(request);
-    const headers = { cookie: cookies };
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
-    // Создаём теги
+    // Создаём теги (cookies auto-carried by request context)
     const tagARes = await request.post("/api/v1/tags", {
       data: { name: "Tag A", color: "#FF0000" },
-      headers,
     });
+    expect(tagARes.status()).toBe(201);
     const tagA = await tagARes.json();
     const tagAId = tagA.data.id;
 
     const tagBRes = await request.post("/api/v1/tags", {
       data: { name: "Tag B", color: "#00FF00" },
-      headers,
     });
+    expect(tagBRes.status()).toBe(201);
     const tagB = await tagBRes.json();
     const tagBId = tagB.data.id;
 
@@ -128,7 +132,6 @@ test.describe("API тесты", () => {
         content: "Content",
         tagIds: [tagAId, tagBId],
       },
-      headers,
     });
     expect(noteRes.status()).toBe(201);
     const note = await noteRes.json();
@@ -136,7 +139,7 @@ test.describe("API тесты", () => {
     expect(note.data.tags).toHaveLength(2);
 
     // Получаем заметку — должны быть оба тега
-    const getRes = await request.get(`/api/v1/notes/${noteId}`, { headers });
+    const getRes = await request.get(`/api/v1/notes/${noteId}`);
     const fetched = await getRes.json();
     const tagNames = fetched.data.tags.map((t: any) => t.name);
     expect(tagNames).toContain("Tag A");
@@ -147,13 +150,12 @@ test.describe("API тесты", () => {
       `/api/v1/notes/${noteId}/tags`,
       {
         data: { tagIds: [tagAId] },
-        headers,
       },
     );
     expect(updateTagsRes.status()).toBe(200);
 
     // Проверяем — только 1 тег
-    const getAfter = await request.get(`/api/v1/notes/${noteId}`, { headers });
+    const getAfter = await request.get(`/api/v1/notes/${noteId}`);
     const afterData = await getAfter.json();
     expect(afterData.data.tags).toHaveLength(1);
     expect(afterData.data.tags[0].name).toBe("Tag A");
