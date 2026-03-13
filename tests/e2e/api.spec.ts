@@ -209,19 +209,22 @@ test.describe("API тесты", () => {
 
   // SC-044: Поиск заметок через API
   test("SC-044: поиск заметок через API", async ({ request }) => {
-    const { cookies } = await getAuthContext(request);
-    const headers = { cookie: cookies };
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
+    // Create notes (cookies auto-carried by request context)
     await request.post("/api/v1/notes", {
       data: { title: "Meeting Notes", content: "Discussion" },
-      headers,
     });
     await request.post("/api/v1/notes", {
       data: { title: "Shopping List", content: "Items" },
-      headers,
     });
 
-    const searchRes = await request.get("/api/v1/notes?search=Meeting", { headers });
+    const searchRes = await request.get("/api/v1/notes?search=Meeting");
     expect(searchRes.status()).toBe(200);
     const result = await searchRes.json();
     const titles = result.data.notes.map((n: any) => n.title);
