@@ -217,13 +217,20 @@ test.describe("Изображения", () => {
     const gifPath = join(TEST_FILES_DIR, "test-invalid.gif");
     writeFileSync(gifPath, Buffer.from([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]));
 
-    await page.getByRole("link", { name: "New Note" }).click();
+    // Wait for auth hydration before interacting
+    const newNoteLink = page.getByRole("link", { name: "New Note" });
+    await newNoteLink.waitFor({ state: "visible", timeout: 10000 });
+    await newNoteLink.click();
+    await page.waitForURL("**/dashboard/notes/new");
+    await page.waitForLoadState("networkidle");
+
     await page.getByLabel("Title").fill("Тест валидации");
     await page.getByLabel("Content").fill("Невалидный формат");
 
     // Загружаем GIF — accept атрибут ограничивает выбор, но проверим через API
     // Пробуем загрузить — если accept блокирует, файл не добавится
     const fileInput = page.locator('input[type="file"]');
+    await fileInput.waitFor({ state: "attached", timeout: 10000 });
     await fileInput.setInputFiles(gifPath);
 
     // Должна появиться ошибка валидации или файл не будет добавлен
