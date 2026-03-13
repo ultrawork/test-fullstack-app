@@ -90,22 +90,36 @@ test.describe("Теги", () => {
 
   // SC-022: Редактирование тега
   test("SC-022: редактирование тега", async ({ page }) => {
+    // Wait for auth hydration and dashboard to be fully ready
+    await page.waitForLoadState("networkidle");
+
     // Сначала создаём тег
     await page.getByRole("button", { name: "Manage tags" }).click();
     const modal = page.getByRole("dialog");
+    await expect(modal).toBeVisible({ timeout: 10000 });
 
     await modal.getByRole("button", { name: "Create New Tag" }).click();
-    await modal.getByLabel("Tag name").fill("Работа");
+
+    // Wait for form to be fully rendered
+    const nameInput = modal.getByLabel("Tag name");
+    await expect(nameInput).toBeVisible({ timeout: 5000 });
+    await nameInput.fill("Работа");
     await modal.getByRole("button", { name: "Create Tag" }).click();
-    await expect(modal.getByText("Работа")).toBeVisible();
+
+    // Wait for tag to appear in list after creation
+    await expect(modal.getByText("Работа")).toBeVisible({ timeout: 10000 });
 
     // Нажимаем Edit рядом с тегом
-    await modal
-      .getByRole("button", { name: "Edit tag Работа" })
-      .click();
+    const editButton = modal.getByRole("button", { name: "Edit tag Работа" });
+    await expect(editButton).toBeVisible({ timeout: 5000 });
+    await editButton.click();
+
+    // Wait for edit form to be fully rendered
+    const editNameInput = modal.getByLabel("Tag name");
+    await expect(editNameInput).toBeVisible({ timeout: 5000 });
 
     // Редактируем
-    await modal.getByLabel("Tag name").fill("Личное");
+    await editNameInput.fill("Личное");
     await modal
       .getByRole("button", { name: "Select color #10B981" })
       .first()
@@ -113,7 +127,7 @@ test.describe("Теги", () => {
     await modal.getByRole("button", { name: "Update Tag" }).click();
 
     // Проверяем обновлённый тег
-    await expect(modal.getByText("Личное")).toBeVisible();
+    await expect(modal.getByText("Личное")).toBeVisible({ timeout: 10000 });
   });
 
   // SC-023: Удаление тега
