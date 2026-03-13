@@ -159,11 +159,13 @@ test.describe("API тесты", () => {
   test("SC-043: фильтрация заметок по тегам через API", async ({
     request,
   }) => {
-    await getAuthContext(request);
+    const { cookies } = await getAuthContext(request);
+    const headers = { cookie: cookies };
 
     // Создаём тег
     const tagRes = await request.post("/api/v1/tags", {
       data: { name: "FilterTag", color: "#FF0000" },
+      headers,
     });
     const tag = await tagRes.json();
     const tagId = tag.data.id;
@@ -175,16 +177,19 @@ test.describe("API тесты", () => {
         content: "Has tag",
         tagIds: [tagId],
       },
+      headers,
     });
 
     // Создаём заметку без тега
     await request.post("/api/v1/notes", {
       data: { title: "Note Without Tag", content: "No tag" },
+      headers,
     });
 
     // Фильтруем по тегу
     const filterRes = await request.get(
       `/api/v1/notes?tagIds=${tagId}`,
+      { headers },
     );
     expect(filterRes.status()).toBe(200);
     const filtered = await filterRes.json();
