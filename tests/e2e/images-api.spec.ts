@@ -227,41 +227,39 @@ test.describe("API изображений", () => {
 
   // SC-025: API валидация — ошибки при невалидных данных
   test("SC-025: API валидация — невалидные данные", async ({ request }) => {
-    const { cookies } = await registerAndGetCookies(request, "val-api");
-    const headers = { cookie: cookies };
+    const email = uniqueEmail("val-api");
+    // Register — cookies auto-carried by Playwright request context
+    await request.post("/api/v1/auth/register", {
+      data: { email, name: "Validation API User", password: "password12345" },
+    });
 
-    // Заметка без обязательных полей
+    // Заметка без обязательных полей (cookies auto-carried)
     const emptyNote = await request.post("/api/v1/notes", {
       data: {},
-      headers,
     });
     expect(emptyNote.status()).toBe(400);
     const emptyBody = await emptyNote.json();
     expect(emptyBody.success).toBe(false);
 
-    // Тег с невалидным цветом
+    // Тег с невалидным цветом (cookies auto-carried)
     const badTag = await request.post("/api/v1/tags", {
       data: { name: "Valid", color: "invalid" },
-      headers,
     });
     expect(badTag.status()).toBe(400);
 
-    // Тег с пустым именем
+    // Тег с пустым именем (cookies auto-carried)
     const emptyTag = await request.post("/api/v1/tags", {
       data: { name: "", color: "#FF0000" },
-      headers,
     });
     expect(emptyTag.status()).toBe(400);
 
-    // Изображение без файлов
+    // Изображение без файлов (cookies auto-carried)
     const noteRes = await request.post("/api/v1/notes", {
       data: { title: "Validation Note", content: "Test" },
-      headers,
     });
     const noteId = (await noteRes.json()).data.id;
 
     const noImages = await request.post(`/api/v1/notes/${noteId}/images`, {
-      headers,
       multipart: {},
     });
     expect([400, 500]).toContain(noImages.status());
