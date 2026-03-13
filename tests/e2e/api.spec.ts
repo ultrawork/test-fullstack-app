@@ -99,17 +99,20 @@ test.describe("API тесты", () => {
 
   // SC-042: Привязка тегов к заметке
   test("SC-042: привязка тегов к заметке через API", async ({ request }) => {
-    await getAuthContext(request);
+    const { cookies } = await getAuthContext(request);
+    const headers = { cookie: cookies };
 
     // Создаём теги
     const tagARes = await request.post("/api/v1/tags", {
       data: { name: "Tag A", color: "#FF0000" },
+      headers,
     });
     const tagA = await tagARes.json();
     const tagAId = tagA.data.id;
 
     const tagBRes = await request.post("/api/v1/tags", {
       data: { name: "Tag B", color: "#00FF00" },
+      headers,
     });
     const tagB = await tagBRes.json();
     const tagBId = tagB.data.id;
@@ -121,6 +124,7 @@ test.describe("API тесты", () => {
         content: "Content",
         tagIds: [tagAId, tagBId],
       },
+      headers,
     });
     expect(noteRes.status()).toBe(201);
     const note = await noteRes.json();
@@ -128,7 +132,7 @@ test.describe("API тесты", () => {
     expect(note.data.tags).toHaveLength(2);
 
     // Получаем заметку — должны быть оба тега
-    const getRes = await request.get(`/api/v1/notes/${noteId}`);
+    const getRes = await request.get(`/api/v1/notes/${noteId}`, { headers });
     const fetched = await getRes.json();
     const tagNames = fetched.data.tags.map((t: any) => t.name);
     expect(tagNames).toContain("Tag A");
@@ -139,12 +143,13 @@ test.describe("API тесты", () => {
       `/api/v1/notes/${noteId}/tags`,
       {
         data: { tagIds: [tagAId] },
+        headers,
       },
     );
     expect(updateTagsRes.status()).toBe(200);
 
     // Проверяем — только 1 тег
-    const getAfter = await request.get(`/api/v1/notes/${noteId}`);
+    const getAfter = await request.get(`/api/v1/notes/${noteId}`, { headers });
     const afterData = await getAfter.json();
     expect(afterData.data.tags).toHaveLength(1);
     expect(afterData.data.tags[0].name).toBe("Tag A");
