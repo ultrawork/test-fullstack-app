@@ -208,8 +208,9 @@ test.describe("Заметки", () => {
 
   // SC-017: Отображение пустого состояния
   test("SC-017: пустое состояние без заметок", async ({ page }) => {
-    await expect(page.getByText("No notes found")).toBeVisible();
-    await expect(page.getByText("Create your first note")).toBeVisible();
+    // Wait for notes fetch to complete and empty state to render (replaces loading spinner)
+    await expect(page.getByText("No notes found")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("Create your first note")).toBeVisible({ timeout: 10000 });
   });
 
   // SC-018: Отмена создания заметки
