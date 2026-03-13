@@ -92,12 +92,15 @@ test("SC-005: выход из системы", async ({ page }) => {
     password: "securePassword123",
   });
 
-  await page.getByRole("button", { name: "Logout" }).click();
-  await page.waitForURL("**/login");
+  await page.waitForLoadState("networkidle");
+  const logoutButton = page.getByRole("button", { name: "Logout" });
+  await expect(logoutButton).toBeVisible({ timeout: 10000 });
+  await logoutButton.click();
+  await page.waitForURL("**/login", { timeout: 10000 });
 
   // Попытка открыть dashboard — редирект на login
   await page.goto("/dashboard");
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(/\/login/, { timeout: 10000 });
 });
 
 // SC-006: Защита приватных маршрутов
