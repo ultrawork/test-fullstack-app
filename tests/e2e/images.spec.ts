@@ -251,11 +251,18 @@ test.describe("Изображения", () => {
 
   // SC-020: Ограничение на максимум 5 изображений
   test("SC-020: ограничение на максимум 5 изображений", async ({ page }) => {
-    await page.getByRole("link", { name: "New Note" }).click();
+    // Wait for auth hydration before interacting
+    const newNoteLink = page.getByRole("link", { name: "New Note" });
+    await newNoteLink.waitFor({ state: "visible", timeout: 10000 });
+    await newNoteLink.click();
+    await page.waitForURL("**/dashboard/notes/new");
+    await page.waitForLoadState("networkidle");
+
     await page.getByLabel("Title").fill("Тест лимита изображений");
     await page.getByLabel("Content").fill("Максимум 5 фото");
 
     const fileInput = page.locator('input[type="file"]');
+    await fileInput.waitFor({ state: "attached", timeout: 10000 });
 
     // Загружаем 5 изображений
     await fileInput.setInputFiles([
@@ -267,7 +274,7 @@ test.describe("Изображения", () => {
     ]);
 
     // Счётчик должен показывать 5/5
-    await expect(page.getByText("Images (5/5)")).toBeVisible();
+    await expect(page.getByText("Images (5/5)")).toBeVisible({ timeout: 10000 });
 
     // Drop-zone должна исчезнуть (canAddMore = false)
     await expect(page.getByRole("button", { name: "Drop images here or click to select" })).not.toBeVisible();
