@@ -68,15 +68,18 @@ test("SC-004: вход с неверными данными", async ({ page }) =
     email,
     password: "securePassword123",
   });
-  await page.getByRole("button", { name: "Logout" }).click();
-  await page.waitForURL("**/login");
+  const logoutBtn = page.getByRole("button", { name: "Logout" });
+  await expect(logoutBtn).toBeVisible({ timeout: 10000 });
+  await logoutBtn.click();
+  await page.waitForURL("**/login", { timeout: 10000 });
 
   // Пытаемся войти с неправильным паролем
+  await page.waitForLoadState("networkidle");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill("wrongPassword");
   await page.getByRole("button", { name: "Sign In" }).click();
 
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.getByTestId("login-error")).toBeVisible({ timeout: 10000 });
   await expect(page).toHaveURL(/\/login/);
 });
 
