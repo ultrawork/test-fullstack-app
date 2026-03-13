@@ -55,11 +55,13 @@ test.describe("API тесты", () => {
 
   // SC-041: CRUD тегов через API
   test("SC-041: CRUD тегов через API", async ({ request }) => {
-    await getAuthContext(request);
+    const { cookies } = await getAuthContext(request);
+    const headers = { cookie: cookies };
 
     // 1. Создать тег
     const createRes = await request.post("/api/v1/tags", {
       data: { name: "API Tag", color: "#FF5733" },
+      headers,
     });
     expect(createRes.status()).toBe(201);
     const created = await createRes.json();
@@ -68,7 +70,7 @@ test.describe("API тесты", () => {
     const tagId = created.data.id;
 
     // 3. Получить все теги — проверить наличие
-    const listRes = await request.get("/api/v1/tags");
+    const listRes = await request.get("/api/v1/tags", { headers });
     expect(listRes.status()).toBe(200);
     const list = await listRes.json();
     expect(list.data.tags.some((t: any) => t.name === "API Tag")).toBe(true);
@@ -76,6 +78,7 @@ test.describe("API тесты", () => {
     // 4. Обновить тег
     const updateRes = await request.put(`/api/v1/tags/${tagId}`, {
       data: { name: "Updated Tag", color: "#33FF57" },
+      headers,
     });
     expect(updateRes.status()).toBe(200);
     const updated = await updateRes.json();
@@ -83,11 +86,11 @@ test.describe("API тесты", () => {
     expect(updated.data.color).toBe("#33FF57");
 
     // 5. Удалить тег
-    const deleteRes = await request.delete(`/api/v1/tags/${tagId}`);
+    const deleteRes = await request.delete(`/api/v1/tags/${tagId}`, { headers });
     expect(deleteRes.status()).toBe(200);
 
     // 6. Проверить отсутствие тега
-    const listAfter = await request.get("/api/v1/tags");
+    const listAfter = await request.get("/api/v1/tags", { headers });
     const afterBody = await listAfter.json();
     expect(afterBody.data.tags.some((t: any) => t.name === "Updated Tag")).toBe(
       false,
