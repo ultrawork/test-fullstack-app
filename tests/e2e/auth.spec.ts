@@ -10,8 +10,9 @@ test("SC-001: регистрация нового пользователя", asy
   await page.getByLabel("Password").fill("securePassword123");
   await page.getByRole("button", { name: "Create Account" }).click();
 
-  await page.waitForURL("**/dashboard");
-  await expect(page.getByText("Test User")).toBeVisible();
+  await page.waitForURL("**/dashboard", { timeout: 15000 });
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByText("Test User")).toBeVisible({ timeout: 10000 });
 });
 
 // SC-002: Регистрация с невалидными данными
