@@ -15,13 +15,16 @@ test.describe("API тесты", () => {
 
   // SC-040: CRUD заметок через API
   test("SC-040: CRUD заметок через API", async ({ request }) => {
-    const { cookies } = await getAuthContext(request);
-    const headers = { cookie: cookies };
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
-    // 1. Создать заметку
+    // 1. Создать заметку (cookies auto-carried by request context)
     const createRes = await request.post("/api/v1/notes", {
       data: { title: "API Note", content: "Created via API" },
-      headers,
     });
     expect(createRes.status()).toBe(201);
     const created = await createRes.json();
@@ -29,7 +32,7 @@ test.describe("API тесты", () => {
     const noteId = created.data.id;
 
     // 3. Получить заметку
-    const getRes = await request.get(`/api/v1/notes/${noteId}`, { headers });
+    const getRes = await request.get(`/api/v1/notes/${noteId}`);
     expect(getRes.status()).toBe(200);
     const fetched = await getRes.json();
     expect(fetched.data.title).toBe("API Note");
@@ -38,18 +41,17 @@ test.describe("API тесты", () => {
     // 4. Обновить заметку
     const updateRes = await request.put(`/api/v1/notes/${noteId}`, {
       data: { title: "Updated API Note" },
-      headers,
     });
     expect(updateRes.status()).toBe(200);
     const updated = await updateRes.json();
     expect(updated.data.title).toBe("Updated API Note");
 
     // 5. Удалить заметку
-    const deleteRes = await request.delete(`/api/v1/notes/${noteId}`, { headers });
+    const deleteRes = await request.delete(`/api/v1/notes/${noteId}`);
     expect(deleteRes.status()).toBe(200);
 
     // 6. Попытка получить удалённую заметку
-    const getDeletedRes = await request.get(`/api/v1/notes/${noteId}`, { headers });
+    const getDeletedRes = await request.get(`/api/v1/notes/${noteId}`);
     expect(getDeletedRes.status()).toBe(404);
   });
 
