@@ -85,13 +85,15 @@ test.describe("API изображений", () => {
 
   // SC-022: API заметок — CRUD (проверяем images в ответе)
   test("SC-022: API заметок — CRUD с images в ответе", async ({ request }) => {
-    const { cookies } = await registerAndGetCookies(request, "notes-api");
-    const headers = { cookie: cookies };
+    const email = uniqueEmail("notes-api");
+    // Register — cookies auto-carried by Playwright request context
+    await request.post("/api/v1/auth/register", {
+      data: { email, name: "Notes API User", password: "password12345" },
+    });
 
-    // Создаём заметку
+    // Создаём заметку (cookies auto-carried)
     const createRes = await request.post("/api/v1/notes", {
       data: { title: "API Note", content: "Created via API" },
-      headers,
     });
     expect(createRes.status()).toBe(201);
     const created = await createRes.json();
@@ -100,33 +102,32 @@ test.describe("API изображений", () => {
     expect(created.data.tags).toEqual([]);
     const noteId = created.data.id;
 
-    // Получаем заметку
-    const getRes = await request.get(`/api/v1/notes/${noteId}`, { headers });
+    // Получаем заметку (cookies auto-carried)
+    const getRes = await request.get(`/api/v1/notes/${noteId}`);
     expect(getRes.status()).toBe(200);
     const fetched = await getRes.json();
     expect(fetched.data.images).toEqual([]);
 
-    // Обновляем
+    // Обновляем (cookies auto-carried)
     const updateRes = await request.put(`/api/v1/notes/${noteId}`, {
       data: { title: "Updated Title", content: "Updated Content" },
-      headers,
     });
     expect(updateRes.status()).toBe(200);
     const updated = await updateRes.json();
     expect(updated.data.title).toBe("Updated Title");
 
-    // Список заметок
-    const listRes = await request.get("/api/v1/notes", { headers });
+    // Список заметок (cookies auto-carried)
+    const listRes = await request.get("/api/v1/notes");
     expect(listRes.status()).toBe(200);
     const list = await listRes.json();
     expect(list.data.notes.some((n: any) => n.id === noteId)).toBe(true);
 
-    // Удаляем
-    const deleteRes = await request.delete(`/api/v1/notes/${noteId}`, { headers });
+    // Удаляем (cookies auto-carried)
+    const deleteRes = await request.delete(`/api/v1/notes/${noteId}`);
     expect(deleteRes.status()).toBe(200);
 
-    // Получаем удалённую → 404
-    const getDeletedRes = await request.get(`/api/v1/notes/${noteId}`, { headers });
+    // Получаем удалённую → 404 (cookies auto-carried)
+    const getDeletedRes = await request.get(`/api/v1/notes/${noteId}`);
     expect(getDeletedRes.status()).toBe(404);
   });
 
