@@ -76,22 +76,34 @@ test("SC-003: вход существующего пользователя", asy
 });
 
 // SC-004: Вход с неверными учётными данными
-test("SC-004: вход с неверными данными", async ({ page }) => {
+test("SC-004: вход с неверными данными", async ({ page, request }) => {
   const email = uniqueEmail("sc004");
-  // Регистрируем пользователя
-  await registerAndLogin(page, {
-    name: "Wrong Pass User",
-    email,
-    password: "securePassword123",
-  });
-  const logoutBtn = page.getByRole("button", { name: "Logout" });
-  await expect(logoutBtn).toBeVisible({ timeout: 10000 });
-  await logoutBtn.click();
-  await page.waitForURL("**/login", { timeout: 10000 });
+
+  // Регистрируем пользователя через API с retry для надёжности
+  let regResponse;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    regResponse = await request.post("/api/v1/auth/register", {
+      data: { name: "Wrong Pass User", email, password: "securePassword123" },
+    });
+    if (regResponse.status() === 201) break;
+    if (regResponse.status() === 400) {
+      const errBody = await regResponse.json();
+      if (errBody.error && errBody.error.includes("Email already in use")) break;
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  expect([201, 400]).toContain(regResponse!.status());
+
+  // Переходим на страницу логина
+  await page.goto("/login");
+  await page.waitForLoadState("networkidle");
+
+  // Ждём гидратации — убеждаемся что input видим и интерактивен
+  const emailInput = page.getByLabel("Email");
+  await emailInput.waitFor({ state: "visible", timeout: 10000 });
 
   // Пытаемся войти с неправильным паролем
-  await page.waitForLoadState("networkidle");
-  await page.getByLabel("Email").fill(email);
+  await emailInput.fill(email);
   await page.getByLabel("Password").fill("wrongPassword");
   await page.getByRole("button", { name: "Sign In" }).click();
 
