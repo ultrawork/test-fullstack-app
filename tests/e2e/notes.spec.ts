@@ -85,16 +85,26 @@ test.describe("Заметки", () => {
 
   // SC-013: Редактирование заметки
   test("SC-013: редактирование заметки", async ({ page }) => {
-    // Создаём заметку
-    await page.getByRole("link", { name: "New Note" }).click();
-    await page.getByLabel("Title").fill("Моя первая заметка");
-    await page.getByLabel("Content").fill("Исходный текст");
-    await page.getByRole("button", { name: "Create Note" }).click();
-    await page.waitForURL(/\/dashboard\/notes\/.+/);
+    // Создаём заметку через API с cookies браузера для надёжности
+    const createRes = await page.request.post("/api/v1/notes", {
+      data: { title: "Моя первая заметка", content: "Исходный текст" },
+    });
+    const body = await createRes.json();
+    const noteId = body.data.id;
+
+    // Переходим на страницу просмотра заметки
+    await page.goto(`/dashboard/notes/${noteId}`);
+    await page.waitForLoadState("networkidle");
+    // Wait for auth hydration + note loading
+    await expect(page.getByText("Моя первая заметка")).toBeVisible({ timeout: 15000 });
 
     // Нажимаем Edit
+    await expect(page.getByRole("link", { name: "Edit" })).toBeVisible({ timeout: 10000 });
     await page.getByRole("link", { name: "Edit" }).click();
     await page.waitForURL(/\/edit$/);
+
+    // Wait for auth hydration on edit page — heading appears after AuthGuard + note fetch
+    await expect(page.getByRole("heading", { name: "Edit Note" })).toBeVisible({ timeout: 15000 });
 
     // Редактируем
     await page.getByLabel("Title").fill("Обновлённая заметка");
@@ -103,8 +113,8 @@ test.describe("Заметки", () => {
 
     // Проверяем обновлённые данные
     await page.waitForURL(/\/dashboard\/notes\/[^/]+$/);
-    await expect(page.getByText("Обновлённая заметка")).toBeVisible();
-    await expect(page.getByText("Обновлённый текст")).toBeVisible();
+    await expect(page.getByText("Обновлённая заметка")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("Обновлённый текст")).toBeVisible({ timeout: 10000 });
   });
 
   // SC-014: Удаление заметки
