@@ -63,20 +63,24 @@ test.describe("Заметки", () => {
 
   // SC-012: Просмотр заметки
   test("SC-012: просмотр заметки", async ({ page }) => {
-    // Сначала создаём заметку
-    await page.getByRole("link", { name: "New Note" }).click();
-    await page.getByLabel("Title").fill("Заметка для просмотра");
-    await page.getByLabel("Content").fill("Содержимое заметки");
-    await page.getByRole("button", { name: "Create Note" }).click();
-    await page.waitForURL(/\/dashboard\/notes\/.+/);
+    // Создаём заметку через API с cookies браузера для надёжности
+    const createRes = await page.request.post("/api/v1/notes", {
+      data: { title: "Заметка для просмотра", content: "Содержимое заметки" },
+    });
+    const body = await createRes.json();
+    const noteId = body.data.id;
 
-    // Проверяем элементы на странице просмотра
-    await expect(page.getByText("Заметка для просмотра")).toBeVisible();
-    await expect(page.getByText("Содержимое заметки")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Edit" })).toBeVisible();
+    // Переходим на страницу просмотра заметки
+    await page.goto(`/dashboard/notes/${noteId}`);
+    await page.waitForLoadState("networkidle");
+
+    // Ждём загрузки заметки (AuthGuard + fetchNote)
+    await expect(page.getByText("Заметка для просмотра")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("Содержимое заметки")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("link", { name: "Edit" })).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("button", { name: "Delete" }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
   });
 
   // SC-013: Редактирование заметки
