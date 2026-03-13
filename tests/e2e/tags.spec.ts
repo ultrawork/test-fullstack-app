@@ -28,6 +28,11 @@ test.describe("Теги", () => {
     await page.getByRole("button", { name: "Sign In" }).click();
     await page.waitForURL("**/dashboard", { timeout: 15000 });
     await page.waitForLoadState("networkidle");
+
+    // Wait for auth hydration to complete — Header renders only after AuthGuard resolves
+    await page
+      .getByRole("button", { name: "Manage tags" })
+      .waitFor({ state: "visible", timeout: 15000 });
   });
 
   // SC-020: Создание нового тега
