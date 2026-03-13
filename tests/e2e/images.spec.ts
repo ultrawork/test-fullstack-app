@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { registerAndLogin, uniqueEmail } from "./helpers";
+import { uniqueEmail } from "./helpers";
 import { join } from "path";
 import { writeFileSync, mkdirSync } from "fs";
 
@@ -30,7 +30,6 @@ function createTestPng(dir: string, name: string, sizeKb: number = 10): string {
 const TEST_FILES_DIR = join(__dirname, "..", "..", "test-fixtures");
 
 test.describe("Изображения", () => {
-  let email: string;
   const password = "securePassword123";
 
   test.beforeAll(() => {
@@ -46,13 +45,29 @@ test.describe("Изображения", () => {
     createTestJpeg(TEST_FILES_DIR, "image6.jpg", 10);
   });
 
-  test.beforeEach(async ({ page }) => {
-    email = uniqueEmail("images");
-    await registerAndLogin(page, {
-      name: "Images User",
-      email,
-      password,
-    });
+  test.beforeEach(async ({ page, request }) => {
+    const email = uniqueEmail("images");
+
+    // Register via API with retries for reliability
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const res = await request.post("/api/v1/auth/register", {
+        data: { name: "Images User", email, password },
+      });
+      if (res.status() === 201) break;
+      if (res.status() === 400) {
+        const body = await res.json();
+        if (body.error && body.error.includes("Email already in use")) break;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+
+    // Login via UI
+    await page.goto("/login");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill(password);
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await page.waitForURL("**/dashboard", { timeout: 15000 });
+    await page.waitForLoadState("networkidle");
   });
 
   // SC-016: Загрузка изображений при редактировании заметки
