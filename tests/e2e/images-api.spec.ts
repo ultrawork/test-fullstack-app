@@ -133,22 +133,23 @@ test.describe("API изображений", () => {
 
   // SC-023: API тегов — CRUD и привязка к заметке
   test("SC-023: API тегов — CRUD и привязка к заметке", async ({ request }) => {
-    const { cookies } = await registerAndGetCookies(request, "tags-api");
-    const headers = { cookie: cookies };
+    const email = uniqueEmail("tags-api");
+    // Register — cookies auto-carried by Playwright request context
+    await request.post("/api/v1/auth/register", {
+      data: { email, name: "Tags API User", password: "password12345" },
+    });
 
-    // Создаём тег
+    // Создаём тег (cookies auto-carried)
     const createTagRes = await request.post("/api/v1/tags", {
       data: { name: "API Tag", color: "#3366FF" },
-      headers,
     });
     expect(createTagRes.status()).toBe(201);
     const tagData = await createTagRes.json();
     const tagId = tagData.data.id;
 
-    // Создаём заметку с тегом
+    // Создаём заметку с тегом (cookies auto-carried)
     const noteRes = await request.post("/api/v1/notes", {
       data: { title: "Tagged Note", content: "Test", tagIds: [tagId] },
-      headers,
     });
     expect(noteRes.status()).toBe(201);
     const noteData = await noteRes.json();
@@ -156,21 +157,20 @@ test.describe("API изображений", () => {
     expect(noteData.data.tags[0].name).toBe("API Tag");
     const noteId = noteData.data.id;
 
-    // Обновляем тег
+    // Обновляем тег (cookies auto-carried)
     const updateTagRes = await request.put(`/api/v1/tags/${tagId}`, {
       data: { name: "Renamed Tag", color: "#FF3366" },
-      headers,
     });
     expect(updateTagRes.status()).toBe(200);
     const updatedTag = await updateTagRes.json();
     expect(updatedTag.data.name).toBe("Renamed Tag");
 
-    // Удаляем тег
-    const deleteTagRes = await request.delete(`/api/v1/tags/${tagId}`, { headers });
+    // Удаляем тег (cookies auto-carried)
+    const deleteTagRes = await request.delete(`/api/v1/tags/${tagId}`);
     expect(deleteTagRes.status()).toBe(200);
 
-    // Получаем заметку — тег должен отсутствовать
-    const noteAfter = await request.get(`/api/v1/notes/${noteId}`, { headers });
+    // Получаем заметку — тег должен отсутствовать (cookies auto-carried)
+    const noteAfter = await request.get(`/api/v1/notes/${noteId}`);
     const noteAfterData = await noteAfter.json();
     expect(noteAfterData.data.tags).toHaveLength(0);
   });
