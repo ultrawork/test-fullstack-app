@@ -166,34 +166,49 @@ test.describe("Изображения", () => {
 
   // SC-018: Удаление изображения из заметки
   test("SC-018: удаление изображения из заметки", async ({ page }) => {
-    // Создаём заметку с изображением
-    await page.getByRole("link", { name: "New Note" }).click();
+    // Создаём заметку с изображением — wait for auth hydration first
+    const newNoteLink = page.getByRole("link", { name: "New Note" });
+    await newNoteLink.waitFor({ state: "visible", timeout: 10000 });
+    await newNoteLink.click();
+    await page.waitForURL("**/dashboard/notes/new");
+    await page.waitForLoadState("networkidle");
+
     await page.getByLabel("Title").fill("Заметка для удаления фото");
     await page.getByLabel("Content").fill("Тест удаления");
 
     const fileInput = page.locator('input[type="file"]');
+    await fileInput.waitFor({ state: "attached", timeout: 10000 });
     await fileInput.setInputFiles(join(TEST_FILES_DIR, "test-image.jpg"));
+
+    // Wait for pending preview before creating
+    await expect(page.getByAltText("Pending upload test-image.jpg")).toBeVisible({ timeout: 10000 });
+
     await page.getByRole("button", { name: "Create Note" }).click();
-    await page.waitForURL(/\/dashboard\/notes\/.+/);
+    await page.waitForURL(/\/dashboard\/notes\/.+/, { timeout: 15000 });
+    await page.waitForLoadState("networkidle");
 
     // Убеждаемся что изображение есть
-    await expect(page.locator('section[aria-label="Image gallery"] img')).toBeVisible();
+    await expect(page.locator('section[aria-label="Image gallery"] img')).toBeVisible({ timeout: 10000 });
 
     // Переходим в редактирование
-    await page.getByRole("link", { name: "Edit" }).click();
+    const editLink = page.getByRole("link", { name: "Edit" });
+    await editLink.waitFor({ state: "visible", timeout: 10000 });
+    await editLink.click();
     await page.waitForURL(/\/edit$/);
+    await page.waitForLoadState("networkidle");
 
     // Нажимаем кнопку удаления изображения
     const removeButton = page.getByRole("button", { name: /Remove image/ });
-    await expect(removeButton).toBeVisible();
+    await expect(removeButton).toBeVisible({ timeout: 10000 });
     await removeButton.click();
 
     // Сохраняем
     await page.getByRole("button", { name: "Update Note" }).click();
-    await page.waitForURL(/\/dashboard\/notes\/[^/]+$/);
+    await page.waitForURL(/\/dashboard\/notes\/[^/]+$/, { timeout: 15000 });
+    await page.waitForLoadState("networkidle");
 
     // Галерея должна исчезнуть (нет изображений)
-    await expect(page.locator('section[aria-label="Image gallery"]')).not.toBeVisible();
+    await expect(page.locator('section[aria-label="Image gallery"]')).not.toBeVisible({ timeout: 10000 });
   });
 
   // SC-019: Валидация загрузки — неподдерживаемый формат
