@@ -5,14 +5,20 @@ import { registerAndLogin, loginViaUI, uniqueEmail } from "./helpers";
 test("SC-001: регистрация нового пользователя", async ({ page }) => {
   const email = uniqueEmail("sc001");
   await page.goto("/register");
-  await page.getByLabel("Name").fill("Test User");
+  // Wait for hydration so React event handlers are attached
+  await page.waitForLoadState("networkidle");
+
+  const nameInput = page.getByLabel("Name");
+  await nameInput.waitFor({ state: "visible", timeout: 10000 });
+  await nameInput.fill("Test User");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill("securePassword123");
+
   await page.getByRole("button", { name: "Create Account" }).click();
 
   await page.waitForURL("**/dashboard", { timeout: 15000 });
-  await page.waitForLoadState("networkidle");
-  await expect(page.getByText("Test User")).toBeVisible({ timeout: 10000 });
+  // Wait for the dashboard to fully render (AuthGuard fetches user via /auth/me)
+  await expect(page.getByText("Test User")).toBeVisible({ timeout: 15000 });
 });
 
 // SC-002: Регистрация с невалидными данными
