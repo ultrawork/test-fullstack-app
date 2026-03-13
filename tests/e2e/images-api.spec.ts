@@ -57,7 +57,7 @@ test.describe("API изображений", () => {
   test("SC-021: API аутентификации — регистрация, вход, me, logout", async ({ request }) => {
     const email = uniqueEmail("auth-api");
 
-    // 1. Регистрация
+    // 1. Регистрация (cookies auto-carried by request context)
     const registerRes = await request.post("/api/v1/auth/register", {
       data: { email, name: "API User", password: "Password123" },
     });
@@ -66,17 +66,14 @@ test.describe("API изображений", () => {
     expect(registerBody.success).toBe(true);
     expect(registerBody.data.user.email).toBe(email);
 
-    const cookies = extractCookies(registerRes);
-    const headers = { cookie: cookies };
-
-    // 2. /auth/me — получаем данные текущего пользователя
-    const meRes = await request.get("/api/v1/auth/me", { headers });
+    // 2. /auth/me — получаем данные текущего пользователя (cookies auto-carried)
+    const meRes = await request.get("/api/v1/auth/me");
     expect(meRes.status()).toBe(200);
     const meBody = await meRes.json();
     expect(meBody.data.user.email).toBe(email);
 
-    // 3. Logout
-    const logoutRes = await request.post("/api/v1/auth/logout", { headers });
+    // 3. Logout (cookies auto-carried)
+    const logoutRes = await request.post("/api/v1/auth/logout");
     expect(logoutRes.status()).toBe(200);
 
     // 4. После логаута /auth/me → 401
