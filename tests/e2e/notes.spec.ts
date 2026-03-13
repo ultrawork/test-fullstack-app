@@ -51,6 +51,8 @@ test.describe("Заметки", () => {
   // SC-011: Создание заметки без обязательных полей
   test("SC-011: создание заметки без обязательных полей", async ({ page }) => {
     await page.goto("/dashboard/notes/new");
+    // Wait for auth hydration — AuthGuard fetches /auth/me before rendering the form
+    await expect(page.getByRole("heading", { name: "Create Note" })).toBeVisible({ timeout: 15000 });
 
     // Нажимаем Create без заполнения полей
     await page.getByRole("button", { name: "Create Note" }).click();
