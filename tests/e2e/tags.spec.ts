@@ -167,20 +167,29 @@ test.describe("Теги", () => {
 
   // SC-024: Создание тега с дублирующим именем (API тест)
   test("SC-024: дублирование имени тега через API", async ({ page }) => {
-    // Use page.request which shares auth cookies from beforeEach login
+    // Use page.evaluate with fetch() to ensure httpOnly cookies are sent by the browser
     // Создаём первый тег
-    const first = await page.request.post("/api/v1/tags", {
-      data: { name: "Работа", color: "#3B82F6" },
+    const firstStatus = await page.evaluate(async () => {
+      const res = await fetch("/api/v1/tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "Работа", color: "#3B82F6" }),
+      });
+      return res.status;
     });
-    expect(first.status()).toBe(201);
+    expect(firstStatus).toBe(201);
 
     // Создаём второй тег с тем же именем
-    const second = await page.request.post("/api/v1/tags", {
-      data: { name: "Работа", color: "#EF4444" },
+    const secondResult = await page.evaluate(async () => {
+      const res = await fetch("/api/v1/tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "Работа", color: "#EF4444" }),
+      });
+      return { status: res.status, body: await res.json() };
     });
-    expect(second.status()).toBe(400);
-    const body = await second.json();
-    expect(body.success).toBe(false);
+    expect(secondResult.status).toBe(400);
+    expect(secondResult.body.success).toBe(false);
   });
 
   // SC-025: Страница управления тегами (/dashboard/tags)
