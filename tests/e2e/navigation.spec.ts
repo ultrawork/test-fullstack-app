@@ -41,32 +41,52 @@ test("SC-052: навигация по dashboard", async ({ page, request }) => {
     await new Promise((r) => setTimeout(r, 2000));
   }
 
-  // Login via UI
+  // Login via UI — wait for full hydration before interacting
   await page.goto("/login");
-  await page.getByLabel("Email").fill(email);
+  await page.waitForLoadState("networkidle");
+
+  const emailInput = page.getByLabel("Email");
+  await emailInput.waitFor({ state: "visible", timeout: 10000 });
+  await emailInput.fill(email);
   await page.getByLabel("Password").fill(password);
-  await page.getByRole("button", { name: "Sign In" }).click();
+
+  const signInButton = page.getByRole("button", { name: "Sign In" });
+  await signInButton.waitFor({ state: "visible", timeout: 10000 });
+  await signInButton.click();
   await page.waitForURL("**/dashboard", { timeout: 15000 });
   await page.waitForLoadState("networkidle");
 
   // Создаём заметку для навигации
-  await page.getByRole("link", { name: "New Note" }).click();
-  await expect(page).toHaveURL(/\/dashboard\/notes\/new/);
+  const newNoteLink = page.getByRole("link", { name: "New Note" });
+  await newNoteLink.waitFor({ state: "visible", timeout: 10000 });
+  await newNoteLink.click();
+  await page.waitForURL("**/dashboard/notes/new");
+  await page.waitForLoadState("networkidle");
 
   await page.getByLabel("Title").fill("Тест навигации");
   await page.getByLabel("Content").fill("Контент");
   await page.getByRole("button", { name: "Create Note" }).click();
   await page.waitForURL(/\/dashboard\/notes\/.+/);
+  await page.waitForLoadState("networkidle");
 
   // Нажимаем Edit
-  await page.getByRole("link", { name: "Edit" }).click();
-  await expect(page).toHaveURL(/\/edit$/);
+  const editLink = page.getByRole("link", { name: "Edit" });
+  await editLink.waitFor({ state: "visible", timeout: 10000 });
+  await editLink.click();
+  await page.waitForURL(/\/edit$/);
+  await page.waitForLoadState("networkidle");
 
   // Cancel возвращает назад
-  await page.getByRole("button", { name: "Cancel" }).click();
+  const cancelButton = page.getByRole("button", { name: "Cancel" });
+  await cancelButton.waitFor({ state: "visible", timeout: 10000 });
+  await cancelButton.click();
+  await page.waitForURL(/\/dashboard\/notes\/[^/]+$/);
+  await page.waitForLoadState("networkidle");
 
   // Нажимаем Notes App — возврат на dashboard
-  await page.getByRole("link", { name: "Notes App" }).click();
+  const notesAppLink = page.getByRole("link", { name: "Notes App" });
+  await notesAppLink.waitFor({ state: "visible", timeout: 10000 });
+  await notesAppLink.click();
   await expect(page).toHaveURL(/\/dashboard$/);
 });
 
