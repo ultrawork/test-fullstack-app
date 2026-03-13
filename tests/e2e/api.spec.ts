@@ -5,17 +5,24 @@ test.describe("API тесты", () => {
   // Хелпер: регистрация + получение авторизованного контекста
   async function getAuthContext(request: typeof test extends never ? never : any) {
     const email = uniqueEmail("api");
-    await request.post("/api/v1/auth/register", {
+    const res = await request.post("/api/v1/auth/register", {
       data: { email, name: "API User", password: "password12345" },
     });
-    return { email };
+    const setCookieHeaders = res.headersArray().filter((h: { name: string; value: string }) => h.name.toLowerCase() === "set-cookie");
+    const cookieString = setCookieHeaders.map((h: { name: string; value: string }) => h.value.split(";")[0]).join("; ");
+    return { email, cookies: cookieString };
   }
 
   // SC-040: CRUD заметок через API
   test("SC-040: CRUD заметок через API", async ({ request }) => {
-    await getAuthContext(request);
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
-    // 1. Создать заметку
+    // 1. Создать заметку (cookies auto-carried by request context)
     const createRes = await request.post("/api/v1/notes", {
       data: { title: "API Note", content: "Created via API" },
     });
@@ -50,9 +57,14 @@ test.describe("API тесты", () => {
 
   // SC-041: CRUD тегов через API
   test("SC-041: CRUD тегов через API", async ({ request }) => {
-    await getAuthContext(request);
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
-    // 1. Создать тег
+    // 1. Создать тег (cookies auto-carried by request context)
     const createRes = await request.post("/api/v1/tags", {
       data: { name: "API Tag", color: "#FF5733" },
     });
@@ -91,18 +103,25 @@ test.describe("API тесты", () => {
 
   // SC-042: Привязка тегов к заметке
   test("SC-042: привязка тегов к заметке через API", async ({ request }) => {
-    await getAuthContext(request);
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
-    // Создаём теги
+    // Создаём теги (cookies auto-carried by request context)
     const tagARes = await request.post("/api/v1/tags", {
       data: { name: "Tag A", color: "#FF0000" },
     });
+    expect(tagARes.status()).toBe(201);
     const tagA = await tagARes.json();
     const tagAId = tagA.data.id;
 
     const tagBRes = await request.post("/api/v1/tags", {
       data: { name: "Tag B", color: "#00FF00" },
     });
+    expect(tagBRes.status()).toBe(201);
     const tagB = await tagBRes.json();
     const tagBId = tagB.data.id;
 
@@ -146,28 +165,36 @@ test.describe("API тесты", () => {
   test("SC-043: фильтрация заметок по тегам через API", async ({
     request,
   }) => {
-    await getAuthContext(request);
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
-    // Создаём тег
+    // Создаём тег (cookies auto-carried by request context)
     const tagRes = await request.post("/api/v1/tags", {
       data: { name: "FilterTag", color: "#FF0000" },
     });
+    expect(tagRes.status()).toBe(201);
     const tag = await tagRes.json();
     const tagId = tag.data.id;
 
     // Создаём заметку с тегом
-    await request.post("/api/v1/notes", {
+    const noteWithTagRes = await request.post("/api/v1/notes", {
       data: {
         title: "Note With Tag",
         content: "Has tag",
         tagIds: [tagId],
       },
     });
+    expect(noteWithTagRes.status()).toBe(201);
 
     // Создаём заметку без тега
-    await request.post("/api/v1/notes", {
+    const noteWithoutTagRes = await request.post("/api/v1/notes", {
       data: { title: "Note Without Tag", content: "No tag" },
     });
+    expect(noteWithoutTagRes.status()).toBe(201);
 
     // Фильтруем по тегу
     const filterRes = await request.get(
@@ -182,8 +209,14 @@ test.describe("API тесты", () => {
 
   // SC-044: Поиск заметок через API
   test("SC-044: поиск заметок через API", async ({ request }) => {
-    await getAuthContext(request);
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
+    // Create notes (cookies auto-carried by request context)
     await request.post("/api/v1/notes", {
       data: { title: "Meeting Notes", content: "Discussion" },
     });
@@ -222,9 +255,14 @@ test.describe("API тесты", () => {
 
   // SC-046: Валидация данных тега через API
   test("SC-046: валидация данных тега через API", async ({ request }) => {
-    await getAuthContext(request);
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
-    // Пустое имя
+    // Пустое имя (cookies auto-carried by request context)
     const emptyName = await request.post("/api/v1/tags", {
       data: { name: "", color: "#FF0000" },
     });

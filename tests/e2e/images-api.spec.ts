@@ -25,24 +25,39 @@ test.describe("API изображений", () => {
     ensureTestFiles();
   });
 
-  // Хелпер: регистрация + создание заметки
-  async function setupNoteWithAuth(request: any): Promise<{ noteId: string }> {
-    const email = uniqueEmail("img-api");
-    await request.post("/api/v1/auth/register", {
+  // Хелпер: извлечение cookies из ответа регистрации/логина
+  function extractCookies(res: any): string {
+    const setCookieHeaders = res.headersArray().filter((h: { name: string; value: string }) => h.name.toLowerCase() === "set-cookie");
+    return setCookieHeaders.map((h: { name: string; value: string }) => h.value.split(";")[0]).join("; ");
+  }
+
+  // Хелпер: регистрация и получение cookies
+  async function registerAndGetCookies(request: any, prefix: string): Promise<{ cookies: string; email: string }> {
+    const email = uniqueEmail(prefix);
+    const res = await request.post("/api/v1/auth/register", {
       data: { email, name: "Image API User", password: "password12345" },
     });
+    const cookies = extractCookies(res);
+    return { cookies, email };
+  }
+
+  // Хелпер: регистрация + создание заметки
+  async function setupNoteWithAuth(request: any): Promise<{ noteId: string; cookies: string }> {
+    const { cookies } = await registerAndGetCookies(request, "img-api");
+    const headers = { cookie: cookies };
     const noteRes = await request.post("/api/v1/notes", {
       data: { title: "Note for images", content: "Image test content" },
+      headers,
     });
     const noteData = await noteRes.json();
-    return { noteId: noteData.data.id };
+    return { noteId: noteData.data.id, cookies };
   }
 
   // SC-021: API аутентификации — расширенный (из scenarios/api.md)
   test("SC-021: API аутентификации — регистрация, вход, me, logout", async ({ request }) => {
     const email = uniqueEmail("auth-api");
 
-    // 1. Регистрация
+    // 1. Регистрация (cookies auto-carried by request context)
     const registerRes = await request.post("/api/v1/auth/register", {
       data: { email, name: "API User", password: "Password123" },
     });
@@ -51,13 +66,13 @@ test.describe("API изображений", () => {
     expect(registerBody.success).toBe(true);
     expect(registerBody.data.user.email).toBe(email);
 
-    // 2. /auth/me — получаем данные текущего пользователя
+    // 2. /auth/me — получаем данные текущего пользователя (cookies auto-carried)
     const meRes = await request.get("/api/v1/auth/me");
     expect(meRes.status()).toBe(200);
     const meBody = await meRes.json();
     expect(meBody.data.user.email).toBe(email);
 
-    // 3. Logout
+    // 3. Logout (cookies auto-carried)
     const logoutRes = await request.post("/api/v1/auth/logout");
     expect(logoutRes.status()).toBe(200);
 
@@ -71,11 +86,12 @@ test.describe("API изображений", () => {
   // SC-022: API заметок — CRUD (проверяем images в ответе)
   test("SC-022: API заметок — CRUD с images в ответе", async ({ request }) => {
     const email = uniqueEmail("notes-api");
+    // Register — cookies auto-carried by Playwright request context
     await request.post("/api/v1/auth/register", {
       data: { email, name: "Notes API User", password: "password12345" },
     });
 
-    // Создаём заметку
+    // Создаём заметку (cookies auto-carried)
     const createRes = await request.post("/api/v1/notes", {
       data: { title: "API Note", content: "Created via API" },
     });
@@ -86,13 +102,13 @@ test.describe("API изображений", () => {
     expect(created.data.tags).toEqual([]);
     const noteId = created.data.id;
 
-    // Получаем заметку
+    // Получаем заметку (cookies auto-carried)
     const getRes = await request.get(`/api/v1/notes/${noteId}`);
     expect(getRes.status()).toBe(200);
     const fetched = await getRes.json();
     expect(fetched.data.images).toEqual([]);
 
-    // Обновляем
+    // Обновляем (cookies auto-carried)
     const updateRes = await request.put(`/api/v1/notes/${noteId}`, {
       data: { title: "Updated Title", content: "Updated Content" },
     });
@@ -100,17 +116,17 @@ test.describe("API изображений", () => {
     const updated = await updateRes.json();
     expect(updated.data.title).toBe("Updated Title");
 
-    // Список заметок
+    // Список заметок (cookies auto-carried)
     const listRes = await request.get("/api/v1/notes");
     expect(listRes.status()).toBe(200);
     const list = await listRes.json();
     expect(list.data.notes.some((n: any) => n.id === noteId)).toBe(true);
 
-    // Удаляем
+    // Удаляем (cookies auto-carried)
     const deleteRes = await request.delete(`/api/v1/notes/${noteId}`);
     expect(deleteRes.status()).toBe(200);
 
-    // Получаем удалённую → 404
+    // Получаем удалённую → 404 (cookies auto-carried)
     const getDeletedRes = await request.get(`/api/v1/notes/${noteId}`);
     expect(getDeletedRes.status()).toBe(404);
   });
@@ -118,11 +134,12 @@ test.describe("API изображений", () => {
   // SC-023: API тегов — CRUD и привязка к заметке
   test("SC-023: API тегов — CRUD и привязка к заметке", async ({ request }) => {
     const email = uniqueEmail("tags-api");
+    // Register — cookies auto-carried by Playwright request context
     await request.post("/api/v1/auth/register", {
       data: { email, name: "Tags API User", password: "password12345" },
     });
 
-    // Создаём тег
+    // Создаём тег (cookies auto-carried)
     const createTagRes = await request.post("/api/v1/tags", {
       data: { name: "API Tag", color: "#3366FF" },
     });
@@ -130,7 +147,7 @@ test.describe("API изображений", () => {
     const tagData = await createTagRes.json();
     const tagId = tagData.data.id;
 
-    // Создаём заметку с тегом
+    // Создаём заметку с тегом (cookies auto-carried)
     const noteRes = await request.post("/api/v1/notes", {
       data: { title: "Tagged Note", content: "Test", tagIds: [tagId] },
     });
@@ -140,7 +157,7 @@ test.describe("API изображений", () => {
     expect(noteData.data.tags[0].name).toBe("API Tag");
     const noteId = noteData.data.id;
 
-    // Обновляем тег
+    // Обновляем тег (cookies auto-carried)
     const updateTagRes = await request.put(`/api/v1/tags/${tagId}`, {
       data: { name: "Renamed Tag", color: "#FF3366" },
     });
@@ -148,11 +165,11 @@ test.describe("API изображений", () => {
     const updatedTag = await updateTagRes.json();
     expect(updatedTag.data.name).toBe("Renamed Tag");
 
-    // Удаляем тег
+    // Удаляем тег (cookies auto-carried)
     const deleteTagRes = await request.delete(`/api/v1/tags/${tagId}`);
     expect(deleteTagRes.status()).toBe(200);
 
-    // Получаем заметку — тег должен отсутствовать
+    // Получаем заметку — тег должен отсутствовать (cookies auto-carried)
     const noteAfter = await request.get(`/api/v1/notes/${noteId}`);
     const noteAfterData = await noteAfter.json();
     expect(noteAfterData.data.tags).toHaveLength(0);
@@ -160,9 +177,20 @@ test.describe("API изображений", () => {
 
   // SC-024: API изображений — загрузка и удаление
   test("SC-024: API изображений — загрузка и удаление", async ({ request }) => {
-    const { noteId } = await setupNoteWithAuth(request);
+    const email = uniqueEmail("img-api");
+    // Register — cookies auto-carried by Playwright request context
+    await request.post("/api/v1/auth/register", {
+      data: { email, name: "Image API User", password: "password12345" },
+    });
 
-    // Загружаем JPEG
+    // Создаём заметку (cookies auto-carried)
+    const noteRes = await request.post("/api/v1/notes", {
+      data: { title: "Note for images", content: "Image test content" },
+    });
+    const noteData = await noteRes.json();
+    const noteId = noteData.data.id;
+
+    // Загружаем JPEG (cookies auto-carried)
     const uploadRes = await request.post(`/api/v1/notes/${noteId}/images`, {
       multipart: {
         images: {
@@ -184,15 +212,15 @@ test.describe("API изображений", () => {
     expect(image).toHaveProperty("size");
     expect(image).toHaveProperty("order");
 
-    // Проверяем что файл доступен
+    // Проверяем что файл доступен (cookies auto-carried)
     const fileRes = await request.get(image.path);
     expect(fileRes.status()).toBe(200);
 
-    // Удаляем изображение
+    // Удаляем изображение (cookies auto-carried)
     const deleteRes = await request.delete(`/api/v1/notes/${noteId}/images/${image.id}`);
     expect(deleteRes.status()).toBe(200);
 
-    // Файл должен быть недоступен
+    // Файл должен быть недоступен (cookies auto-carried)
     const fileAfterDelete = await request.get(image.path);
     expect(fileAfterDelete.status()).toBe(404);
   });
@@ -200,11 +228,12 @@ test.describe("API изображений", () => {
   // SC-025: API валидация — ошибки при невалидных данных
   test("SC-025: API валидация — невалидные данные", async ({ request }) => {
     const email = uniqueEmail("val-api");
+    // Register — cookies auto-carried by Playwright request context
     await request.post("/api/v1/auth/register", {
-      data: { email, name: "Validation User", password: "password12345" },
+      data: { email, name: "Validation API User", password: "password12345" },
     });
 
-    // Заметка без обязательных полей
+    // Заметка без обязательных полей (cookies auto-carried)
     const emptyNote = await request.post("/api/v1/notes", {
       data: {},
     });
@@ -212,19 +241,19 @@ test.describe("API изображений", () => {
     const emptyBody = await emptyNote.json();
     expect(emptyBody.success).toBe(false);
 
-    // Тег с невалидным цветом
+    // Тег с невалидным цветом (cookies auto-carried)
     const badTag = await request.post("/api/v1/tags", {
       data: { name: "Valid", color: "invalid" },
     });
     expect(badTag.status()).toBe(400);
 
-    // Тег с пустым именем
+    // Тег с пустым именем (cookies auto-carried)
     const emptyTag = await request.post("/api/v1/tags", {
       data: { name: "", color: "#FF0000" },
     });
     expect(emptyTag.status()).toBe(400);
 
-    // Изображение без файлов
+    // Изображение без файлов (cookies auto-carried)
     const noteRes = await request.post("/api/v1/notes", {
       data: { title: "Validation Note", content: "Test" },
     });

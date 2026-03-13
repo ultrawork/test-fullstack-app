@@ -46,6 +46,7 @@ export default function Header(): ReactNode {
               type="button"
               onClick={handleLogout}
               className="rounded-md px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              data-testid="logout-button"
             >
               Logout
             </button>

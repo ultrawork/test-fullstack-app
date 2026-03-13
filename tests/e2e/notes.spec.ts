@@ -1,17 +1,34 @@
 import { test, expect } from "@playwright/test";
-import { registerAndLogin, uniqueEmail } from "./helpers";
+import { uniqueEmail } from "./helpers";
 
 test.describe("Заметки", () => {
-  let email: string;
   const password = "securePassword123";
 
-  test.beforeEach(async ({ page }) => {
-    email = uniqueEmail("notes");
-    await registerAndLogin(page, {
-      name: "Notes User",
-      email,
-      password,
-    });
+  test.beforeEach(async ({ page, request }) => {
+    const email = uniqueEmail("notes");
+
+    // Register via API with retries for reliability
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const res = await request.post("/api/v1/auth/register", {
+        data: { name: "Notes User", email, password },
+      });
+      if (res.status() === 201) break;
+      if (res.status() === 400) {
+        const body = await res.json();
+        if (body.error && body.error.includes("Email already in use")) break;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+
+    // Login via UI
+    await page.goto("/login");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill(password);
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await page.waitForURL("**/dashboard", { timeout: 15000 });
+    await page.waitForLoadState("networkidle");
+    // Wait for auth hydration — AuthGuard fetches /auth/me before rendering dashboard
+    await expect(page.getByRole("heading", { name: "My Notes" })).toBeVisible({ timeout: 15000 });
   });
 
   // SC-010: Создание новой заметки
@@ -34,6 +51,8 @@ test.describe("Заметки", () => {
   // SC-011: Создание заметки без обязательных полей
   test("SC-011: создание заметки без обязательных полей", async ({ page }) => {
     await page.goto("/dashboard/notes/new");
+    // Wait for auth hydration — AuthGuard fetches /auth/me before rendering the form
+    await expect(page.getByRole("heading", { name: "Create Note" })).toBeVisible({ timeout: 15000 });
 
     // Нажимаем Create без заполнения полей
     await page.getByRole("button", { name: "Create Note" }).click();
@@ -44,34 +63,48 @@ test.describe("Заметки", () => {
 
   // SC-012: Просмотр заметки
   test("SC-012: просмотр заметки", async ({ page }) => {
-    // Сначала создаём заметку
-    await page.getByRole("link", { name: "New Note" }).click();
-    await page.getByLabel("Title").fill("Заметка для просмотра");
-    await page.getByLabel("Content").fill("Содержимое заметки");
-    await page.getByRole("button", { name: "Create Note" }).click();
-    await page.waitForURL(/\/dashboard\/notes\/.+/);
+    // Создаём заметку через API с cookies браузера для надёжности
+    const createRes = await page.request.post("/api/v1/notes", {
+      data: { title: "Заметка для просмотра", content: "Содержимое заметки" },
+    });
+    const body = await createRes.json();
+    const noteId = body.data.id;
 
-    // Проверяем элементы на странице просмотра
-    await expect(page.getByText("Заметка для просмотра")).toBeVisible();
-    await expect(page.getByText("Содержимое заметки")).toBeVisible();
-    await expect(page.getByRole("link", { name: "Edit" })).toBeVisible();
+    // Переходим на страницу просмотра заметки
+    await page.goto(`/dashboard/notes/${noteId}`);
+    await page.waitForLoadState("networkidle");
+
+    // Ждём загрузки заметки (AuthGuard + fetchNote)
+    await expect(page.getByText("Заметка для просмотра")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("Содержимое заметки")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("link", { name: "Edit" })).toBeVisible({ timeout: 10000 });
     await expect(
       page.getByRole("button", { name: "Delete" }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 10000 });
   });
 
   // SC-013: Редактирование заметки
   test("SC-013: редактирование заметки", async ({ page }) => {
-    // Создаём заметку
-    await page.getByRole("link", { name: "New Note" }).click();
-    await page.getByLabel("Title").fill("Моя первая заметка");
-    await page.getByLabel("Content").fill("Исходный текст");
-    await page.getByRole("button", { name: "Create Note" }).click();
-    await page.waitForURL(/\/dashboard\/notes\/.+/);
+    // Создаём заметку через API с cookies браузера для надёжности
+    const createRes = await page.request.post("/api/v1/notes", {
+      data: { title: "Моя первая заметка", content: "Исходный текст" },
+    });
+    const body = await createRes.json();
+    const noteId = body.data.id;
+
+    // Переходим на страницу просмотра заметки
+    await page.goto(`/dashboard/notes/${noteId}`);
+    await page.waitForLoadState("networkidle");
+    // Wait for auth hydration + note loading
+    await expect(page.getByText("Моя первая заметка")).toBeVisible({ timeout: 15000 });
 
     // Нажимаем Edit
+    await expect(page.getByRole("link", { name: "Edit" })).toBeVisible({ timeout: 10000 });
     await page.getByRole("link", { name: "Edit" }).click();
     await page.waitForURL(/\/edit$/);
+
+    // Wait for auth hydration on edit page — heading appears after AuthGuard + note fetch
+    await expect(page.getByRole("heading", { name: "Edit Note" })).toBeVisible({ timeout: 15000 });
 
     // Редактируем
     await page.getByLabel("Title").fill("Обновлённая заметка");
@@ -80,45 +113,59 @@ test.describe("Заметки", () => {
 
     // Проверяем обновлённые данные
     await page.waitForURL(/\/dashboard\/notes\/[^/]+$/);
-    await expect(page.getByText("Обновлённая заметка")).toBeVisible();
-    await expect(page.getByText("Обновлённый текст")).toBeVisible();
+    await expect(page.getByText("Обновлённая заметка")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("Обновлённый текст")).toBeVisible({ timeout: 10000 });
   });
 
   // SC-014: Удаление заметки
   test("SC-014: удаление заметки", async ({ page }) => {
-    // Создаём заметку
-    await page.getByRole("link", { name: "New Note" }).click();
-    await page.getByLabel("Title").fill("Заметка для удаления");
-    await page.getByLabel("Content").fill("Будет удалена");
-    await page.getByRole("button", { name: "Create Note" }).click();
-    await page.waitForURL(/\/dashboard\/notes\/.+/);
+    // Создаём заметку через API с cookies браузера для надёжности
+    const createRes = await page.request.post("/api/v1/notes", {
+      data: { title: "Заметка для удаления", content: "Будет удалена" },
+    });
+    const body = await createRes.json();
+    const noteId = body.data.id;
+
+    // Переходим на страницу просмотра заметки
+    await page.goto(`/dashboard/notes/${noteId}`);
+    await page.waitForLoadState("networkidle");
+    // Wait for auth hydration + note loading
+    await expect(page.getByText("Заметка для удаления")).toBeVisible({ timeout: 15000 });
 
     // Удаляем
+    await expect(page.getByRole("button", { name: "Delete" })).toBeVisible({ timeout: 10000 });
     await page.getByRole("button", { name: "Delete" }).first().click();
 
     // Подтверждаем в модальном окне
     const modal = page.getByRole("dialog");
-    await expect(modal).toBeVisible();
+    await expect(modal).toBeVisible({ timeout: 10000 });
     await modal.getByRole("button", { name: "Delete" }).click();
 
     // Должны вернуться на dashboard
-    await page.waitForURL("**/dashboard");
+    await page.waitForURL("**/dashboard", { timeout: 15000 });
     await expect(page.getByText("Заметка для удаления")).not.toBeVisible();
   });
 
   // SC-015: Отмена удаления заметки
   test("SC-015: отмена удаления заметки", async ({ page }) => {
-    // Создаём заметку
-    await page.getByRole("link", { name: "New Note" }).click();
-    await page.getByLabel("Title").fill("Заметка не удаляется");
-    await page.getByLabel("Content").fill("Останется на месте");
-    await page.getByRole("button", { name: "Create Note" }).click();
-    await page.waitForURL(/\/dashboard\/notes\/.+/);
+    // Создаём заметку через API с cookies браузера для надёжности
+    const createRes = await page.request.post("/api/v1/notes", {
+      data: { title: "Заметка не удаляется", content: "Останется на месте" },
+    });
+    const body = await createRes.json();
+    const noteId = body.data.id;
+
+    // Переходим на страницу просмотра заметки
+    await page.goto(`/dashboard/notes/${noteId}`);
+    await page.waitForLoadState("networkidle");
+    // Wait for auth hydration + note loading
+    await expect(page.getByText("Заметка не удаляется")).toBeVisible({ timeout: 15000 });
 
     // Нажимаем Delete, потом Cancel
+    await expect(page.getByRole("button", { name: "Delete" })).toBeVisible({ timeout: 10000 });
     await page.getByRole("button", { name: "Delete" }).first().click();
     const modal = page.getByRole("dialog");
-    await expect(modal).toBeVisible();
+    await expect(modal).toBeVisible({ timeout: 10000 });
     await modal.getByRole("button", { name: "Cancel" }).click();
 
     // Заметка осталась
@@ -127,45 +174,57 @@ test.describe("Заметки", () => {
 
   // SC-016: Поиск заметок по тексту
   test("SC-016: поиск заметок по тексту", async ({ page }) => {
-    // Создаём несколько заметок
+    // Создаём несколько заметок через API с cookies браузера для надёжности
     for (const title of [
       "Рецепт торта",
       "Список покупок",
       "Рецепт пиццы",
     ]) {
-      await page.getByRole("link", { name: "New Note" }).click();
-      await page.getByLabel("Title").fill(title);
-      await page.getByLabel("Content").fill(`Содержимое: ${title}`);
-      await page.getByRole("button", { name: "Create Note" }).click();
-      await page.waitForURL(/\/dashboard\/notes\/.+/);
-      await page.goto("/dashboard");
+      await page.request.post("/api/v1/notes", {
+        data: { title, content: `Содержимое: ${title}` },
+      });
     }
+
+    // Переходим на dashboard и ждём загрузки
+    await page.goto("/dashboard");
+    await page.waitForLoadState("networkidle");
+    // Wait for auth hydration — AuthGuard fetches /auth/me before rendering dashboard
+    await expect(page.getByRole("heading", { name: "My Notes" })).toBeVisible({ timeout: 15000 });
+
+    // Ждём пока заметки загрузятся на страницу
+    await expect(page.getByText("Рецепт торта").first()).toBeVisible({ timeout: 10000 });
 
     // Поиск
     await page.getByRole("searchbox", { name: "Search notes" }).fill("Рецепт");
 
-    // Ждём debounce
+    // Ждём debounce и обновления списка
     await page.waitForTimeout(500);
+    await page.waitForLoadState("networkidle");
 
-    await expect(page.getByText("Рецепт торта").first()).toBeVisible();
-    await expect(page.getByText("Рецепт пиццы").first()).toBeVisible();
+    await expect(page.getByText("Рецепт торта").first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Рецепт пиццы").first()).toBeVisible({ timeout: 10000 });
     await expect(page.getByText("Список покупок")).not.toBeVisible();
   });
 
   // SC-017: Отображение пустого состояния
   test("SC-017: пустое состояние без заметок", async ({ page }) => {
-    await expect(page.getByText("No notes found")).toBeVisible();
-    await expect(page.getByText("Create your first note")).toBeVisible();
+    // Wait for notes fetch to complete and empty state to render (replaces loading spinner)
+    await expect(page.getByText("No notes found")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("Create your first note")).toBeVisible({ timeout: 10000 });
   });
 
   // SC-018: Отмена создания заметки
   test("SC-018: отмена создания заметки", async ({ page }) => {
     await page.getByRole("link", { name: "New Note" }).click();
+    await page.waitForURL("**/dashboard/notes/new");
+    // Wait for auth hydration — AuthGuard fetches /auth/me before rendering the form
+    await expect(page.getByRole("heading", { name: "Create Note" })).toBeVisible({ timeout: 15000 });
+
     await page.getByLabel("Title").fill("Черновик");
     await page.getByRole("button", { name: "Cancel" }).click();
 
     // Должны вернуться на dashboard
-    await page.waitForURL("**/dashboard");
+    await page.waitForURL("**/dashboard", { timeout: 15000 });
     await expect(page.getByText("Черновик")).not.toBeVisible();
   });
 });

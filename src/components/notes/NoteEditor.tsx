@@ -124,6 +124,14 @@ export default function NoteEditor({ note }: NoteEditorProps): ReactNode {
         required
       />
 
+      <p
+        className="-mt-2 text-xs text-gray-500"
+        aria-live="polite"
+        data-testid="char-counter"
+      >
+        {content.length} {content.length === 1 ? "character" : "characters"}
+      </p>
+
       <TagSelector
         tags={tags}
         selectedIds={selectedTagIds}

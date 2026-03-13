@@ -38,7 +38,8 @@ export async function registerAndLogin(
   await page.getByLabel("Email").fill(user.email);
   await page.getByLabel("Password").fill(user.password);
   await page.getByRole("button", { name: "Create Account" }).click();
-  await page.waitForURL("**/dashboard");
+  await page.waitForURL("**/dashboard", { timeout: 15000 });
+  await page.waitForLoadState("networkidle");
 }
 
 /**

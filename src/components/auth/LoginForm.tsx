@@ -64,7 +64,7 @@ export default function LoginForm(): ReactNode {
       />
 
       {error && (
-        <p className="text-sm text-red-600" role="alert">
+        <p className="text-sm text-red-600" role="alert" data-testid="login-error">
           {error}
         </p>
       )}

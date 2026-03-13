@@ -1,0 +1,27 @@
+/* NoteForm - Title */
+"note_form_title_label" = "Title";
+"note_form_title_placeholder" = "Note title";
+"note_form_title_a11y" = "Note title input";
+
+/* NoteForm - Content */
+"note_form_content_label" = "Content";
+"note_form_content_placeholder" = "Write your note…";
+"note_form_content_a11y" = "Note content input";
+
+/* NoteForm - Character Counter */
+"note_form_char_count" = "%d characters";
+"note_form_char_count_a11y" = "%d characters entered";
+
+/* NoteForm - Actions */
+"note_form_cancel" = "Cancel";
+"note_form_cancel_a11y" = "Cancel note editing";
+"note_form_create" = "Create Note";
+"note_form_create_a11y" = "Create new note";
+"note_form_update" = "Update Note";
+"note_form_update_a11y" = "Update note";
+
+/* NoteForm - Errors */
+"note_form_error" = "Error: %@";
+"note_form_error_title_required" = "Title is required";
+"note_form_error_title_too_long" = "Title must be at most 255 characters";
+"note_form_error_save_failed" = "Failed to save note";
