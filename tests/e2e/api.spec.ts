@@ -57,13 +57,16 @@ test.describe("API тесты", () => {
 
   // SC-041: CRUD тегов через API
   test("SC-041: CRUD тегов через API", async ({ request }) => {
-    const { cookies } = await getAuthContext(request);
-    const headers = { cookie: cookies };
+    // Register and let Playwright auto-persist cookies from Set-Cookie response
+    const email = uniqueEmail("api");
+    const regRes = await request.post("/api/v1/auth/register", {
+      data: { email, name: "API User", password: "password12345" },
+    });
+    expect(regRes.ok()).toBeTruthy();
 
-    // 1. Создать тег
+    // 1. Создать тег (cookies auto-carried by request context)
     const createRes = await request.post("/api/v1/tags", {
       data: { name: "API Tag", color: "#FF5733" },
-      headers,
     });
     expect(createRes.status()).toBe(201);
     const created = await createRes.json();
@@ -72,7 +75,7 @@ test.describe("API тесты", () => {
     const tagId = created.data.id;
 
     // 3. Получить все теги — проверить наличие
-    const listRes = await request.get("/api/v1/tags", { headers });
+    const listRes = await request.get("/api/v1/tags");
     expect(listRes.status()).toBe(200);
     const list = await listRes.json();
     expect(list.data.tags.some((t: any) => t.name === "API Tag")).toBe(true);
@@ -80,7 +83,6 @@ test.describe("API тесты", () => {
     // 4. Обновить тег
     const updateRes = await request.put(`/api/v1/tags/${tagId}`, {
       data: { name: "Updated Tag", color: "#33FF57" },
-      headers,
     });
     expect(updateRes.status()).toBe(200);
     const updated = await updateRes.json();
@@ -88,11 +90,11 @@ test.describe("API тесты", () => {
     expect(updated.data.color).toBe("#33FF57");
 
     // 5. Удалить тег
-    const deleteRes = await request.delete(`/api/v1/tags/${tagId}`, { headers });
+    const deleteRes = await request.delete(`/api/v1/tags/${tagId}`);
     expect(deleteRes.status()).toBe(200);
 
     // 6. Проверить отсутствие тега
-    const listAfter = await request.get("/api/v1/tags", { headers });
+    const listAfter = await request.get("/api/v1/tags");
     const afterBody = await listAfter.json();
     expect(afterBody.data.tags.some((t: any) => t.name === "Updated Tag")).toBe(
       false,
