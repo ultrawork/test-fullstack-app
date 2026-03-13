@@ -24,13 +24,30 @@ test("SC-051: навигация с лендинга к формам входа/
 });
 
 // SC-052: Навигация по dashboard
-test("SC-052: навигация по dashboard", async ({ page }) => {
+test("SC-052: навигация по dashboard", async ({ page, request }) => {
   const email = uniqueEmail("sc052");
-  await registerAndLogin(page, {
-    name: "Nav User",
-    email,
-    password: "securePassword123",
-  });
+  const password = "securePassword123";
+
+  // Register via API with retries for reliability
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const res = await request.post("/api/v1/auth/register", {
+      data: { name: "Nav User", email, password },
+    });
+    if (res.status() === 201) break;
+    if (res.status() === 400) {
+      const body = await res.json();
+      if (body.error && body.error.includes("Email already in use")) break;
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+
+  // Login via UI
+  await page.goto("/login");
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill(password);
+  await page.getByRole("button", { name: "Sign In" }).click();
+  await page.waitForURL("**/dashboard", { timeout: 15000 });
+  await page.waitForLoadState("networkidle");
 
   // Создаём заметку для навигации
   await page.getByRole("link", { name: "New Note" }).click();
