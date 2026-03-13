@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- NoteForm - Title -->
+    <string name="note_form_title_label">Title</string>
+    <string name="note_form_title_placeholder">Note title</string>
+    <string name="note_form_title_input_a11y">Note title input</string>
+
+    <!-- NoteForm - Content -->
+    <string name="note_form_content_label">Content</string>
+    <string name="note_form_content_placeholder">Write your note…</string>
+    <string name="note_form_content_input_a11y">Note content input</string>
+
+    <!-- NoteForm - Character Counter -->
+    <string name="note_form_char_count">%1$d characters</string>
+    <string name="note_form_char_count_a11y">%1$d characters entered</string>
+
+    <!-- NoteForm - Actions -->
+    <string name="note_form_cancel">Cancel</string>
+    <string name="note_form_cancel_a11y">Cancel note editing</string>
+    <string name="note_form_create">Create Note</string>
+    <string name="note_form_update">Update Note</string>
+    <string name="note_form_submit_create_a11y">Create new note</string>
+    <string name="note_form_submit_update_a11y">Update note</string>
+
+    <!-- NoteForm - Errors -->
+    <string name="note_form_error_title_required">Title is required</string>
+    <string name="note_form_error_title_too_long">Title must be at most 255 characters</string>
+    <string name="note_form_error_save_failed">Failed to save note</string>
+</resources>
