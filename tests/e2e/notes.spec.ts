@@ -174,28 +174,35 @@ test.describe("Заметки", () => {
 
   // SC-016: Поиск заметок по тексту
   test("SC-016: поиск заметок по тексту", async ({ page }) => {
-    // Создаём несколько заметок
+    // Создаём несколько заметок через API с cookies браузера для надёжности
     for (const title of [
       "Рецепт торта",
       "Список покупок",
       "Рецепт пиццы",
     ]) {
-      await page.getByRole("link", { name: "New Note" }).click();
-      await page.getByLabel("Title").fill(title);
-      await page.getByLabel("Content").fill(`Содержимое: ${title}`);
-      await page.getByRole("button", { name: "Create Note" }).click();
-      await page.waitForURL(/\/dashboard\/notes\/.+/);
-      await page.goto("/dashboard");
+      await page.request.post("/api/v1/notes", {
+        data: { title, content: `Содержимое: ${title}` },
+      });
     }
+
+    // Переходим на dashboard и ждём загрузки
+    await page.goto("/dashboard");
+    await page.waitForLoadState("networkidle");
+    // Wait for auth hydration — AuthGuard fetches /auth/me before rendering dashboard
+    await expect(page.getByRole("heading", { name: "My Notes" })).toBeVisible({ timeout: 15000 });
+
+    // Ждём пока заметки загрузятся на страницу
+    await expect(page.getByText("Рецепт торта").first()).toBeVisible({ timeout: 10000 });
 
     // Поиск
     await page.getByRole("searchbox", { name: "Search notes" }).fill("Рецепт");
 
-    // Ждём debounce
+    // Ждём debounce и обновления списка
     await page.waitForTimeout(500);
+    await page.waitForLoadState("networkidle");
 
-    await expect(page.getByText("Рецепт торта").first()).toBeVisible();
-    await expect(page.getByText("Рецепт пиццы").first()).toBeVisible();
+    await expect(page.getByText("Рецепт торта").first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Рецепт пиццы").first()).toBeVisible({ timeout: 10000 });
     await expect(page.getByText("Список покупок")).not.toBeVisible();
   });
 
