@@ -30,23 +30,23 @@ struct NoteFormView: View {
 
     private var titleField: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(NSLocalizedString("note_form_title_label", comment: "Note title label"))
+            Text(NSLocalizedString("note_form_title_label", tableName: "NoteLocalizable", comment: "Note title label"))
                 .font(.subheadline)
                 .fontWeight(.medium)
 
             TextField(
-                NSLocalizedString("note_form_title_placeholder", comment: "Note title placeholder"),
+                NSLocalizedString("note_form_title_placeholder", tableName: "NoteLocalizable", comment: "Note title placeholder"),
                 text: $title
             )
             .textFieldStyle(.roundedBorder)
-            .accessibilityLabel(NSLocalizedString("note_form_title_a11y", comment: "Note title input"))
+            .accessibilityLabel(NSLocalizedString("note_form_title_a11y", tableName: "NoteLocalizable", comment: "Note title input"))
             .accessibilityIdentifier("note_form_title_field")
         }
     }
 
     private var contentField: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(NSLocalizedString("note_form_content_label", comment: "Note content label"))
+            Text(NSLocalizedString("note_form_content_label", tableName: "NoteLocalizable", comment: "Note content label"))
                 .font(.subheadline)
                 .fontWeight(.medium)
 
@@ -56,7 +56,7 @@ struct NoteFormView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color.gray.opacity(0.3), lineWidth: 1)
                 )
-                .accessibilityLabel(NSLocalizedString("note_form_content_a11y", comment: "Note content input"))
+                .accessibilityLabel(NSLocalizedString("note_form_content_a11y", tableName: "NoteLocalizable", comment: "Note content input"))
                 .accessibilityIdentifier("note_form_content_field")
         }
     }
@@ -64,7 +64,7 @@ struct NoteFormView: View {
     private var characterCounter: some View {
         Text(
             String(
-                format: NSLocalizedString("note_form_char_count", comment: "Character count"),
+                format: NSLocalizedString("note_form_char_count", tableName: "NoteLocalizable", comment: "Character count"),
                 content.count
             )
         )
@@ -73,7 +73,7 @@ struct NoteFormView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityLabel(
             String(
-                format: NSLocalizedString("note_form_char_count_a11y", comment: "Character count accessibility"),
+                format: NSLocalizedString("note_form_char_count_a11y", tableName: "NoteLocalizable", comment: "Character count accessibility"),
                 content.count
             )
         )
@@ -88,7 +88,7 @@ struct NoteFormView: View {
                 .foregroundColor(.red)
                 .accessibilityLabel(
                     String(
-                        format: NSLocalizedString("note_form_error", comment: "Note form error"),
+                        format: NSLocalizedString("note_form_error", tableName: "NoteLocalizable", comment: "Note form error"),
                         errorMessage
                     )
                 )
@@ -97,11 +97,11 @@ struct NoteFormView: View {
 
     private var actionButtons: some View {
         HStack {
-            Button(NSLocalizedString("note_form_cancel", comment: "Cancel button")) {
+            Button(NSLocalizedString("note_form_cancel", tableName: "NoteLocalizable", comment: "Cancel button")) {
                 onCancel()
             }
             .foregroundColor(.secondary)
-            .accessibilityLabel(NSLocalizedString("note_form_cancel_a11y", comment: "Cancel note editing"))
+            .accessibilityLabel(NSLocalizedString("note_form_cancel_a11y", tableName: "NoteLocalizable", comment: "Cancel note editing"))
             .accessibilityIdentifier("note_form_cancel_button")
 
             Spacer()
@@ -114,8 +114,8 @@ struct NoteFormView: View {
                 } else {
                     Text(
                         isEditing
-                            ? NSLocalizedString("note_form_update", comment: "Update note button")
-                            : NSLocalizedString("note_form_create", comment: "Create note button")
+                            ? NSLocalizedString("note_form_update", tableName: "NoteLocalizable", comment: "Update note button")
+                            : NSLocalizedString("note_form_create", tableName: "NoteLocalizable", comment: "Create note button")
                     )
                 }
             }
@@ -123,8 +123,8 @@ struct NoteFormView: View {
             .disabled(isSubmitting || title.trimmingCharacters(in: .whitespaces).isEmpty)
             .accessibilityLabel(
                 isEditing
-                    ? NSLocalizedString("note_form_update_a11y", comment: "Update note accessibility")
-                    : NSLocalizedString("note_form_create_a11y", comment: "Create note accessibility")
+                    ? NSLocalizedString("note_form_update_a11y", tableName: "NoteLocalizable", comment: "Update note accessibility")
+                    : NSLocalizedString("note_form_create_a11y", tableName: "NoteLocalizable", comment: "Create note accessibility")
             )
             .accessibilityIdentifier("note_form_submit_button")
         }
@@ -133,11 +133,11 @@ struct NoteFormView: View {
     private func submitForm() {
         let trimmedTitle = title.trimmingCharacters(in: .whitespaces)
         guard !trimmedTitle.isEmpty else {
-            errorMessage = NSLocalizedString("note_form_error_title_required", comment: "Title required")
+            errorMessage = NSLocalizedString("note_form_error_title_required", tableName: "NoteLocalizable", comment: "Title required")
             return
         }
         guard trimmedTitle.count <= 255 else {
-            errorMessage = NSLocalizedString("note_form_error_title_too_long", comment: "Title too long")
+            errorMessage = NSLocalizedString("note_form_error_title_too_long", tableName: "NoteLocalizable", comment: "Title too long")
             return
         }
 
@@ -146,7 +146,9 @@ struct NoteFormView: View {
 
         Task {
             await onSubmit(trimmedTitle, content)
-            isSubmitting = false
+            if !Task.isCancelled {
+                isSubmitting = false
+            }
         }
     }
 }
