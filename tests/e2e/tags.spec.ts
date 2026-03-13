@@ -65,19 +65,27 @@ test.describe("Теги", () => {
 
   // SC-021: Создание тега с невалидными данными
   test("SC-021: создание тега без имени", async ({ page }) => {
+    // Wait for auth hydration and dashboard to be fully ready
+    await page.waitForLoadState("networkidle");
     await page.getByRole("button", { name: "Manage tags" }).click();
     const modal = page.getByRole("dialog");
+    await expect(modal).toBeVisible({ timeout: 10000 });
 
     await modal.getByRole("button", { name: "Create New Tag" }).click();
 
+    // Wait for form to be fully rendered
+    const nameInput = modal.getByLabel("Tag name");
+    await expect(nameInput).toBeVisible({ timeout: 5000 });
+
     // Пытаемся создать без имени — поле required, очищаем и отправляем
-    await modal.getByLabel("Tag name").fill("");
-    await modal.getByRole("button", { name: "Create Tag" }).click();
+    await nameInput.fill("");
+
+    const submitButton = modal.getByRole("button", { name: "Create Tag" });
+    await expect(submitButton).toBeVisible({ timeout: 5000 });
+    await submitButton.click();
 
     // Должны остаться на форме (кнопка Create Tag всё ещё видна)
-    await expect(
-      modal.getByRole("button", { name: "Create Tag" }),
-    ).toBeVisible();
+    await expect(submitButton).toBeVisible();
   });
 
   // SC-022: Редактирование тега
