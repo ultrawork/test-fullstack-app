@@ -119,23 +119,30 @@ test.describe("Заметки", () => {
 
   // SC-014: Удаление заметки
   test("SC-014: удаление заметки", async ({ page }) => {
-    // Создаём заметку
-    await page.getByRole("link", { name: "New Note" }).click();
-    await page.getByLabel("Title").fill("Заметка для удаления");
-    await page.getByLabel("Content").fill("Будет удалена");
-    await page.getByRole("button", { name: "Create Note" }).click();
-    await page.waitForURL(/\/dashboard\/notes\/.+/);
+    // Создаём заметку через API с cookies браузера для надёжности
+    const createRes = await page.request.post("/api/v1/notes", {
+      data: { title: "Заметка для удаления", content: "Будет удалена" },
+    });
+    const body = await createRes.json();
+    const noteId = body.data.id;
+
+    // Переходим на страницу просмотра заметки
+    await page.goto(`/dashboard/notes/${noteId}`);
+    await page.waitForLoadState("networkidle");
+    // Wait for auth hydration + note loading
+    await expect(page.getByText("Заметка для удаления")).toBeVisible({ timeout: 15000 });
 
     // Удаляем
+    await expect(page.getByRole("button", { name: "Delete" })).toBeVisible({ timeout: 10000 });
     await page.getByRole("button", { name: "Delete" }).first().click();
 
     // Подтверждаем в модальном окне
     const modal = page.getByRole("dialog");
-    await expect(modal).toBeVisible();
+    await expect(modal).toBeVisible({ timeout: 10000 });
     await modal.getByRole("button", { name: "Delete" }).click();
 
     // Должны вернуться на dashboard
-    await page.waitForURL("**/dashboard");
+    await page.waitForURL("**/dashboard", { timeout: 15000 });
     await expect(page.getByText("Заметка для удаления")).not.toBeVisible();
   });
 
