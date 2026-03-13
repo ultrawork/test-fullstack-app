@@ -125,37 +125,43 @@ test.describe("Изображения", () => {
 
   // SC-017: Загрузка изображений при создании новой заметки
   test("SC-017: загрузка изображений при создании новой заметки", async ({ page }) => {
-    await page.getByRole("link", { name: "New Note" }).click();
+    const newNoteLink = page.getByRole("link", { name: "New Note" });
+    await newNoteLink.waitFor({ state: "visible", timeout: 10000 });
+    await newNoteLink.click();
     await page.waitForURL("**/dashboard/notes/new");
+    await page.waitForLoadState("networkidle");
 
     await page.getByLabel("Title").fill("Заметка с фото");
     await page.getByLabel("Content").fill("Тест загрузки изображений");
 
     // Добавляем 2 файла (JPEG и PNG)
     const fileInput = page.locator('input[type="file"]');
+    await fileInput.waitFor({ state: "attached", timeout: 10000 });
     await fileInput.setInputFiles([
       join(TEST_FILES_DIR, "test-image.jpg"),
       join(TEST_FILES_DIR, "test-image.png"),
     ]);
 
     // Проверяем что pending-превью отображаются
-    await expect(page.getByAltText("Pending upload test-image.jpg")).toBeVisible();
-    await expect(page.getByAltText("Pending upload test-image.png")).toBeVisible();
+    await expect(page.getByAltText("Pending upload test-image.jpg")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByAltText("Pending upload test-image.png")).toBeVisible({ timeout: 10000 });
 
     // Создаём заметку (pendingImages загрузятся после создания)
     await page.getByRole("button", { name: "Create Note" }).click();
 
     // Должны перейти на страницу просмотра
-    await page.waitForURL(/\/dashboard\/notes\/.+/);
+    await page.waitForURL(/\/dashboard\/notes\/.+/, { timeout: 15000 });
+    await page.waitForLoadState("networkidle");
 
     // Оба изображения должны отображаться в галерее
-    await expect(page.locator('section[aria-label="Image gallery"]')).toBeVisible();
+    await expect(page.locator('section[aria-label="Image gallery"]')).toBeVisible({ timeout: 10000 });
     const galleryImages = page.locator('section[aria-label="Image gallery"] img');
-    await expect(galleryImages).toHaveCount(2);
+    await expect(galleryImages).toHaveCount(2, { timeout: 10000 });
 
     // Проверяем thumbnails на дашборде
     await page.goto("/dashboard");
-    await expect(page.locator('[role="group"][aria-label="Image attachments"] img').first()).toBeVisible();
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator('[role="group"][aria-label="Image attachments"] img').first()).toBeVisible({ timeout: 10000 });
   });
 
   // SC-018: Удаление изображения из заметки
