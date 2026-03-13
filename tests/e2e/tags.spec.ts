@@ -194,19 +194,33 @@ test.describe("Теги", () => {
 
   // SC-025: Страница управления тегами (/dashboard/tags)
   test("SC-025: страница управления тегами", async ({ page }) => {
-    // Создаём теги через API (используем page.request для общих cookies)
-    await page.request.post("/api/v1/tags", {
-      data: { name: "Работа", color: "#3B82F6" },
+    // Создаём теги через API using page.evaluate to send httpOnly cookies
+    const tag1Status = await page.evaluate(async () => {
+      const res = await fetch("/api/v1/tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "Работа", color: "#3B82F6" }),
+      });
+      return res.status;
     });
-    await page.request.post("/api/v1/tags", {
-      data: { name: "Срочно", color: "#EF4444" },
+    expect(tag1Status).toBe(201);
+
+    const tag2Status = await page.evaluate(async () => {
+      const res = await fetch("/api/v1/tags", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: "Срочно", color: "#EF4444" }),
+      });
+      return res.status;
     });
+    expect(tag2Status).toBe(201);
 
     // Открываем страницу тегов
     await page.goto("/dashboard/tags");
+    await page.waitForLoadState("networkidle");
 
-    await expect(page.getByText("Manage Tags")).toBeVisible();
-    await expect(page.getByText("Работа")).toBeVisible();
-    await expect(page.getByText("Срочно")).toBeVisible();
+    await expect(page.getByText("Manage Tags")).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("Работа")).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText("Срочно")).toBeVisible({ timeout: 10000 });
   });
 });
