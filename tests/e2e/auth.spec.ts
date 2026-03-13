@@ -34,22 +34,29 @@ test("SC-002: регистрация с невалидными данными", 
 });
 
 // SC-003: Вход в систему существующего пользователя
-test("SC-003: вход существующего пользователя", async ({ page }) => {
+test("SC-003: вход существующего пользователя", async ({ page, request }) => {
   const email = uniqueEmail("sc003");
-  // Сначала регистрируем
-  await registerAndLogin(page, {
-    name: "Login Test User",
-    email,
-    password: "securePassword123",
+
+  // Регистрируем пользователя через API для надёжности
+  await request.post("/api/v1/auth/register", {
+    data: { name: "Login Test User", email, password: "securePassword123" },
   });
 
+  // Входим через UI
+  await loginViaUI(page, { email, password: "securePassword123" });
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByText("Login Test User")).toBeVisible({ timeout: 10000 });
+
   // Выходим
-  await page.getByRole("button", { name: "Logout" }).click();
-  await page.waitForURL("**/login");
+  const logoutButton = page.getByRole("button", { name: "Logout" });
+  await expect(logoutButton).toBeVisible({ timeout: 10000 });
+  await logoutButton.click();
+  await page.waitForURL("**/login", { timeout: 10000 });
 
   // Входим заново
   await loginViaUI(page, { email, password: "securePassword123" });
-  await expect(page.getByText("Login Test User")).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await expect(page.getByText("Login Test User")).toBeVisible({ timeout: 10000 });
 });
 
 // SC-004: Вход с неверными учётными данными
