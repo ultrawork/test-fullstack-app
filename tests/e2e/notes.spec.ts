@@ -27,6 +27,8 @@ test.describe("Заметки", () => {
     await page.getByRole("button", { name: "Sign In" }).click();
     await page.waitForURL("**/dashboard", { timeout: 15000 });
     await page.waitForLoadState("networkidle");
+    // Wait for auth hydration — AuthGuard fetches /auth/me before rendering dashboard
+    await expect(page.getByRole("heading", { name: "My Notes" })).toBeVisible({ timeout: 15000 });
   });
 
   // SC-010: Создание новой заметки
