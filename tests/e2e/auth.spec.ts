@@ -112,15 +112,29 @@ test("SC-004: вход с неверными данными", async ({ page, req
 });
 
 // SC-005: Выход из системы
-test("SC-005: выход из системы", async ({ page }) => {
+test("SC-005: выход из системы", async ({ page, request }) => {
   const email = uniqueEmail("sc005");
-  await registerAndLogin(page, {
-    name: "Logout User",
-    email,
-    password: "securePassword123",
-  });
 
+  // Регистрируем пользователя через API с retry для надёжности
+  let regResponse;
+  for (let attempt = 0; attempt < 5; attempt++) {
+    regResponse = await request.post("/api/v1/auth/register", {
+      data: { name: "Logout User", email, password: "securePassword123" },
+    });
+    if (regResponse.status() === 201) break;
+    if (regResponse.status() === 400) {
+      const errBody = await regResponse.json();
+      if (errBody.error && errBody.error.includes("Email already in use")) break;
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  expect([201, 400]).toContain(regResponse!.status());
+
+  // Входим через UI
+  await loginViaUI(page, { email, password: "securePassword123" });
   await page.waitForLoadState("networkidle");
+  await expect(page.getByText("Logout User")).toBeVisible({ timeout: 15000 });
+
   const logoutButton = page.getByRole("button", { name: "Logout" });
   await expect(logoutButton).toBeVisible({ timeout: 10000 });
   await logoutButton.click();
