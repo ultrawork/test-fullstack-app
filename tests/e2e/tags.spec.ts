@@ -1,17 +1,33 @@
 import { test, expect } from "@playwright/test";
-import { registerAndLogin, uniqueEmail } from "./helpers";
+import { uniqueEmail } from "./helpers";
 
 test.describe("Теги", () => {
   let email: string;
   const password = "securePassword123";
 
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
     email = uniqueEmail("tags");
-    await registerAndLogin(page, {
-      name: "Tags User",
-      email,
-      password,
-    });
+
+    // Register via API with retries for reliability
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const res = await request.post("/api/v1/auth/register", {
+        data: { name: "Tags User", email, password },
+      });
+      if (res.status() === 201) break;
+      if (res.status() === 400) {
+        const body = await res.json();
+        if (body.error && body.error.includes("Email already in use")) break;
+      }
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+
+    // Login via UI
+    await page.goto("/login");
+    await page.getByLabel("Email").fill(email);
+    await page.getByLabel("Password").fill(password);
+    await page.getByRole("button", { name: "Sign In" }).click();
+    await page.waitForURL("**/dashboard", { timeout: 15000 });
+    await page.waitForLoadState("networkidle");
   });
 
   // SC-020: Создание нового тега
@@ -112,26 +128,16 @@ test.describe("Теги", () => {
   });
 
   // SC-024: Создание тега с дублирующим именем (API тест)
-  test("SC-024: дублирование имени тега через API", async ({ request }) => {
-    const testEmail = uniqueEmail("sc024");
-
-    // Регистрируемся через API
-    await request.post("/api/v1/auth/register", {
-      data: {
-        email: testEmail,
-        name: "Tag Dup User",
-        password: "password12345",
-      },
-    });
-
+  test("SC-024: дублирование имени тега через API", async ({ page }) => {
+    // Use page.request which shares auth cookies from beforeEach login
     // Создаём первый тег
-    const first = await request.post("/api/v1/tags", {
+    const first = await page.request.post("/api/v1/tags", {
       data: { name: "Работа", color: "#3B82F6" },
     });
     expect(first.status()).toBe(201);
 
     // Создаём второй тег с тем же именем
-    const second = await request.post("/api/v1/tags", {
+    const second = await page.request.post("/api/v1/tags", {
       data: { name: "Работа", color: "#EF4444" },
     });
     expect(second.status()).toBe(400);
