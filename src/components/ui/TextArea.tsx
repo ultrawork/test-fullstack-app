@@ -29,6 +29,7 @@ export default function TextArea({
         {label}
       </label>
       <textarea
+        {...props}
         id={inputId}
         aria-label={label}
         className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -39,7 +40,6 @@ export default function TextArea({
         aria-describedby={error ? errorId : undefined}
         aria-invalid={error ? "true" : undefined}
         rows={6}
-        {...props}
       />
       {error && (
         <p id={errorId} className="text-sm text-red-600" role="alert">

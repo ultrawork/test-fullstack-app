@@ -26,6 +26,7 @@ export default function Input({
         {label}
       </label>
       <input
+        {...props}
         id={inputId}
         aria-label={label}
         className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
@@ -35,7 +36,6 @@ export default function Input({
         } ${className}`}
         aria-describedby={error ? errorId : undefined}
         aria-invalid={error ? "true" : undefined}
-        {...props}
       />
       {error && (
         <p id={errorId} className="text-sm text-red-600" role="alert">
