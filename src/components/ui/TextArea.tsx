@@ -3,7 +3,6 @@
 import {
   type TextareaHTMLAttributes,
   type ReactNode,
-  useId,
 } from "react";
 
 interface TextAreaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
@@ -18,8 +17,7 @@ export default function TextArea({
   id: externalId,
   ...props
 }: TextAreaProps): ReactNode {
-  const generatedId = useId();
-  const inputId = externalId ?? generatedId;
+  const inputId = externalId ?? label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   const errorId = `${inputId}-error`;
 
   return (

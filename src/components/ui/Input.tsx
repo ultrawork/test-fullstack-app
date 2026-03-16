@@ -1,6 +1,6 @@
 "use client";
 
-import { type InputHTMLAttributes, type ReactNode, useId } from "react";
+import { type InputHTMLAttributes, type ReactNode } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -14,8 +14,7 @@ export default function Input({
   id: externalId,
   ...props
 }: InputProps): ReactNode {
-  const generatedId = useId();
-  const inputId = externalId ?? generatedId;
+  const inputId = externalId ?? label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   const errorId = `${inputId}-error`;
 
   return (
