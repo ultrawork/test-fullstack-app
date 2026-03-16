@@ -47,6 +47,13 @@ export default function NoteEditor({
     onSubmit(title.trim(), content.trim(), categoryId || undefined);
   };
 
+  const resetForm = (): void => {
+    setTitle("");
+    setContent("");
+    setCategoryId("");
+    setErrors({});
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       <Input
@@ -87,6 +94,9 @@ export default function NoteEditor({
       <div className="flex gap-2">
         <Button type="submit" isLoading={isLoading}>
           {submitLabel}
+        </Button>
+        <Button type="button" variant="secondary" onClick={resetForm}>
+          Clear
         </Button>
       </div>
     </form>
