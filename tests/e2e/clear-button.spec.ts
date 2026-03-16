@@ -62,14 +62,15 @@ test.describe('Clear button in note editor form', () => {
     await page.getByRole('button', { name: 'Create Note' }).click();
 
     // Verify validation errors are shown
-    const alerts = page.getByRole('alert');
-    await expect(alerts.first()).toBeVisible();
+    await expect(page.getByText('Title is required')).toBeVisible();
+    await expect(page.getByText('Content is required')).toBeVisible();
 
     // Click Clear
     await page.getByRole('button', { name: 'Clear' }).click();
 
     // Verify validation errors are gone
-    await expect(page.getByRole('alert')).not.toBeVisible();
+    await expect(page.getByText('Title is required')).not.toBeVisible();
+    await expect(page.getByText('Content is required')).not.toBeVisible();
   });
 
   // SC-203: Clear button does not submit the form
