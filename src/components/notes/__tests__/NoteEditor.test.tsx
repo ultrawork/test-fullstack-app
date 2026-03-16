@@ -71,4 +71,51 @@ describe('NoteEditor', () => {
     render(<NoteEditor />);
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeInTheDocument();
   });
+
+  it('renders clear button', () => {
+    render(<NoteEditor />);
+    expect(screen.getByRole('button', { name: 'Clear' })).toBeInTheDocument();
+  });
+
+  it('clears all fields when clear button is clicked', async () => {
+    render(<NoteEditor />);
+    const user = userEvent.setup();
+
+    await user.type(screen.getByLabelText('Title'), 'My Title');
+    await user.type(screen.getByLabelText('Content'), 'My Content');
+    await user.selectOptions(screen.getByLabelText('Category'), 'cat-1');
+
+    expect(screen.getByLabelText('Title')).toHaveValue('My Title');
+    expect(screen.getByLabelText('Content')).toHaveValue('My Content');
+    expect(screen.getByLabelText('Category')).toHaveValue('cat-1');
+
+    await user.click(screen.getByRole('button', { name: 'Clear' }));
+
+    expect(screen.getByLabelText('Title')).toHaveValue('');
+    expect(screen.getByLabelText('Content')).toHaveValue('');
+    expect(screen.getByLabelText('Category')).toHaveValue('');
+  });
+
+  it('clears validation errors when clear button is clicked', async () => {
+    render(<NoteEditor />);
+    const user = userEvent.setup();
+
+    await user.click(screen.getByRole('button', { name: 'Create Note' }));
+    const alerts = await screen.findAllByRole('alert');
+    expect(alerts.length).toBeGreaterThan(0);
+
+    await user.click(screen.getByRole('button', { name: 'Clear' }));
+    expect(screen.queryAllByRole('alert')).toHaveLength(0);
+  });
+
+  it('does not submit the form when clear button is clicked', async () => {
+    render(<NoteEditor />);
+    const user = userEvent.setup();
+
+    await user.type(screen.getByLabelText('Title'), 'Title');
+    await user.type(screen.getByLabelText('Content'), 'Content');
+    await user.click(screen.getByRole('button', { name: 'Clear' }));
+
+    expect(mockCreateNote).not.toHaveBeenCalled();
+  });
 });
