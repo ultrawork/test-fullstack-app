@@ -26,11 +26,8 @@ export async function middleware(
     let isAuthenticated = false;
     if (accessToken) {
       try {
-        const secret = process.env.JWT_SECRET;
-        if (secret) {
-          await jwtVerify(accessToken, new TextEncoder().encode(secret));
-          isAuthenticated = true;
-        }
+        await jwtVerify(accessToken, getJwtSecret());
+        isAuthenticated = true;
       } catch {
         isAuthenticated = false;
       }
