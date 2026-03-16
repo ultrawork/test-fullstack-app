@@ -29,6 +29,13 @@ export function NoteEditor({ note }: NoteEditorProps): ReactNode {
     fetchCategories();
   }, [fetchCategories]);
 
+  const resetForm = (): void => {
+    setTitle('');
+    setContent('');
+    setCategoryId('');
+    setErrors({});
+  };
+
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
     setErrors({});
@@ -116,6 +123,9 @@ export function NoteEditor({ note }: NoteEditorProps): ReactNode {
       <div className="flex gap-3">
         <Button type="submit" loading={loading}>
           {note ? 'Update' : 'Create'} Note
+        </Button>
+        <Button type="button" variant="secondary" onClick={resetForm}>
+          Clear
         </Button>
         <Button type="button" variant="secondary" onClick={() => router.back()}>
           Cancel
