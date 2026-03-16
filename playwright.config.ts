@@ -9,6 +9,7 @@ export default defineConfig({
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:4000',
     trace: 'on-first-retry',
+    viewport: { width: 1280, height: 720 },
   },
   reporter: [['junit', { outputFile: 'test-results/results.xml' }]],
 });
