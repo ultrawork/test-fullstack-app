@@ -69,4 +69,39 @@ describe("NoteEditor", () => {
       screen.getByRole("button", { name: "Create Note" }),
     ).toBeInTheDocument();
   });
+
+  it("renders Clear button", () => {
+    render(<NoteEditor onSubmit={vi.fn()} />);
+    expect(
+      screen.getByRole("button", { name: "Clear" }),
+    ).toBeInTheDocument();
+  });
+
+  it("clears all fields when Clear button is clicked", async () => {
+    render(<NoteEditor onSubmit={vi.fn()} />);
+    await userEvent.type(screen.getByLabelText("Title"), "Test Title");
+    await userEvent.type(screen.getByLabelText("Content"), "Test Content");
+    await userEvent.click(screen.getByRole("button", { name: "Clear" }));
+    expect(screen.getByLabelText("Title")).toHaveValue("");
+    expect(screen.getByLabelText("Content")).toHaveValue("");
+  });
+
+  it("clears validation errors when Clear button is clicked", async () => {
+    render(<NoteEditor onSubmit={vi.fn()} />);
+    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(screen.getByText("Title is required")).toBeInTheDocument();
+    expect(screen.getByText("Content is required")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Clear" }));
+    expect(screen.queryByText("Title is required")).not.toBeInTheDocument();
+    expect(screen.queryByText("Content is required")).not.toBeInTheDocument();
+  });
+
+  it("does not call onSubmit when Clear button is clicked", async () => {
+    const onSubmit = vi.fn();
+    render(<NoteEditor onSubmit={onSubmit} />);
+    await userEvent.type(screen.getByLabelText("Title"), "Test Title");
+    await userEvent.type(screen.getByLabelText("Content"), "Test Content");
+    await userEvent.click(screen.getByRole("button", { name: "Clear" }));
+    expect(onSubmit).not.toHaveBeenCalled();
+  });
 });
