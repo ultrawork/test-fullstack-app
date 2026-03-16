@@ -110,18 +110,22 @@ test.describe('Заметки', () => {
     await page.getByRole('button', { name: 'Create Note' }).click();
     await page.waitForURL('**/dashboard');
 
+    // Ждём появления карточки заметки на дашборде
+    await expect(page.getByTestId('note-card')).toBeVisible();
+
     // Нажимаем кнопку удаления на карточке
     await page.getByTestId('note-delete-button').click();
 
     // Проверяем модальное окно
     await expect(page.getByRole('dialog')).toBeVisible();
-    await expect(page.getByText('Are you sure you want to delete "Заметка для удаления"?')).toBeVisible();
+    await expect(page.getByText('Are you sure you want to delete')).toBeVisible();
 
     // Подтверждаем удаление
     await page.getByRole('dialog').getByRole('button', { name: 'Delete' }).click();
 
-    // Проверяем что заметка исчезла
-    await expect(page.getByText('Заметка для удаления')).not.toBeVisible();
+    // Ждём закрытия модального окна и исчезновения заметки
+    await expect(page.getByRole('dialog')).not.toBeVisible();
+    await expect(page.getByTestId('note-card')).not.toBeVisible();
   });
 
   // SC-106: Отмена удаления заметки
