@@ -20,8 +20,8 @@ test.describe('Категории', () => {
     await page.getByRole('button', { name: 'Add' }).click();
 
     // Проверяем появление категории
-    await expect(page.getByText('Работа')).toBeVisible();
-    await expect(page.getByText('0 notes')).toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('Работа')).toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('0 notes')).toBeVisible();
 
     // Поле ввода очищено
     await expect(page.getByLabel('Category name')).toHaveValue('');
