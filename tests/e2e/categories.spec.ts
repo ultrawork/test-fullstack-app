@@ -20,8 +20,8 @@ test.describe('Категории', () => {
     await page.getByRole('button', { name: 'Add' }).click();
 
     // Проверяем появление категории
-    await expect(page.getByText('Работа')).toBeVisible();
-    await expect(page.getByText('0 notes')).toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('Работа')).toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('0 notes')).toBeVisible();
 
     // Поле ввода очищено
     await expect(page.getByLabel('Category name')).toHaveValue('');
@@ -57,7 +57,7 @@ test.describe('Категории', () => {
     // Создаём категорию
     await page.getByLabel('Category name').fill('Работа');
     await page.getByRole('button', { name: 'Add' }).click();
-    await expect(page.getByText('Работа')).toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('Работа')).toBeVisible();
 
     // Нажимаем Edit
     await page.getByRole('button', { name: 'Edit Работа' }).click();
@@ -72,7 +72,7 @@ test.describe('Категории', () => {
 
     // Модалка закрылась, обновлённое имя
     await expect(page.getByRole('dialog')).not.toBeVisible();
-    await expect(page.getByText('Проекты')).toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('Проекты')).toBeVisible();
   });
 
   // SC-204: Удаление категории
@@ -85,7 +85,7 @@ test.describe('Категории', () => {
     // Создаём категорию
     await page.getByLabel('Category name').fill('Для удаления');
     await page.getByRole('button', { name: 'Add' }).click();
-    await expect(page.getByText('Для удаления')).toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('Для удаления')).toBeVisible();
 
     // Нажимаем Delete
     await page.getByRole('button', { name: 'Delete Для удаления' }).click();
@@ -101,7 +101,7 @@ test.describe('Категории', () => {
 
     // Категория исчезла
     await expect(page.getByRole('dialog')).not.toBeVisible();
-    await expect(page.getByText('Для удаления')).not.toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('Для удаления')).not.toBeVisible();
   });
 
   // SC-205: Фильтрация заметок по категории
@@ -135,23 +135,25 @@ test.describe('Категории', () => {
     await page.waitForURL('**/dashboard');
 
     // Фильтруем по «Работа»
-    await page.getByRole('button', { name: /Работа/ }).click();
+    const sidebar = page.getByTestId('sidebar');
+    const dashboard = page.getByTestId('dashboard-page');
+    await sidebar.getByRole('button', { name: /Работа/ }).click();
     await page.waitForTimeout(500);
-    await expect(page.getByText('Рабочая задача')).toBeVisible();
-    await expect(page.getByText('Дневник')).not.toBeVisible();
+    await expect(dashboard.getByText('Рабочая задача')).toBeVisible();
+    await expect(dashboard.getByText('Дневник')).not.toBeVisible();
 
     // Фильтруем по «Личное»
-    await page.getByRole('button', { name: /Личное/ }).click();
+    await sidebar.getByRole('button', { name: /Личное/ }).click();
     await page.waitForTimeout(500);
-    await expect(page.getByText('Дневник')).toBeVisible();
-    await expect(page.getByText('Рабочая задача')).not.toBeVisible();
+    await expect(dashboard.getByText('Дневник')).toBeVisible();
+    await expect(dashboard.getByText('Рабочая задача')).not.toBeVisible();
 
     // Сбрасываем — All Notes
-    await page.getByRole('button', { name: 'All Notes' }).click();
+    await sidebar.getByRole('button', { name: 'All Notes' }).click();
     await page.waitForTimeout(500);
-    await expect(page.getByText('Рабочая задача')).toBeVisible();
-    await expect(page.getByText('Дневник')).toBeVisible();
-    await expect(page.getByText('Без категории')).toBeVisible();
+    await expect(dashboard.getByText('Рабочая задача')).toBeVisible();
+    await expect(dashboard.getByText('Дневник')).toBeVisible();
+    await expect(dashboard.getByText('Без категории')).toBeVisible();
   });
 
   // SC-206: Создание заметки с привязкой к категории
@@ -178,8 +180,9 @@ test.describe('Категории', () => {
     await page.getByRole('button', { name: 'Create Note' }).click();
 
     await page.waitForURL('**/dashboard');
-    await expect(page.getByText('Заметка с категорией')).toBeVisible();
-    await expect(page.getByText('Работа')).toBeVisible();
+    const dashboard = page.getByTestId('dashboard-page');
+    await expect(dashboard.getByText('Заметка с категорией')).toBeVisible();
+    await expect(dashboard.getByText('Работа')).toBeVisible();
   });
 
   // SC-207: CRUD категорий через API
