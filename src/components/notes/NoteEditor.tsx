@@ -47,6 +47,13 @@ export default function NoteEditor({
     onSubmit(title.trim(), content.trim(), categoryId || undefined);
   };
 
+  const resetForm = (): void => {
+    setTitle("");
+    setContent("");
+    setCategoryId("");
+    setErrors({});
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4" noValidate>
       <Input
@@ -72,6 +79,7 @@ export default function NoteEditor({
         </label>
         <select
           id="category-select"
+          aria-label="Category (optional)"
           value={categoryId}
           onChange={(e) => setCategoryId(e.target.value)}
           className="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -87,6 +95,9 @@ export default function NoteEditor({
       <div className="flex gap-2">
         <Button type="submit" isLoading={isLoading}>
           {submitLabel}
+        </Button>
+        <Button type="button" variant="secondary" onClick={resetForm}>
+          Clear
         </Button>
       </div>
     </form>

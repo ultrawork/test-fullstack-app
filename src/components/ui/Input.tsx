@@ -1,6 +1,6 @@
 "use client";
 
-import { type InputHTMLAttributes, type ReactNode, useId } from "react";
+import { type InputHTMLAttributes, type ReactNode } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
@@ -14,8 +14,7 @@ export default function Input({
   id: externalId,
   ...props
 }: InputProps): ReactNode {
-  const generatedId = useId();
-  const inputId = externalId ?? generatedId;
+  const inputId = externalId ?? label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   const errorId = `${inputId}-error`;
 
   return (
@@ -27,7 +26,9 @@ export default function Input({
         {label}
       </label>
       <input
+        {...props}
         id={inputId}
+        aria-label={label}
         className={`block w-full rounded-md border px-3 py-2 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
           error
             ? "border-red-500 focus:border-red-500 focus:ring-red-500"
@@ -35,7 +36,6 @@ export default function Input({
         } ${className}`}
         aria-describedby={error ? errorId : undefined}
         aria-invalid={error ? "true" : undefined}
-        {...props}
       />
       {error && (
         <p id={errorId} className="text-sm text-red-600" role="alert">
