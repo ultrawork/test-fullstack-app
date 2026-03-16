@@ -32,27 +32,27 @@ test.describe('Аутентификация', () => {
 
     // Шаг 1: пустые поля
     await page.getByRole('button', { name: 'Create account' }).click();
-    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.getByRole('alert').first()).toBeVisible();
 
     // Шаг 2: невалидный email
     await page.getByLabel('Email').fill('not-an-email');
     await page.getByLabel('Password', { exact: true }).fill(TEST_PASSWORD);
     await page.getByLabel('Confirm Password').fill(TEST_PASSWORD);
     await page.getByRole('button', { name: 'Create account' }).click();
-    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.getByRole('alert').first()).toBeVisible();
 
     // Шаг 3: короткий пароль
     await page.getByLabel('Email').fill('valid@example.com');
     await page.getByLabel('Password', { exact: true }).fill('short');
     await page.getByLabel('Confirm Password').fill('short');
     await page.getByRole('button', { name: 'Create account' }).click();
-    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.getByRole('alert').first()).toBeVisible();
 
     // Шаг 4: пароли не совпадают
     await page.getByLabel('Password', { exact: true }).fill(TEST_PASSWORD);
     await page.getByLabel('Confirm Password').fill('DifferentPass');
     await page.getByRole('button', { name: 'Create account' }).click();
-    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.getByRole('alert').first()).toBeVisible();
 
     // Остаёмся на странице регистрации
     await expect(page).toHaveURL(/\/register/);
