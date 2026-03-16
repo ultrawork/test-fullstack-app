@@ -180,8 +180,9 @@ test.describe('Категории', () => {
     await page.getByRole('button', { name: 'Create Note' }).click();
 
     await page.waitForURL('**/dashboard');
-    await expect(page.getByText('Заметка с категорией')).toBeVisible();
-    await expect(page.getByText('Работа')).toBeVisible();
+    const dashboard = page.getByTestId('dashboard-page');
+    await expect(dashboard.getByText('Заметка с категорией')).toBeVisible();
+    await expect(dashboard.getByText('Работа')).toBeVisible();
   });
 
   // SC-207: CRUD категорий через API
