@@ -57,7 +57,7 @@ test.describe('Категории', () => {
     // Создаём категорию
     await page.getByLabel('Category name').fill('Работа');
     await page.getByRole('button', { name: 'Add' }).click();
-    await expect(page.getByText('Работа')).toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('Работа')).toBeVisible();
 
     // Нажимаем Edit
     await page.getByRole('button', { name: 'Edit Работа' }).click();
@@ -72,7 +72,7 @@ test.describe('Категории', () => {
 
     // Модалка закрылась, обновлённое имя
     await expect(page.getByRole('dialog')).not.toBeVisible();
-    await expect(page.getByText('Проекты')).toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('Проекты')).toBeVisible();
   });
 
   // SC-204: Удаление категории
