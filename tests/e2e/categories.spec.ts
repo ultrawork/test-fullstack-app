@@ -85,7 +85,7 @@ test.describe('Категории', () => {
     // Создаём категорию
     await page.getByLabel('Category name').fill('Для удаления');
     await page.getByRole('button', { name: 'Add' }).click();
-    await expect(page.getByText('Для удаления')).toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('Для удаления')).toBeVisible();
 
     // Нажимаем Delete
     await page.getByRole('button', { name: 'Delete Для удаления' }).click();
@@ -101,7 +101,7 @@ test.describe('Категории', () => {
 
     // Категория исчезла
     await expect(page.getByRole('dialog')).not.toBeVisible();
-    await expect(page.getByText('Для удаления')).not.toBeVisible();
+    await expect(page.getByTestId('categories-page').getByText('Для удаления')).not.toBeVisible();
   });
 
   // SC-205: Фильтрация заметок по категории
