@@ -39,7 +39,8 @@ test.describe('Заметки', () => {
     await page.getByRole('button', { name: 'Create Note' }).click();
 
     // Должны появиться ошибки валидации
-    await expect(page.getByRole('alert')).toBeVisible();
+    await expect(page.getByText('Title is required')).toBeVisible();
+    await expect(page.getByText('Content is required')).toBeVisible();
     await expect(page).toHaveURL(/\/dashboard\/notes\/new/);
   });
 
