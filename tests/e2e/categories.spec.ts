@@ -135,23 +135,25 @@ test.describe('Категории', () => {
     await page.waitForURL('**/dashboard');
 
     // Фильтруем по «Работа»
-    await page.getByRole('button', { name: /Работа/ }).click();
+    const sidebar = page.getByTestId('sidebar');
+    const dashboard = page.getByTestId('dashboard-page');
+    await sidebar.getByRole('button', { name: /Работа/ }).click();
     await page.waitForTimeout(500);
-    await expect(page.getByText('Рабочая задача')).toBeVisible();
-    await expect(page.getByText('Дневник')).not.toBeVisible();
+    await expect(dashboard.getByText('Рабочая задача')).toBeVisible();
+    await expect(dashboard.getByText('Дневник')).not.toBeVisible();
 
     // Фильтруем по «Личное»
-    await page.getByRole('button', { name: /Личное/ }).click();
+    await sidebar.getByRole('button', { name: /Личное/ }).click();
     await page.waitForTimeout(500);
-    await expect(page.getByText('Дневник')).toBeVisible();
-    await expect(page.getByText('Рабочая задача')).not.toBeVisible();
+    await expect(dashboard.getByText('Дневник')).toBeVisible();
+    await expect(dashboard.getByText('Рабочая задача')).not.toBeVisible();
 
     // Сбрасываем — All Notes
-    await page.getByRole('button', { name: 'All Notes' }).click();
+    await sidebar.getByRole('button', { name: 'All Notes' }).click();
     await page.waitForTimeout(500);
-    await expect(page.getByText('Рабочая задача')).toBeVisible();
-    await expect(page.getByText('Дневник')).toBeVisible();
-    await expect(page.getByText('Без категории')).toBeVisible();
+    await expect(dashboard.getByText('Рабочая задача')).toBeVisible();
+    await expect(dashboard.getByText('Дневник')).toBeVisible();
+    await expect(dashboard.getByText('Без категории')).toBeVisible();
   });
 
   // SC-206: Создание заметки с привязкой к категории
