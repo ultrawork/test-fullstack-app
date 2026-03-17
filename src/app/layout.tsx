@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,10 +11,17 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>): React.JSX.Element {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <header className="flex justify-end p-4">
+          <nav aria-label="Theme settings">
+            <ThemeToggle />
+          </nav>
+        </header>
+        {children}
+      </body>
     </html>
   );
 }
