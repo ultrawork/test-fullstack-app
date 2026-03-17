@@ -4,6 +4,9 @@ type NotesListProps = {
   notes: Note[];
 };
 
+/**
+ * Renders the notes collection using semantic list and article markup.
+ */
 export default function NotesList({ notes }: NotesListProps): JSX.Element {
   return (
     <section aria-label="Notes list" className="w-full">
