@@ -5,6 +5,9 @@ type SearchInputProps = {
   placeholder?: string;
 };
 
+/**
+ * Renders a labeled controlled search input for filtering notes by title.
+ */
 export default function SearchInput({
   id = "search",
   value,
@@ -20,7 +23,9 @@ export default function SearchInput({
         className="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900"
         id={id}
         name="search"
-        onChange={(event) => onChange(event.target.value)}
+        onChange={(event) => {
+          onChange(event.target.value);
+        }}
         placeholder={placeholder}
         type="search"
         value={value}
