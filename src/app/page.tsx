@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import NotesList from "@/components/NotesList";
 import SearchInput from "@/components/SearchInput";
 import type { Note } from "@/types/note";
@@ -9,36 +9,49 @@ const notes: Note[] = [
   {
     id: "1",
     title: "First Note",
-    content: "A short introduction note for the notes app.",
+    content: "Capture quick thoughts and reminders in your first note.",
   },
   {
     id: "2",
     title: "Shopping list",
-    content: "Milk, eggs, bread, and fruit for the week.",
+    content: "Remember milk, bread, fruit, and tea for the week.",
   },
   {
     id: "3",
     title: "Work plan",
-    content: "Prepare roadmap updates and review sprint tasks.",
+    content: "Outline priorities, milestones, and follow-up tasks for work.",
   },
 ];
 
+/**
+ * Renders the main notes page with a client-side title search filter.
+ */
 export default function HomePage(): JSX.Element {
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const normalizedQuery = searchQuery.trim().toLowerCase();
-  const filteredNotes = normalizedQuery
-    ? notes.filter((note) => note.title.toLowerCase().includes(normalizedQuery))
-    : notes;
+
+  const filteredNotes = useMemo((): Note[] => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return notes;
+    }
+
+    return notes.filter((note) =>
+      note.title.toLowerCase().includes(normalizedQuery),
+    );
+  }, [searchQuery]);
 
   return (
-    <main className="min-h-screen bg-white px-6 py-10">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
-        <header className="flex flex-col gap-4">
-          <h1 className="text-4xl font-bold">Notes App</h1>
+    <>
+      <header className="border-b border-gray-200 bg-white">
+        <div className="mx-auto flex w-full max-w-4xl flex-col gap-4 px-6 py-8">
+          <h1 className="text-4xl font-bold text-gray-900">Notes App</h1>
           <SearchInput value={searchQuery} onChange={setSearchQuery} />
-        </header>
+        </div>
+      </header>
+      <main className="mx-auto flex min-h-screen w-full max-w-4xl px-6 py-8">
         <NotesList notes={filteredNotes} />
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
