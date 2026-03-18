@@ -185,6 +185,17 @@ function resolveNotificationClickUrl(notification, action) {
   return resolveNotificationTargetUrl(data?.url);
 }
 
+function isTrustedMessageSource(source) {
+  return Boolean(
+    source &&
+      typeof source === "object" &&
+      "id" in source &&
+      "type" in source &&
+      source.type === "window" &&
+      typeof source.id === "string",
+  );
+}
+
 self.addEventListener("push", (event) => {
   const payload = parsePushPayload(event);
   const title = payload?.title || "Notification";
@@ -232,10 +243,16 @@ self.addEventListener("notificationclick", (event) => {
 });
 
 self.addEventListener("message", (event) => {
-  if (!event.data) return;
+  if (!isPlainObject(event.data) || typeof event.data.type !== "string") {
+    return;
+  }
 
   switch (event.data.type) {
     case "SKIP_WAITING":
+      if (!isTrustedMessageSource(event.source)) {
+        return;
+      }
+
       self.skipWaiting();
       break;
 
