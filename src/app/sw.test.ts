@@ -1,74 +1,12 @@
-/**
- * Tests for public/sw.js Service Worker logic.
- * We test the utility functions extracted from the SW in isolation.
- */
 import { describe, expect, it } from "vitest";
 
-/** Build notification options from a push payload. */
-function buildNotificationOptions(payload: Record<string, unknown> | null) {
-  const isHighOrUrgent =
-    payload?.priority === "HIGH" || payload?.priority === "URGENT";
-
-  const requireInteraction =
-    ((payload?.requireInteraction as boolean | undefined) ?? isHighOrUrgent) ||
-    false;
-
-  const tag = (payload?.tag as string | undefined) || undefined;
-
-  const renotify = tag
-    ? (((payload?.renotify as boolean | undefined) ?? isHighOrUrgent) || false)
-    : false;
-
-  const silent =
-    ((payload?.silent as boolean | undefined) ?? (payload?.priority === "LOW")) ||
-    false;
-
-  return {
-    body: (payload?.body as string | undefined) || "",
-    icon: payload?.icon as string | undefined,
-    badge: payload?.badge as string | undefined,
-    tag,
-    data: {
-      ...(payload?.data as Record<string, unknown> | undefined),
-      url:
-        (payload?.url as string | undefined) ||
-        (payload?.data as Record<string, unknown> | undefined)?.url ||
-        "/",
-      _meta: {
-        priority: (payload?.priority as string | undefined) || null,
-        type: (payload?.type as string | undefined) || null,
-      },
-    },
-    requireInteraction,
-    renotify,
-    silent,
-    actions: Array.isArray(payload?.actions)
-      ? (payload.actions as unknown[])
-      : undefined,
-  };
-}
-
-/** Safely parse push event data. */
-function parsePushPayload(
-  jsonText: string | null,
-): Record<string, unknown> | null {
-  if (!jsonText) return null;
-
-  try {
-    return JSON.parse(jsonText) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
-/** Check whether a URL belongs to the same origin. */
-function isSameOrigin(url: string, origin: string): boolean {
-  try {
-    return new URL(url, origin).origin === origin;
-  } catch {
-    return false;
-  }
-}
+import {
+  buildNotificationOptions,
+  isSameOrigin,
+  normalizeUrlForMatch,
+  parsePushPayload,
+  resolveNotificationTargetUrl,
+} from "@/lib/sw-helpers";
 
 describe("parsePushPayload", () => {
   it("returns null for null input", () => {
@@ -214,5 +152,63 @@ describe("isSameOrigin", () => {
 
   it("returns false for invalid absolute URL", () => {
     expect(isSameOrigin("https://[invalid]/", origin)).toBe(false);
+  });
+});
+
+describe("normalizeUrlForMatch", () => {
+  const origin = "https://example.com";
+
+  it("normalizes relative and absolute same-origin URLs to same match key", () => {
+    expect(normalizeUrlForMatch("/notes/1", origin)).toEqual({
+      origin,
+      pathname: "/notes/1",
+    });
+
+    expect(normalizeUrlForMatch("https://example.com/notes/1/", origin)).toEqual({
+      origin,
+      pathname: "/notes/1",
+    });
+  });
+
+  it("ignores query and hash when matching", () => {
+    expect(
+      normalizeUrlForMatch("https://example.com/notes/1?tab=a#section", origin),
+    ).toEqual({
+      origin,
+      pathname: "/notes/1",
+    });
+  });
+
+  it("returns null for cross-origin URL", () => {
+    expect(normalizeUrlForMatch("https://other.com/notes/1", origin)).toBeNull();
+  });
+});
+
+describe("resolveNotificationTargetUrl", () => {
+  const origin = "https://example.com";
+
+  it("returns same-origin relative path", () => {
+    expect(resolveNotificationTargetUrl("/notes/1?tab=a#details", origin)).toBe(
+      "/notes/1?tab=a#details",
+    );
+  });
+
+  it("converts same-origin absolute url to app-relative path", () => {
+    expect(
+      resolveNotificationTargetUrl(
+        "https://example.com/notes/1?tab=a#details",
+        origin,
+      ),
+    ).toBe("/notes/1?tab=a#details");
+  });
+
+  it("falls back to / for cross-origin url", () => {
+    expect(resolveNotificationTargetUrl("https://other.com/phishing", origin)).toBe(
+      "/",
+    );
+  });
+
+  it("falls back to / for invalid url", () => {
+    expect(resolveNotificationTargetUrl("https://[invalid]/", origin)).toBe("/");
   });
 });
