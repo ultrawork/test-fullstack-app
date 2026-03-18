@@ -10,7 +10,7 @@ describe("HomePage", () => {
   it("renders the heading", () => {
     render(<HomePage />);
     expect(
-      screen.getByRole("heading", { level: 1, name: "Notes App" }),
+      screen.getByRole("heading", { level: 1, name: "My Notes" }),
     ).toBeInTheDocument();
   });
 
