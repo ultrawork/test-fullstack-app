@@ -2,6 +2,7 @@ FROM node:20-alpine AS base
 
 FROM base AS deps
 WORKDIR /app
+ENV PRISMA_SKIP_POSTINSTALL_GENERATE=true
 COPY package.json package-lock.json* ./
 RUN npm ci
 

@@ -23,6 +23,32 @@ Private, self-hosted notes application with cloud sync across Web, iOS, and Andr
 
 **Deployment:** Docker Compose (self-hosted)
 
+## Environment Setup
+
+1. Copy `.env.example` to `.env`:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Fill in `DATABASE_URL` and `VAPID_SUBJECT` in `.env`.
+
+3. Generate VAPID keys:
+
+   ```bash
+   npm run vapid:generate
+   ```
+
+   Copy the output values into `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` in `.env`.
+
+> **Note:** If you encounter a Prisma generate error during `npm install`, run:
+>
+> ```bash
+> PRISMA_SKIP_POSTINSTALL_GENERATE=true npm ci
+> ```
+>
+> Then run `npm run prisma:generate` once a Prisma schema is in place.
+
 ## Getting Started
 
 ### Prerequisites

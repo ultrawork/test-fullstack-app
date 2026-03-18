@@ -28,6 +28,8 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
+        env:
+          PRISMA_SKIP_POSTINSTALL_GENERATE: "true"
         run: npm ci
 
       - name: Lint
