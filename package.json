@@ -10,12 +10,16 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "ioredis": "^5.4.1",
     "next": "^15.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "zod": "^3.23.8",
     "zustand": "^5.0.0"
   },
   "devDependencies": {
+    "prisma": "^5.22.0",
     "@eslint/eslintrc": "^3.0.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
