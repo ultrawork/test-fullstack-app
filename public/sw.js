@@ -3,19 +3,19 @@
  *
  * Ожидаемый формат payload (JSON):
  * {
- *   title?:            string,
- *   body?:             string,
- *   icon?:             string,
- *   badge?:            string,
- *   tag?:              string,
- *   url?:              string,    // URL для открытия при клике
- *   priority?:         'LOW' | 'NORMAL' | 'HIGH' | 'URGENT',
- *   type?:             string,
- *   actions?:          NotificationAction[],
+ *   title?: string,
+ *   body?: string,
+ *   icon?: string,
+ *   badge?: string,
+ *   tag?: string,
+ *   url?: string, // URL для открытия при клике
+ *   priority?: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT',
+ *   type?: string,
+ *   actions?: NotificationAction[],
  *   requireInteraction?: boolean,
- *   renotify?:         boolean,
- *   silent?:           boolean,
- *   data?:             object,    // произвольные данные; data.url используется как fallback URL
+ *   renotify?: boolean,
+ *   silent?: boolean,
+ *   data?: object, // произвольные данные; data.url используется как fallback URL
  * }
  *
  * Регистрация (рекомендация для usePushSubscription):
@@ -28,8 +28,8 @@
 // ---------------------------------------------------------------------------
 
 /** @type {string} Версия кэша. При изменении старые кэши автоматически удаляются. */
-const CACHE_VERSION = 'v1';
-const CACHE_PREFIX = 'notes-web-sw';
+const CACHE_VERSION = "v1";
+const CACHE_PREFIX = "notes-web-sw";
 
 /** Имя текущего кэша. */
 const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VERSION}`;
@@ -41,7 +41,7 @@ const SW_VERSION = CACHE_VERSION;
 // install — открываем текущий кэш и немедленно активируем SW
 // ---------------------------------------------------------------------------
 
-self.addEventListener('install', (event) => {
+self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME));
   self.skipWaiting();
 });
@@ -50,14 +50,14 @@ self.addEventListener('install', (event) => {
 // activate — очищаем устаревшие кэши и забираем управление всеми клиентами
 // ---------------------------------------------------------------------------
 
-self.addEventListener('activate', (event) => {
+self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
       await Promise.all(
         keys
-          .filter((k) => k.startsWith(CACHE_PREFIX) && k !== CACHE_NAME)
-          .map((k) => caches.delete(k)),
+          .filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME)
+          .map((key) => caches.delete(key)),
       );
       await self.clients.claim();
     })(),
@@ -77,6 +77,7 @@ self.addEventListener('activate', (event) => {
  */
 function parsePushPayload(event) {
   if (!event.data) return null;
+
   try {
     return event.data.json();
   } catch {
@@ -106,23 +107,21 @@ function isSameOrigin(url) {
 // push — отображение уведомления
 // ---------------------------------------------------------------------------
 
-self.addEventListener('push', (event) => {
+self.addEventListener("push", (event) => {
   const payload = parsePushPayload(event);
-
   const isHighOrUrgent =
-    payload?.priority === 'HIGH' || payload?.priority === 'URGENT';
-
-  const title = payload?.title || 'Notification';
+    payload?.priority === "HIGH" || payload?.priority === "URGENT";
+  const title = payload?.title || "Notification";
 
   /** @type {NotificationOptions} */
   const options = {
-    body: payload?.body || '',
+    body: payload?.body || "",
     ...(payload?.icon !== undefined && { icon: payload.icon }),
     ...(payload?.badge !== undefined && { badge: payload.badge }),
     tag: payload?.tag || undefined,
     data: {
       ...payload?.data,
-      url: payload?.url || payload?.data?.url || '/',
+      url: payload?.url || payload?.data?.url || "/",
       _meta: {
         swVersion: SW_VERSION,
         receivedAt: Date.now(),
@@ -135,12 +134,14 @@ self.addEventListener('push', (event) => {
         ? payload.requireInteraction
         : isHighOrUrgent,
     renotify: payload?.tag
-      ? (payload?.renotify !== undefined ? payload.renotify : isHighOrUrgent)
+      ? payload?.renotify !== undefined
+        ? payload.renotify
+        : isHighOrUrgent
       : false,
     silent:
       payload?.silent !== undefined
         ? payload.silent
-        : payload?.priority === 'LOW',
+        : payload?.priority === "LOW",
     ...(Array.isArray(payload?.actions) && { actions: payload.actions }),
     timestamp: Date.now(),
   };
@@ -152,15 +153,15 @@ self.addEventListener('push', (event) => {
 // notificationclick — открытие/фокус нужной вкладки
 // ---------------------------------------------------------------------------
 
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const urlToOpen = event.notification?.data?.url || '/';
+  const urlToOpen = event.notification?.data?.url || "/";
 
   event.waitUntil(
     (async () => {
       const allClients = await self.clients.matchAll({
-        type: 'window',
+        type: "window",
         includeUncontrolled: true,
       });
 
@@ -168,11 +169,9 @@ self.addEventListener('notificationclick', (event) => {
         ? new URL(urlToOpen, self.location.origin).href
         : urlToOpen;
 
-      const matchingClient = allClients.find(
-        (c) => c.url === targetUrl,
-      );
+      const matchingClient = allClients.find((client) => client.url === targetUrl);
 
-      if (matchingClient && 'focus' in matchingClient) {
+      if (matchingClient && "focus" in matchingClient) {
         return matchingClient.focus();
       }
 
@@ -185,17 +184,17 @@ self.addEventListener('notificationclick', (event) => {
 // message — служебные команды от приложения
 // ---------------------------------------------------------------------------
 
-self.addEventListener('message', (event) => {
+self.addEventListener("message", (event) => {
   if (!event.data) return;
 
   switch (event.data.type) {
-    case 'SKIP_WAITING':
+    case "SKIP_WAITING":
       self.skipWaiting();
       break;
 
-    case 'GET_VERSION':
+    case "GET_VERSION":
       event.source?.postMessage({
-        type: 'SW_VERSION',
+        type: "SW_VERSION",
         payload: { sw: SW_VERSION, cache: CACHE_NAME },
       });
       break;
