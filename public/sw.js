@@ -121,8 +121,8 @@ self.addEventListener('push', (event) => {
     ...(payload?.badge !== undefined && { badge: payload.badge }),
     tag: payload?.tag || undefined,
     data: {
-      url: payload?.url || payload?.data?.url || '/',
       ...payload?.data,
+      url: payload?.url || payload?.data?.url || '/',
       _meta: {
         swVersion: SW_VERSION,
         receivedAt: Date.now(),
@@ -134,8 +134,9 @@ self.addEventListener('push', (event) => {
       payload?.requireInteraction !== undefined
         ? payload.requireInteraction
         : isHighOrUrgent,
-    renotify:
-      payload?.renotify !== undefined ? payload.renotify : isHighOrUrgent,
+    renotify: payload?.tag
+      ? (payload?.renotify !== undefined ? payload.renotify : isHighOrUrgent)
+      : false,
     silent:
       payload?.silent !== undefined
         ? payload.silent

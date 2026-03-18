@@ -15,8 +15,11 @@ function buildNotificationOptions(payload: Record<string, unknown> | null) {
     ((payload?.requireInteraction as boolean | undefined) ?? isHighOrUrgent) ||
     false;
 
-  const renotify =
-    ((payload?.renotify as boolean | undefined) ?? isHighOrUrgent) || false;
+  const tag = (payload?.tag as string | undefined) || undefined;
+
+  const renotify = tag
+    ? (((payload?.renotify as boolean | undefined) ?? isHighOrUrgent) || false)
+    : false;
 
   const silent =
     ((payload?.silent as boolean | undefined) ??
@@ -27,10 +30,10 @@ function buildNotificationOptions(payload: Record<string, unknown> | null) {
     body: (payload?.body as string | undefined) || "",
     icon: payload?.icon as string | undefined,
     badge: payload?.badge as string | undefined,
-    tag: (payload?.tag as string | undefined) || undefined,
+    tag,
     data: {
-      url: (payload?.url as string | undefined) || (payload?.data as Record<string, unknown> | undefined)?.url || "/",
       ...(payload?.data as Record<string, unknown> | undefined),
+      url: (payload?.url as string | undefined) || (payload?.data as Record<string, unknown> | undefined)?.url || "/",
       _meta: {
         priority: (payload?.priority as string | undefined) || null,
         type: (payload?.type as string | undefined) || null,
@@ -113,19 +116,42 @@ describe("buildNotificationOptions — data.url", () => {
     const opts = buildNotificationOptions({ data: { url: "/notes/2" } });
     expect(opts.data.url).toBe("/notes/2");
   });
+
+  it("top-level url takes precedence over data.url", () => {
+    const opts = buildNotificationOptions({ url: "/primary", data: { url: "/secondary" } });
+    expect(opts.data.url).toBe("/primary");
+  });
 });
 
 describe("buildNotificationOptions — priority mapping", () => {
-  it("sets requireInteraction and renotify for HIGH priority", () => {
+  it("sets requireInteraction for HIGH priority", () => {
     const opts = buildNotificationOptions({ priority: "HIGH" });
     expect(opts.requireInteraction).toBe(true);
+  });
+
+  it("sets renotify for HIGH priority when tag is present", () => {
+    const opts = buildNotificationOptions({ priority: "HIGH", tag: "high-msg" });
     expect(opts.renotify).toBe(true);
   });
 
-  it("sets requireInteraction and renotify for URGENT priority", () => {
+  it("does not set renotify for HIGH priority without tag", () => {
+    const opts = buildNotificationOptions({ priority: "HIGH" });
+    expect(opts.renotify).toBe(false);
+  });
+
+  it("sets requireInteraction for URGENT priority", () => {
     const opts = buildNotificationOptions({ priority: "URGENT" });
     expect(opts.requireInteraction).toBe(true);
+  });
+
+  it("sets renotify for URGENT priority when tag is present", () => {
+    const opts = buildNotificationOptions({ priority: "URGENT", tag: "urgent-msg" });
     expect(opts.renotify).toBe(true);
+  });
+
+  it("does not set renotify for URGENT priority without tag", () => {
+    const opts = buildNotificationOptions({ priority: "URGENT" });
+    expect(opts.renotify).toBe(false);
   });
 
   it("sets silent for LOW priority", () => {
