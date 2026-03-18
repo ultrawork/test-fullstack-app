@@ -18,4 +18,11 @@ describe("HomePage", () => {
     render(<HomePage />);
     expect(screen.getByRole("main")).toBeInTheDocument();
   });
+
+  it("renders footer with copyright", () => {
+    render(<HomePage />);
+    const footer = screen.getByRole("contentinfo");
+    expect(footer).toBeInTheDocument();
+    expect(footer).toHaveTextContent("© 2026 Notes App");
+  });
 });
