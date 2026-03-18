@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: notes
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
