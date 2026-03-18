@@ -17,9 +17,9 @@ Private, self-hosted notes application with cloud sync across Web, iOS, and Andr
 
 - Node.js + Express.js
 - PostgreSQL + Prisma ORM
-- JWT authentication (access + refresh tokens)
+- JWT authentication (access token in-memory + refresh token in httpOnly cookie)
 
-**API:** `/api/v1/auth/*`, `/api/v1/notes/*`, `/api/v1/categories/*`
+**API:** `/api/v2/auth/*`, `/api/v2/notes/*`, `/api/v2/categories/*`
 
 **Deployment:** Docker Compose (self-hosted)
 
@@ -56,7 +56,13 @@ src/
 │   └── globals.css   # Global styles (Tailwind)
 ├── components/       # Reusable UI components
 ├── stores/           # Zustand state stores
+│   └── auth.ts       # Auth store (JWT in-memory, no localStorage)
 ├── lib/              # Utilities and helpers
+│   ├── api/          # API infrastructure
+│   │   ├── config.ts # API v2 base URL and prefix
+│   │   ├── http.ts   # HTTP client with auto-refresh on 401
+│   │   └── auth.ts   # Auth API (login, register, logout, refresh)
+│   └── rbac.ts       # RBAC helpers (roles, permissions)
 └── types/            # TypeScript type definitions
 ```
 
