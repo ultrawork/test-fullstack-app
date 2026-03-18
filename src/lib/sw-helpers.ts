@@ -1,3 +1,11 @@
+export type PushPriority = "LOW" | "NORMAL" | "HIGH" | "URGENT" | string;
+
+export type PushPayloadAction = {
+  action: string;
+  title: string;
+  icon?: string;
+};
+
 export type PushPayload = {
   title?: string;
   body?: string;
@@ -5,17 +13,24 @@ export type PushPayload = {
   badge?: string;
   tag?: string;
   url?: string;
-  priority?: "LOW" | "NORMAL" | "HIGH" | "URGENT" | string;
+  priority?: PushPriority;
   type?: string;
   actions?: unknown;
+  actionUrls?: Record<string, string>;
   requireInteraction?: boolean;
   renotify?: boolean;
   silent?: boolean;
-  data?: Record<string, unknown> & { url?: string };
+  data?: Record<string, unknown> & {
+    url?: string;
+    actionUrls?: Record<string, string>;
+    actions?: unknown;
+  };
 };
 
 export type NotificationData = Record<string, unknown> & {
   url: string;
+  actionUrls?: Record<string, string>;
+  actions?: PushPayloadAction[];
   _meta: {
     priority: string | null;
     type: string | null;
@@ -31,8 +46,40 @@ export type NotificationOptionsLike = {
   requireInteraction: boolean;
   renotify: boolean;
   silent: boolean;
-  actions?: unknown[];
+  actions?: PushPayloadAction[];
 };
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+function normalizePayloadActions(actions: unknown): PushPayloadAction[] | undefined {
+  if (!Array.isArray(actions)) {
+    return undefined;
+  }
+
+  return actions.filter((action): action is PushPayloadAction => {
+    return isPlainObject(action) && typeof action.action === "string" && typeof action.title === "string";
+  });
+}
+
+function normalizeActionUrls(actionUrls: unknown): Record<string, string> | undefined {
+  if (!isPlainObject(actionUrls)) {
+    return undefined;
+  }
+
+  const normalizedEntries = Object.entries(actionUrls).filter((entry): entry is [string, string] => {
+    const [key, value] = entry;
+    return typeof key === "string" && typeof value === "string";
+  });
+
+  return normalizedEntries.length > 0 ? Object.fromEntries(normalizedEntries) : undefined;
+}
 
 export function parsePushPayload(jsonText: string | null): PushPayload | null {
   if (!jsonText) {
@@ -40,7 +87,8 @@ export function parsePushPayload(jsonText: string | null): PushPayload | null {
   }
 
   try {
-    return JSON.parse(jsonText) as PushPayload;
+    const parsed = JSON.parse(jsonText) as unknown;
+    return isPlainObject(parsed) ? (parsed as PushPayload) : null;
   } catch {
     return null;
   }
@@ -49,17 +97,14 @@ export function parsePushPayload(jsonText: string | null): PushPayload | null {
 export function buildNotificationOptions(
   payload: PushPayload | null,
 ): NotificationOptionsLike {
-  const isHighOrUrgent =
-    payload?.priority === "HIGH" || payload?.priority === "URGENT";
-
-  const requireInteraction =
-    payload?.requireInteraction ?? isHighOrUrgent ?? false;
-
+  const isHighOrUrgent = payload?.priority === "HIGH" || payload?.priority === "URGENT";
+  const requireInteraction = payload?.requireInteraction ?? isHighOrUrgent ?? false;
   const tag = payload?.tag || undefined;
-
   const renotify = tag ? (payload?.renotify ?? isHighOrUrgent ?? false) : false;
-
   const silent = payload?.silent ?? (payload?.priority === "LOW") ?? false;
+  const payloadData = isPlainObject(payload?.data) ? payload.data : undefined;
+  const normalizedActions = normalizePayloadActions(payload?.actions);
+  const actionUrls = normalizeActionUrls(payload?.actionUrls) ?? normalizeActionUrls(payloadData?.actionUrls);
 
   return {
     body: payload?.body || "",
@@ -67,8 +112,10 @@ export function buildNotificationOptions(
     badge: payload?.badge,
     tag,
     data: {
-      ...(payload?.data || {}),
-      url: payload?.url || payload?.data?.url || "/",
+      ...(payloadData || {}),
+      url: payload?.url || payloadData?.url || "/",
+      ...(actionUrls && { actionUrls }),
+      ...(normalizedActions && { actions: normalizedActions }),
       _meta: {
         priority: payload?.priority || null,
         type: payload?.type || null,
@@ -77,9 +124,7 @@ export function buildNotificationOptions(
     requireInteraction,
     renotify,
     silent,
-    actions: Array.isArray(payload?.actions)
-      ? (payload.actions as unknown[])
-      : undefined,
+    actions: normalizedActions,
   };
 }
 
