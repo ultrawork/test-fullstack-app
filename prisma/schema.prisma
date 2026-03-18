@@ -1,0 +1,81 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum EmailQueueStatus {
+  pending
+  sent
+  failed
+}
+
+enum NotificationPriority {
+  low
+  medium
+  high
+  urgent
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  notifications           Notification[]
+  notificationPreferences NotificationPreference[]
+
+  @@map("users")
+}
+
+model EmailQueue {
+  id        String           @id @default(uuid())
+  to        String
+  subject   String
+  htmlBody  String           @map("html_body")
+  status    EmailQueueStatus @default(pending)
+  attempts  Int              @default(0)
+  error     String?
+  sentAt    DateTime?        @map("sent_at")
+  createdAt DateTime         @default(now()) @map("created_at")
+  updatedAt DateTime         @updatedAt @map("updated_at")
+
+  @@index([status, attempts])
+  @@map("email_queue")
+}
+
+model Notification {
+  id        String               @id @default(uuid())
+  userId    String               @map("user_id")
+  type      String
+  title     String
+  message   String
+  priority  NotificationPriority @default(medium)
+  read      Boolean              @default(false)
+  createdAt DateTime             @default(now()) @map("created_at")
+  updatedAt DateTime             @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model NotificationPreference {
+  id           String  @id @default(uuid())
+  userId       String  @map("user_id")
+  emailEnabled Boolean @default(true) @map("email_enabled")
+  pushEnabled  Boolean @default(true) @map("push_enabled")
+  quietStart   String? @map("quiet_start")
+  quietEnd     String? @map("quiet_end")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+  @@map("notification_preferences")
+}
