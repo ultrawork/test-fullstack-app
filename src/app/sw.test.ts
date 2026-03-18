@@ -2,9 +2,7 @@
  * Tests for public/sw.js Service Worker logic.
  * We test the utility functions extracted from the SW in isolation.
  */
-import { describe, it, expect } from "vitest";
-
-// --- Helpers extracted from sw.js for testability ---
+import { describe, expect, it } from "vitest";
 
 /** Build notification options from a push payload. */
 function buildNotificationOptions(payload: Record<string, unknown> | null) {
@@ -22,8 +20,7 @@ function buildNotificationOptions(payload: Record<string, unknown> | null) {
     : false;
 
   const silent =
-    ((payload?.silent as boolean | undefined) ??
-      (payload?.priority === "LOW")) ||
+    ((payload?.silent as boolean | undefined) ?? (payload?.priority === "LOW")) ||
     false;
 
   return {
@@ -33,7 +30,10 @@ function buildNotificationOptions(payload: Record<string, unknown> | null) {
     tag,
     data: {
       ...(payload?.data as Record<string, unknown> | undefined),
-      url: (payload?.url as string | undefined) || (payload?.data as Record<string, unknown> | undefined)?.url || "/",
+      url:
+        (payload?.url as string | undefined) ||
+        (payload?.data as Record<string, unknown> | undefined)?.url ||
+        "/",
       _meta: {
         priority: (payload?.priority as string | undefined) || null,
         type: (payload?.type as string | undefined) || null,
@@ -50,9 +50,10 @@ function buildNotificationOptions(payload: Record<string, unknown> | null) {
 
 /** Safely parse push event data. */
 function parsePushPayload(
-  jsonText: string | null
+  jsonText: string | null,
 ): Record<string, unknown> | null {
   if (!jsonText) return null;
+
   try {
     return JSON.parse(jsonText) as Record<string, unknown>;
   } catch {
@@ -68,8 +69,6 @@ function isSameOrigin(url: string, origin: string): boolean {
     return false;
   }
 }
-
-// --- Tests ---
 
 describe("parsePushPayload", () => {
   it("returns null for null input", () => {
@@ -91,98 +90,110 @@ describe("parsePushPayload", () => {
 
 describe("buildNotificationOptions — body", () => {
   it("uses empty string when body is absent", () => {
-    const opts = buildNotificationOptions(null);
-    expect(opts.body).toBe("");
+    const options = buildNotificationOptions(null);
+    expect(options.body).toBe("");
   });
 
   it("uses payload body when present", () => {
-    const opts = buildNotificationOptions({ body: "test body" });
-    expect(opts.body).toBe("test body");
+    const options = buildNotificationOptions({ body: "test body" });
+    expect(options.body).toBe("test body");
   });
 });
 
 describe("buildNotificationOptions — data.url", () => {
   it("defaults url to /", () => {
-    const opts = buildNotificationOptions(null);
-    expect(opts.data.url).toBe("/");
+    const options = buildNotificationOptions(null);
+    expect(options.data.url).toBe("/");
   });
 
   it("uses top-level url field", () => {
-    const opts = buildNotificationOptions({ url: "/notes/1" });
-    expect(opts.data.url).toBe("/notes/1");
+    const options = buildNotificationOptions({ url: "/notes/1" });
+    expect(options.data.url).toBe("/notes/1");
   });
 
   it("falls back to data.url", () => {
-    const opts = buildNotificationOptions({ data: { url: "/notes/2" } });
-    expect(opts.data.url).toBe("/notes/2");
+    const options = buildNotificationOptions({ data: { url: "/notes/2" } });
+    expect(options.data.url).toBe("/notes/2");
   });
 
   it("top-level url takes precedence over data.url", () => {
-    const opts = buildNotificationOptions({ url: "/primary", data: { url: "/secondary" } });
-    expect(opts.data.url).toBe("/primary");
+    const options = buildNotificationOptions({
+      url: "/primary",
+      data: { url: "/secondary" },
+    });
+    expect(options.data.url).toBe("/primary");
   });
 });
 
 describe("buildNotificationOptions — priority mapping", () => {
   it("sets requireInteraction for HIGH priority", () => {
-    const opts = buildNotificationOptions({ priority: "HIGH" });
-    expect(opts.requireInteraction).toBe(true);
+    const options = buildNotificationOptions({ priority: "HIGH" });
+    expect(options.requireInteraction).toBe(true);
   });
 
   it("sets renotify for HIGH priority when tag is present", () => {
-    const opts = buildNotificationOptions({ priority: "HIGH", tag: "high-msg" });
-    expect(opts.renotify).toBe(true);
+    const options = buildNotificationOptions({
+      priority: "HIGH",
+      tag: "high-msg",
+    });
+    expect(options.renotify).toBe(true);
   });
 
   it("does not set renotify for HIGH priority without tag", () => {
-    const opts = buildNotificationOptions({ priority: "HIGH" });
-    expect(opts.renotify).toBe(false);
+    const options = buildNotificationOptions({ priority: "HIGH" });
+    expect(options.renotify).toBe(false);
   });
 
   it("sets requireInteraction for URGENT priority", () => {
-    const opts = buildNotificationOptions({ priority: "URGENT" });
-    expect(opts.requireInteraction).toBe(true);
+    const options = buildNotificationOptions({ priority: "URGENT" });
+    expect(options.requireInteraction).toBe(true);
   });
 
   it("sets renotify for URGENT priority when tag is present", () => {
-    const opts = buildNotificationOptions({ priority: "URGENT", tag: "urgent-msg" });
-    expect(opts.renotify).toBe(true);
+    const options = buildNotificationOptions({
+      priority: "URGENT",
+      tag: "urgent-msg",
+    });
+    expect(options.renotify).toBe(true);
   });
 
   it("does not set renotify for URGENT priority without tag", () => {
-    const opts = buildNotificationOptions({ priority: "URGENT" });
-    expect(opts.renotify).toBe(false);
+    const options = buildNotificationOptions({ priority: "URGENT" });
+    expect(options.renotify).toBe(false);
   });
 
   it("sets silent for LOW priority", () => {
-    const opts = buildNotificationOptions({ priority: "LOW" });
-    expect(opts.silent).toBe(true);
-    expect(opts.requireInteraction).toBe(false);
+    const options = buildNotificationOptions({ priority: "LOW" });
+    expect(options.silent).toBe(true);
+    expect(options.requireInteraction).toBe(false);
   });
 
   it("leaves all flags false for NORMAL priority", () => {
-    const opts = buildNotificationOptions({ priority: "NORMAL" });
-    expect(opts.requireInteraction).toBe(false);
-    expect(opts.renotify).toBe(false);
-    expect(opts.silent).toBe(false);
+    const options = buildNotificationOptions({ priority: "NORMAL" });
+    expect(options.requireInteraction).toBe(false);
+    expect(options.renotify).toBe(false);
+    expect(options.silent).toBe(false);
   });
 
   it("allows payload to override silent even on LOW priority", () => {
-    const opts = buildNotificationOptions({ priority: "LOW", silent: false });
-    expect(opts.silent).toBe(false);
+    const options = buildNotificationOptions({
+      priority: "LOW",
+      silent: false,
+    });
+    expect(options.silent).toBe(false);
   });
 });
 
 describe("buildNotificationOptions — actions", () => {
   it("sets actions when array is provided", () => {
     const actions = [{ action: "open", title: "Open" }];
-    const opts = buildNotificationOptions({ actions });
-    expect(opts.actions).toEqual(actions);
+    const options = buildNotificationOptions({ actions });
+    expect(options.actions).toEqual(actions);
   });
 
   it("sets actions to undefined when not an array", () => {
-    const opts = buildNotificationOptions({ actions: "open" });
-    expect(opts.actions).toBeUndefined();
+    const options = buildNotificationOptions({ actions: "open" });
+    expect(options.actions).toBeUndefined();
   });
 });
 
