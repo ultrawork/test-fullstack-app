@@ -42,9 +42,11 @@ Private, self-hosted notes application with cloud sync across Web, iOS, and Andr
    Copy the output values into `VAPID_PUBLIC_KEY` and `VAPID_PRIVATE_KEY` in `.env`.
 
 > **Note:** If you encounter a Prisma generate error during `npm install`, run:
+>
 > ```bash
 > PRISMA_SKIP_POSTINSTALL_GENERATE=true npm ci
 > ```
+>
 > Then run `npm run prisma:generate` once a Prisma schema is in place.
 
 ## Getting Started
