@@ -1,22 +1,9 @@
 /**
  * Service Worker — обработка push-уведомлений.
  *
- * Ожидаемый формат payload (JSON):
- * {
- *   title?: string,
- *   body?: string,
- *   icon?: string,
- *   badge?: string,
- *   tag?: string,
- *   url?: string,
- *   priority?: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT',
- *   type?: string,
- *   actions?: NotificationAction[],
- *   requireInteraction?: boolean,
- *   renotify?: boolean,
- *   silent?: boolean,
- *   data?: object,
- * }
+ * Логика ниже синхронизирована с src/lib/sw-helpers.ts.
+ * Если формат payload или notification options меняется,
+ * обновляй helper и этот файл вместе, потому что SW выполняется отдельно от app bundle.
  */
 
 const CACHE_VERSION = "v1";
@@ -43,18 +30,100 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+function isPlainObject(value) {
+  if (value === null || typeof value !== "object") {
+    return false;
+  }
+
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
+}
+
+function normalizePayloadActions(actions) {
+  if (!Array.isArray(actions)) {
+    return undefined;
+  }
+
+  return actions.filter(
+    (action) =>
+      isPlainObject(action) &&
+      typeof action.action === "string" &&
+      typeof action.title === "string",
+  );
+}
+
+function normalizeActionUrls(actionUrls) {
+  if (!isPlainObject(actionUrls)) {
+    return undefined;
+  }
+
+  const normalizedEntries = Object.entries(actionUrls).filter(
+    ([key, value]) => typeof key === "string" && typeof value === "string",
+  );
+
+  return normalizedEntries.length > 0
+    ? Object.fromEntries(normalizedEntries)
+    : undefined;
+}
+
 function parsePushPayload(event) {
   if (!event.data) return null;
 
   try {
-    return event.data.json();
+    const parsed = event.data.json();
+    return isPlainObject(parsed) ? parsed : null;
   } catch {
     try {
-      return JSON.parse(event.data.text());
+      const parsed = JSON.parse(event.data.text());
+      return isPlainObject(parsed) ? parsed : null;
     } catch {
       return null;
     }
   }
+}
+
+function buildNotificationOptions(payload) {
+  const isHighOrUrgent =
+    payload?.priority === "HIGH" || payload?.priority === "URGENT";
+  const payloadData = isPlainObject(payload?.data) ? payload.data : undefined;
+  const normalizedActions = normalizePayloadActions(payload?.actions);
+  const actionUrls =
+    normalizeActionUrls(payload?.actionUrls) ||
+    normalizeActionUrls(payloadData?.actionUrls);
+
+  return {
+    body: payload?.body || "",
+    ...(payload?.icon !== undefined && { icon: payload.icon }),
+    ...(payload?.badge !== undefined && { badge: payload.badge }),
+    tag: payload?.tag || undefined,
+    data: {
+      ...(payloadData || {}),
+      url: payload?.url || payloadData?.url || "/",
+      ...(actionUrls && { actionUrls }),
+      ...(normalizedActions && { actions: normalizedActions }),
+      _meta: {
+        swVersion: SW_VERSION,
+        receivedAt: Date.now(),
+        priority: payload?.priority || null,
+        type: payload?.type || null,
+      },
+    },
+    requireInteraction:
+      payload?.requireInteraction !== undefined
+        ? payload.requireInteraction
+        : isHighOrUrgent,
+    renotify: payload?.tag
+      ? payload?.renotify !== undefined
+        ? payload.renotify
+        : isHighOrUrgent
+      : false,
+    silent:
+      payload?.silent !== undefined
+        ? payload.silent
+        : payload?.priority === "LOW",
+    ...(normalizedActions && { actions: normalizedActions }),
+    timestamp: Date.now(),
+  };
 }
 
 function isSameOrigin(url) {
@@ -95,43 +164,31 @@ function resolveNotificationTargetUrl(url) {
   }
 }
 
+function resolveNotificationClickUrl(notification, action) {
+  const data = isPlainObject(notification?.data) ? notification.data : undefined;
+
+  if (action) {
+    const actionUrls = normalizeActionUrls(data?.actionUrls);
+
+    if (actionUrls?.[action]) {
+      return resolveNotificationTargetUrl(actionUrls[action]);
+    }
+
+    const actions = normalizePayloadActions(data?.actions);
+    const matchingAction = actions?.find((item) => item.action === action);
+
+    if (matchingAction && data?.url) {
+      return resolveNotificationTargetUrl(data.url);
+    }
+  }
+
+  return resolveNotificationTargetUrl(data?.url);
+}
+
 self.addEventListener("push", (event) => {
   const payload = parsePushPayload(event);
-  const isHighOrUrgent =
-    payload?.priority === "HIGH" || payload?.priority === "URGENT";
   const title = payload?.title || "Notification";
-
-  const options = {
-    body: payload?.body || "",
-    ...(payload?.icon !== undefined && { icon: payload.icon }),
-    ...(payload?.badge !== undefined && { badge: payload.badge }),
-    tag: payload?.tag || undefined,
-    data: {
-      ...payload?.data,
-      url: payload?.url || payload?.data?.url || "/",
-      _meta: {
-        swVersion: SW_VERSION,
-        receivedAt: Date.now(),
-        priority: payload?.priority || null,
-        type: payload?.type || null,
-      },
-    },
-    requireInteraction:
-      payload?.requireInteraction !== undefined
-        ? payload.requireInteraction
-        : isHighOrUrgent,
-    renotify: payload?.tag
-      ? payload?.renotify !== undefined
-        ? payload.renotify
-        : isHighOrUrgent
-      : false,
-    silent:
-      payload?.silent !== undefined
-        ? payload.silent
-        : payload?.priority === "LOW",
-    ...(Array.isArray(payload?.actions) && { actions: payload.actions }),
-    timestamp: Date.now(),
-  };
+  const options = buildNotificationOptions(payload);
 
   event.waitUntil(self.registration.showNotification(title, options));
 });
@@ -139,7 +196,10 @@ self.addEventListener("push", (event) => {
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const urlToOpen = resolveNotificationTargetUrl(event.notification?.data?.url);
+  const urlToOpen = resolveNotificationClickUrl(
+    event.notification,
+    event.action || "",
+  );
 
   event.waitUntil(
     (async () => {
