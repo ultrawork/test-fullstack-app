@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: notes-backend
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+app:
+  cache:
+    default-ttl: ${CACHE_DEFAULT_TTL:PT1H}
+    key-prefix: ${CACHE_KEY_PREFIX:notes:}
