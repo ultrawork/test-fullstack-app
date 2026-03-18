@@ -8,47 +8,26 @@
  *   icon?: string,
  *   badge?: string,
  *   tag?: string,
- *   url?: string, // URL для открытия при клике
+ *   url?: string,
  *   priority?: 'LOW' | 'NORMAL' | 'HIGH' | 'URGENT',
  *   type?: string,
  *   actions?: NotificationAction[],
  *   requireInteraction?: boolean,
  *   renotify?: boolean,
  *   silent?: boolean,
- *   data?: object, // произвольные данные; data.url используется как fallback URL
+ *   data?: object,
  * }
- *
- * Регистрация (рекомендация для usePushSubscription):
- *   navigator.serviceWorker.register('/sw.js?v=' + CACHE_VERSION)
- * Версионирование query-параметром обходит агрессивное кеширование статики.
  */
 
-// ---------------------------------------------------------------------------
-// Версионирование
-// ---------------------------------------------------------------------------
-
-/** @type {string} Версия кэша. При изменении старые кэши автоматически удаляются. */
 const CACHE_VERSION = "v1";
 const CACHE_PREFIX = "notes-web-sw";
-
-/** Имя текущего кэша. */
 const CACHE_NAME = `${CACHE_PREFIX}-${CACHE_VERSION}`;
-
-/** Версия SW — используется для диагностики и ответов на сообщения клиента. */
 const SW_VERSION = CACHE_VERSION;
-
-// ---------------------------------------------------------------------------
-// install — открываем текущий кэш и немедленно активируем SW
-// ---------------------------------------------------------------------------
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME));
   self.skipWaiting();
 });
-
-// ---------------------------------------------------------------------------
-// activate — очищаем устаревшие кэши и забираем управление всеми клиентами
-// ---------------------------------------------------------------------------
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
@@ -64,17 +43,6 @@ self.addEventListener("activate", (event) => {
   );
 });
 
-// ---------------------------------------------------------------------------
-// Вспомогательные функции
-// ---------------------------------------------------------------------------
-
-/**
- * Безопасно парсит данные push-события.
- * Сначала пробует event.data.json(), при неудаче — JSON.parse(event.data.text()).
- *
- * @param {PushEvent} event
- * @returns {object|null}
- */
 function parsePushPayload(event) {
   if (!event.data) return null;
 
@@ -89,12 +57,6 @@ function parsePushPayload(event) {
   }
 }
 
-/**
- * Проверяет, принадлежит ли URL тому же origin, что и SW.
- *
- * @param {string} url
- * @returns {boolean}
- */
 function isSameOrigin(url) {
   try {
     return new URL(url, self.location.origin).origin === self.location.origin;
@@ -103,9 +65,35 @@ function isSameOrigin(url) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// push — отображение уведомления
-// ---------------------------------------------------------------------------
+function normalizeUrlForMatch(url) {
+  try {
+    const normalized = new URL(url, self.location.origin);
+
+    if (normalized.origin !== self.location.origin) {
+      return null;
+    }
+
+    return {
+      origin: normalized.origin,
+      pathname: normalized.pathname.replace(/\/+$/, "") || "/",
+    };
+  } catch {
+    return null;
+  }
+}
+
+function resolveNotificationTargetUrl(url) {
+  if (!url || !isSameOrigin(url)) {
+    return "/";
+  }
+
+  try {
+    const normalized = new URL(url, self.location.origin);
+    return `${normalized.pathname}${normalized.search}${normalized.hash}` || "/";
+  } catch {
+    return "/";
+  }
+}
 
 self.addEventListener("push", (event) => {
   const payload = parsePushPayload(event);
@@ -113,7 +101,6 @@ self.addEventListener("push", (event) => {
     payload?.priority === "HIGH" || payload?.priority === "URGENT";
   const title = payload?.title || "Notification";
 
-  /** @type {NotificationOptions} */
   const options = {
     body: payload?.body || "",
     ...(payload?.icon !== undefined && { icon: payload.icon }),
@@ -149,14 +136,10 @@ self.addEventListener("push", (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// ---------------------------------------------------------------------------
-// notificationclick — открытие/фокус нужной вкладки
-// ---------------------------------------------------------------------------
-
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
-  const urlToOpen = event.notification?.data?.url || "/";
+  const urlToOpen = resolveNotificationTargetUrl(event.notification?.data?.url);
 
   event.waitUntil(
     (async () => {
@@ -165,24 +148,28 @@ self.addEventListener("notificationclick", (event) => {
         includeUncontrolled: true,
       });
 
-      const targetUrl = isSameOrigin(urlToOpen)
-        ? new URL(urlToOpen, self.location.origin).href
-        : urlToOpen;
+      const targetMatch = normalizeUrlForMatch(urlToOpen);
 
-      const matchingClient = allClients.find((client) => client.url === targetUrl);
+      if (targetMatch) {
+        const matchingClient = allClients.find((client) => {
+          const clientMatch = normalizeUrlForMatch(client.url);
 
-      if (matchingClient && "focus" in matchingClient) {
-        return matchingClient.focus();
+          return (
+            clientMatch !== null &&
+            clientMatch.origin === targetMatch.origin &&
+            clientMatch.pathname === targetMatch.pathname
+          );
+        });
+
+        if (matchingClient && "focus" in matchingClient) {
+          return matchingClient.focus();
+        }
       }
 
-      return self.clients.openWindow(targetUrl);
+      return self.clients.openWindow(urlToOpen);
     })(),
   );
 });
-
-// ---------------------------------------------------------------------------
-// message — служебные команды от приложения
-// ---------------------------------------------------------------------------
 
 self.addEventListener("message", (event) => {
   if (!event.data) return;
