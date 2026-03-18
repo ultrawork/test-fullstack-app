@@ -1,0 +1,85 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum NotificationChannel {
+  EMAIL
+  PUSH
+  SMS
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+}
+
+enum NotificationPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+/// Application user who can receive notifications.
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pushSubscriptions PushSubscription[]
+  notificationPrefs NotificationPref[]
+  notifications     Notification[]
+}
+
+/// Web Push subscription for delivering push notifications.
+model PushSubscription {
+  id        String   @id @default(uuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+/// Per-channel notification preference for a user.
+model NotificationPref {
+  id      String              @id @default(uuid())
+  channel NotificationChannel
+  enabled Boolean             @default(true)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([userId, channel])
+}
+
+/// A notification sent to a user via a specific channel.
+model Notification {
+  id        String               @id @default(uuid())
+  channel   NotificationChannel
+  status    NotificationStatus   @default(PENDING)
+  priority  NotificationPriority @default(NORMAL)
+  title     String
+  body      String
+  createdAt DateTime             @default(now())
+  sentAt    DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+}
