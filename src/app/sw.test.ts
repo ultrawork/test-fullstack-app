@@ -17,13 +17,20 @@ describe("parsePushPayload", () => {
     expect(parsePushPayload("not-json")).toBeNull();
   });
 
-  it("parses valid JSON", () => {
+  it("parses valid JSON object", () => {
     expect(parsePushPayload('{"title":"Hello"}')).toEqual({ title: "Hello" });
   });
 
   it("returns null for empty string", () => {
     expect(parsePushPayload("")).toBeNull();
   });
+
+  it.each(['"text"', "123", "true", "[]"])(
+    "returns null for non-object JSON payload %s",
+    (input) => {
+      expect(parsePushPayload(input)).toBeNull();
+    },
+  );
 });
 
 describe("buildNotificationOptions — body", () => {
@@ -60,6 +67,19 @@ describe("buildNotificationOptions — data.url", () => {
       data: { url: "/secondary" },
     });
     expect(options.data.url).toBe("/primary");
+  });
+
+  it("ignores non-object payload.data", () => {
+    const options = buildNotificationOptions({
+      data: "bad-data" as never,
+    });
+    expect(options.data).toEqual({
+      url: "/",
+      _meta: {
+        priority: null,
+        type: null,
+      },
+    });
   });
 });
 
@@ -123,15 +143,33 @@ describe("buildNotificationOptions — priority mapping", () => {
 });
 
 describe("buildNotificationOptions — actions", () => {
-  it("sets actions when array is provided", () => {
+  it("sets actions when valid array is provided", () => {
     const actions = [{ action: "open", title: "Open" }];
     const options = buildNotificationOptions({ actions });
     expect(options.actions).toEqual(actions);
+    expect(options.data.actions).toEqual(actions);
+  });
+
+  it("drops invalid action entries", () => {
+    const options = buildNotificationOptions({
+      actions: [{ action: "open" }, { action: "dismiss", title: "Dismiss" }],
+    });
+    expect(options.actions).toEqual([{ action: "dismiss", title: "Dismiss" }]);
   });
 
   it("sets actions to undefined when not an array", () => {
     const options = buildNotificationOptions({ actions: "open" });
     expect(options.actions).toBeUndefined();
+  });
+
+  it("preserves valid actionUrls map", () => {
+    const options = buildNotificationOptions({
+      actionUrls: { open: "/notes/1", dismiss: "/inbox" },
+    });
+    expect(options.data.actionUrls).toEqual({
+      open: "/notes/1",
+      dismiss: "/inbox",
+    });
   });
 });
 
