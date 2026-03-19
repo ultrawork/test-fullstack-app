@@ -12,6 +12,7 @@ const initialNotes: ReadonlyArray<Note> = [
     archivedAt: null,
     createdAt: "2024-01-01T10:00:00.000Z",
     updatedAt: "2024-01-01T10:00:00.000Z",
+    tags: ["work", "urgent"],
   },
   {
     id: "note-2",
@@ -20,6 +21,7 @@ const initialNotes: ReadonlyArray<Note> = [
     archivedAt: null,
     createdAt: "2024-01-02T10:00:00.000Z",
     updatedAt: "2024-01-02T10:00:00.000Z",
+    tags: ["personal", "work"],
   },
   {
     id: "note-3",
@@ -28,6 +30,7 @@ const initialNotes: ReadonlyArray<Note> = [
     archivedAt: "2024-02-15T12:00:00.000Z",
     createdAt: "2024-01-03T10:00:00.000Z",
     updatedAt: "2024-02-15T12:00:00.000Z",
+    tags: [],
   },
   {
     id: "note-4",
@@ -36,6 +39,7 @@ const initialNotes: ReadonlyArray<Note> = [
     archivedAt: null,
     createdAt: "2024-01-04T10:00:00.000Z",
     updatedAt: "2024-01-04T10:00:00.000Z",
+    tags: ["ideas"],
   },
 ];
 
@@ -89,5 +93,76 @@ export function updateNote(id: string, update: NoteUpdate): Note | undefined {
  * Используется для обеспечения детерминированности тестов.
  */
 export function resetDb(): void {
-  notes = initialNotes.map((n) => ({ ...n }));
+  notes = initialNotes.map((n) => ({ ...n, tags: [...n.tags] }));
+}
+
+/**
+ * Добавляет тег к заметке. Нормализует тег через trim.
+ * Не добавляет дублирующий тег; обновляет updatedAt только при реальном изменении.
+ *
+ * @param id  — идентификатор заметки.
+ * @param tag — строка тега (будет нормализована через trim).
+ * @returns Копия обновлённой заметки или undefined, если заметка не найдена.
+ */
+export function addTagToNote(id: string, tag: string): Note | undefined {
+  const index = notes.findIndex((n) => n.id === id);
+  if (index === -1) return undefined;
+
+  const normalizedTag = tag.trim();
+  const note = notes[index];
+
+  if (normalizedTag === "" || note.tags.includes(normalizedTag)) {
+    return { ...note, tags: [...note.tags] };
+  }
+
+  const updated: Note = {
+    ...note,
+    tags: [...note.tags, normalizedTag],
+    updatedAt: new Date().toISOString(),
+  };
+  notes[index] = updated;
+  return { ...updated, tags: [...updated.tags] };
+}
+
+/**
+ * Удаляет тег из заметки. Нормализует тег через trim.
+ * Обновляет updatedAt только при реальном изменении массива тегов.
+ *
+ * @param id  — идентификатор заметки.
+ * @param tag — строка тега (будет нормализована через trim).
+ * @returns Копия актуальной заметки или undefined, если заметка не найдена.
+ */
+export function removeTagFromNote(id: string, tag: string): Note | undefined {
+  const index = notes.findIndex((n) => n.id === id);
+  if (index === -1) return undefined;
+
+  const normalizedTag = tag.trim();
+  const note = notes[index];
+
+  if (normalizedTag === "" || !note.tags.includes(normalizedTag)) {
+    return { ...note, tags: [...note.tags] };
+  }
+
+  const updated: Note = {
+    ...note,
+    tags: note.tags.filter((t) => t !== normalizedTag),
+    updatedAt: new Date().toISOString(),
+  };
+  notes[index] = updated;
+  return { ...updated, tags: [...updated.tags] };
+}
+
+/**
+ * Возвращает отсортированный список уникальных тегов из всех заметок.
+ *
+ * @returns Новый массив уникальных тегов, отсортированных по алфавиту (localeCompare).
+ */
+export function listTags(): string[] {
+  const tagSet = new Set<string>();
+  for (const note of notes) {
+    for (const tag of note.tags) {
+      tagSet.add(tag);
+    }
+  }
+  return Array.from(tagSet).sort((a, b) => a.localeCompare(b));
 }
