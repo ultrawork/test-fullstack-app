@@ -1,10 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import {
-  listNotes,
-  findNote,
-  updateNote,
-  resetDb,
-} from "./notes";
+import { listNotes, findNote, updateNote, resetDb } from "./notes";
 import type { Note } from "@/types/note";
 
 beforeEach(() => {

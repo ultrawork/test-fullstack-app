@@ -27,4 +27,6 @@ export interface Note {
  * Допустимые поля для обновления заметки.
  * Обновление id, createdAt не разрешено.
  */
-export type NoteUpdate = Partial<Pick<Note, "title" | "content" | "archivedAt">>;
+export type NoteUpdate = Partial<
+  Pick<Note, "title" | "content" | "archivedAt">
+>;
