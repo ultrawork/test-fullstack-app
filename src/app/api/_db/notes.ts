@@ -12,6 +12,7 @@ const initialNotes: ReadonlyArray<Note> = [
     archivedAt: null,
     createdAt: "2024-01-01T10:00:00.000Z",
     updatedAt: "2024-01-01T10:00:00.000Z",
+    tags: ["work", "important"],
   },
   {
     id: "note-2",
@@ -20,6 +21,7 @@ const initialNotes: ReadonlyArray<Note> = [
     archivedAt: null,
     createdAt: "2024-01-02T10:00:00.000Z",
     updatedAt: "2024-01-02T10:00:00.000Z",
+    tags: ["personal"],
   },
   {
     id: "note-3",
@@ -28,6 +30,7 @@ const initialNotes: ReadonlyArray<Note> = [
     archivedAt: "2024-02-15T12:00:00.000Z",
     createdAt: "2024-01-03T10:00:00.000Z",
     updatedAt: "2024-02-15T12:00:00.000Z",
+    tags: ["work"],
   },
   {
     id: "note-4",
@@ -36,6 +39,7 @@ const initialNotes: ReadonlyArray<Note> = [
     archivedAt: null,
     createdAt: "2024-01-04T10:00:00.000Z",
     updatedAt: "2024-01-04T10:00:00.000Z",
+    tags: [],
   },
 ];
 

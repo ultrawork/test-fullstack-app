@@ -21,6 +21,8 @@ export interface Note {
   createdAt: string;
   /** ISO-строка момента последнего обновления. */
   updatedAt: string;
+  /** Теги заметки. */
+  tags: string[];
 }
 
 /**
