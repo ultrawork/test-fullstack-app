@@ -24,19 +24,19 @@ export default function TagInput({
   const [inputValue, setInputValue] = useState<string>("");
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
 
   const inputId = `tag-input-${noteId}`;
   const listboxId = `tag-suggestions-${noteId}`;
-  const tagsLoadedRef = useRef<boolean>(false);
+  const isLoadingRef = useRef<boolean>(false);
+  const blurTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /** Загружает список доступных тегов через GET /api/tags. */
   const loadTags = useCallback(async (): Promise<void> => {
-    if (isLoading) return;
-    setIsLoading(true);
+    if (isLoadingRef.current) return;
+    isLoadingRef.current = true;
     setError(null);
     try {
       const res = await fetch("/api/tags");
@@ -45,19 +45,20 @@ export default function TagInput({
       }
       const data: string[] = await res.json();
       setAvailableTags(Array.from(new Set(data)));
-      tagsLoadedRef.current = true;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не удалось загрузить теги";
       setError(message);
     } finally {
-      setIsLoading(false);
+      isLoadingRef.current = false;
     }
-  }, [isLoading]);
+  }, []);
 
   useEffect(() => {
     loadTags();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    return () => {
+      if (blurTimeoutRef.current !== null) clearTimeout(blurTimeoutRef.current);
+    };
+  }, [loadTags]);
 
   /** Фильтрует подсказки: исключает existingTags, фильтрует по inputValue. */
   const suggestions: string[] = availableTags.filter((tag) => {
@@ -80,6 +81,7 @@ export default function TagInput({
 
     setIsSubmitting(true);
     setError(null);
+    let added = false;
     try {
       const res = await fetch(`/api/notes/${noteId}/tags`, {
         method: "POST",
@@ -92,7 +94,7 @@ export default function TagInput({
       setInputValue("");
       setIsOpen(false);
       setHighlightedIndex(null);
-      onAdded(trimmed);
+      added = true;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Не удалось добавить тег";
       setError(message);
@@ -100,18 +102,23 @@ export default function TagInput({
     } finally {
       setIsSubmitting(false);
     }
+    if (added) {
+      onAdded(trimmed);
+    }
   };
 
   const handleFocus = (): void => {
-    setIsOpen(true);
-    if (!tagsLoadedRef.current && !isLoading) {
-      loadTags();
+    if (blurTimeoutRef.current !== null) {
+      clearTimeout(blurTimeoutRef.current);
+      blurTimeoutRef.current = null;
     }
+    setIsOpen(true);
+    loadTags();
   };
 
   const handleBlur = (): void => {
     // Задержка, чтобы клик по подсказке успел обработаться раньше закрытия списка
-    setTimeout(() => setIsOpen(false), 150);
+    blurTimeoutRef.current = setTimeout(() => setIsOpen(false), 150);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>): void => {

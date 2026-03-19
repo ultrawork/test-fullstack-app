@@ -148,7 +148,11 @@ describe("TagInput", () => {
     render(<TagInput noteId="note-1" existingTags={[]} onAdded={() => {}} />);
     await userEvent.click(screen.getByTestId("tag-input"));
     await userEvent.keyboard("{Enter}");
-    expect(fetch).toHaveBeenCalledTimes(1); // only the initial GET /api/tags
+    // no POST should be made for empty input
+    expect(fetch).not.toHaveBeenCalledWith(
+      expect.stringContaining("/api/notes/"),
+      expect.objectContaining({ method: "POST" }),
+    );
   });
 
   it("has aria-live region for errors", () => {
