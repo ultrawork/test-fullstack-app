@@ -12,7 +12,7 @@ const initialNotes: ReadonlyArray<Note> = [
     archivedAt: null,
     createdAt: "2024-01-01T10:00:00.000Z",
     updatedAt: "2024-01-01T10:00:00.000Z",
-    tags: ["work", "important"],
+    tags: ["work", "urgent"],
   },
   {
     id: "note-2",
@@ -86,6 +86,40 @@ export function updateNote(id: string, update: NoteUpdate): Note | undefined {
   };
   notes[index] = updated;
   return { ...updated };
+}
+
+/**
+ * Добавляет тег к заметке. Если тег уже присутствует, не дублирует.
+ *
+ * @param id  — идентификатор заметки.
+ * @param tag — тег для добавления.
+ * @returns Копия обновлённой заметки или undefined, если заметка не найдена.
+ */
+export function addTagToNote(id: string, tag: string): Note | undefined {
+  const index = notes.findIndex((n) => n.id === id);
+  if (index === -1) return undefined;
+
+  if (!notes[index].tags.includes(tag)) {
+    notes[index].tags = [...notes[index].tags, tag];
+  }
+  notes[index] = { ...notes[index], updatedAt: new Date().toISOString() };
+  return { ...notes[index] };
+}
+
+/**
+ * Удаляет тег из заметки. Идемпотентно — если тега нет, ничего не делает.
+ *
+ * @param id  — идентификатор заметки.
+ * @param tag — тег для удаления.
+ * @returns Копия обновлённой заметки или undefined, если заметка не найдена.
+ */
+export function removeTagFromNote(id: string, tag: string): Note | undefined {
+  const index = notes.findIndex((n) => n.id === id);
+  if (index === -1) return undefined;
+
+  notes[index].tags = notes[index].tags.filter((t) => t !== tag);
+  notes[index] = { ...notes[index], updatedAt: new Date().toISOString() };
+  return { ...notes[index] };
 }
 
 /**

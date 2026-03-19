@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach } from "vitest";
+import { NextRequest } from "next/server";
 import { resetDb } from "@/app/api/_db/notes";
 import { GET } from "./route";
 
 /**
  * Вспомогательная функция для создания NextRequest с заданным URL.
  */
-function makeRequest(url: string): Request {
-  return new Request(url);
+function makeRequest(url: string): NextRequest {
+  return new NextRequest(url);
 }
 
 beforeEach(() => {

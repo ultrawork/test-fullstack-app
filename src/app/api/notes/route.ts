@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { listNotes } from "@/app/api/_db/notes";
 import type { Note } from "@/types/note";
 
@@ -9,9 +9,8 @@ import type { Note } from "@/types/note";
  * через query-параметр `tag` (includes-фильтрация по массиву tags).
  * Всегда возвращает 200.
  */
-export function GET(request: Request): NextResponse<Note[]> {
-  const { searchParams } = new URL(request.url);
-  const tag = searchParams.get("tag");
+export function GET(request: NextRequest): NextResponse<Note[]> {
+  const tag = request.nextUrl.searchParams.get("tag")?.trim() || null;
 
   let notes = listNotes();
 
