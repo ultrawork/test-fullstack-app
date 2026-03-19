@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { listNotes, findNote, updateNote, resetDb } from "./notes";
+import {
+  listNotes,
+  findNote,
+  updateNote,
+  resetDb,
+  addTagToNote,
+  removeTagFromNote,
+  listTags,
+} from "./notes";
 import type { Note } from "@/types/note";
 
 beforeEach(() => {
@@ -134,5 +142,128 @@ describe("resetDb", () => {
     listNotes().forEach((n) => updateNote(n.id, { title: "x" }));
     resetDb();
     expect(listNotes().length).toBe(countBefore);
+  });
+});
+
+describe("addTagToNote", () => {
+  it("adds trimmed tag and updates updatedAt", () => {
+    const notes = listNotes();
+    const noteWithoutTags = notes.find((n) => n.tags.length === 0)!;
+    const originalUpdatedAt = noteWithoutTags.updatedAt;
+
+    const result = addTagToNote(noteWithoutTags.id, " work ");
+
+    expect(result).toBeDefined();
+    expect(result?.tags).toContain("work");
+    expect(result?.tags.filter((t) => t === "work").length).toBe(1);
+    expect(result?.updatedAt).not.toBe(originalUpdatedAt);
+  });
+
+  it("deduplicates and does not update updatedAt on duplicate", () => {
+    const notes = listNotes();
+    const noteWithWork = notes.find((n) => n.tags.includes("work"))!;
+    const originalLength = noteWithWork.tags.length;
+    const originalUpdatedAt = noteWithWork.updatedAt;
+
+    const result = addTagToNote(noteWithWork.id, "work");
+
+    expect(result).toBeDefined();
+    expect(result?.tags.length).toBe(originalLength);
+    expect(result?.updatedAt).toBe(originalUpdatedAt);
+  });
+
+  it("returns undefined for unknown id", () => {
+    expect(addTagToNote("no-such-id", "x")).toBeUndefined();
+  });
+
+  it("no-op on empty tag (whitespace only)", () => {
+    const [first] = listNotes();
+    const originalLength = first.tags.length;
+    const originalUpdatedAt = first.updatedAt;
+
+    const result = addTagToNote(first.id, "   ");
+
+    expect(result?.tags.length).toBe(originalLength);
+    expect(result?.updatedAt).toBe(originalUpdatedAt);
+  });
+
+  it("persists changes — findNote reflects added tag", () => {
+    const notes = listNotes();
+    const noteWithoutTags = notes.find((n) => n.tags.length === 0)!;
+
+    addTagToNote(noteWithoutTags.id, "newTag");
+
+    expect(findNote(noteWithoutTags.id)?.tags).toContain("newTag");
+  });
+});
+
+describe("removeTagFromNote", () => {
+  it("removes existing tag and updates updatedAt", () => {
+    const notes = listNotes();
+    const noteWithUrgent = notes.find((n) => n.tags.includes("urgent"))!;
+    const originalUpdatedAt = noteWithUrgent.updatedAt;
+
+    const result = removeTagFromNote(noteWithUrgent.id, " urgent ");
+
+    expect(result).toBeDefined();
+    expect(result?.tags).not.toContain("urgent");
+    expect(result?.updatedAt).not.toBe(originalUpdatedAt);
+  });
+
+  it("no-op when tag not present (updatedAt unchanged)", () => {
+    const [first] = listNotes();
+    const originalUpdatedAt = first.updatedAt;
+
+    const result = removeTagFromNote(first.id, "not-exists");
+
+    expect(result?.updatedAt).toBe(originalUpdatedAt);
+  });
+
+  it("returns undefined for unknown id", () => {
+    expect(removeTagFromNote("no-such-id", "work")).toBeUndefined();
+  });
+
+  it("persists changes — findNote reflects removed tag", () => {
+    const notes = listNotes();
+    const noteWithUrgent = notes.find((n) => n.tags.includes("urgent"))!;
+
+    removeTagFromNote(noteWithUrgent.id, "urgent");
+
+    expect(findNote(noteWithUrgent.id)?.tags).not.toContain("urgent");
+  });
+});
+
+describe("listTags", () => {
+  it("returns sorted unique list of tags", () => {
+    const tags = listTags();
+
+    expect(Array.isArray(tags)).toBe(true);
+    // Теги должны быть отсортированы
+    const sorted = [...tags].sort((a, b) => a.localeCompare(b));
+    expect(tags).toEqual(sorted);
+    // Нет дублей
+    expect(new Set(tags).size).toBe(tags.length);
+    // Содержит ожидаемые теги из initialNotes
+    expect(tags).toContain("work");
+    expect(tags).toContain("urgent");
+    expect(tags).toContain("personal");
+    expect(tags).toContain("ideas");
+  });
+
+  it("reflects updates after add", () => {
+    addTagToNote("note-3", "brandNewTag");
+    const tags = listTags();
+
+    expect(tags).toContain("brandNewTag");
+    const sorted = [...tags].sort((a, b) => a.localeCompare(b));
+    expect(tags).toEqual(sorted);
+  });
+
+  it("removes tag from listTags when removed from all notes", () => {
+    // "urgent" присутствует только в note-1
+    removeTagFromNote("note-1", "urgent");
+    const tags = listTags();
+
+    expect(tags).not.toContain("urgent");
   });
 });
