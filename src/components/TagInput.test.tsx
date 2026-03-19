@@ -9,7 +9,9 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const mockFetch = (responses: Array<{ ok: boolean; json: () => Promise<unknown> }>) => {
+const mockFetch = (
+  responses: Array<{ ok: boolean; json: () => Promise<unknown> }>,
+) => {
   let callIndex = 0;
   return vi.spyOn(global, "fetch").mockImplementation(() => {
     const response = responses[callIndex] ?? responses[responses.length - 1];
@@ -20,7 +22,9 @@ const mockFetch = (responses: Array<{ ok: boolean; json: () => Promise<unknown> 
 
 describe("TagInput", () => {
   beforeEach(() => {
-    mockFetch([{ ok: true, json: () => Promise.resolve(["react", "typescript", "css"]) }]);
+    mockFetch([
+      { ok: true, json: () => Promise.resolve(["react", "typescript", "css"]) },
+    ]);
   });
 
   it("renders label 'Добавить тег'", () => {

@@ -23,7 +23,9 @@ export default function TagsSandboxPage(): React.JSX.Element {
 
   return (
     <main className="mx-auto max-w-xl px-4 py-10">
-      <h1 className="mb-6 text-2xl font-bold">Sandbox: TagBadge &amp; TagInput</h1>
+      <h1 className="mb-6 text-2xl font-bold">
+        Sandbox: TagBadge &amp; TagInput
+      </h1>
 
       <section className="mb-6">
         <h2 className="mb-3 text-lg font-semibold">Текущие теги</h2>
@@ -32,18 +34,18 @@ export default function TagsSandboxPage(): React.JSX.Element {
         ) : (
           <div className="flex flex-wrap gap-2">
             {tags.map((tag) => (
-              <TagBadge key={tag} tag={tag} onRemove={() => handleRemove(tag)} />
+              <TagBadge
+                key={tag}
+                tag={tag}
+                onRemove={() => handleRemove(tag)}
+              />
             ))}
           </div>
         )}
       </section>
 
       <section className="mb-8">
-        <TagInput
-          noteId={NOTE_ID}
-          existingTags={tags}
-          onAdded={handleAdded}
-        />
+        <TagInput noteId={NOTE_ID} existingTags={tags} onAdded={handleAdded} />
       </section>
 
       <aside className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">

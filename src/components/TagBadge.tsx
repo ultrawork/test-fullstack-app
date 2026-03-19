@@ -41,7 +41,10 @@ interface TagBadgeProps {
  * Бейдж тега с детерминированным цветом на основе хэша строки.
  * Опционально показывает кнопку удаления.
  */
-export default function TagBadge({ tag, onRemove }: TagBadgeProps): React.JSX.Element {
+export default function TagBadge({
+  tag,
+  onRemove,
+}: TagBadgeProps): React.JSX.Element {
   const colorClass = COLOR_PRESETS[hashTag(tag) % COLOR_PRESETS.length];
 
   return (

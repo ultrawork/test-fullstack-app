@@ -46,7 +46,8 @@ export default function TagInput({
       const data: string[] = await res.json();
       setAvailableTags(Array.from(new Set(data)));
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Не удалось загрузить теги";
+      const message =
+        err instanceof Error ? err.message : "Не удалось загрузить теги";
       setError(message);
     } finally {
       isLoadingRef.current = false;
@@ -96,7 +97,8 @@ export default function TagInput({
       setHighlightedIndex(null);
       added = true;
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Не удалось добавить тег";
+      const message =
+        err instanceof Error ? err.message : "Не удалось добавить тег";
       setError(message);
       alert(message);
     } finally {
@@ -150,7 +152,10 @@ export default function TagInput({
 
   return (
     <div className="relative">
-      <label htmlFor={inputId} className="mb-1 block text-sm font-medium text-gray-700">
+      <label
+        htmlFor={inputId}
+        className="mb-1 block text-sm font-medium text-gray-700"
+      >
         Добавить тег
       </label>
       <div className="flex gap-2">
@@ -164,7 +169,9 @@ export default function TagInput({
           autoComplete="off"
           aria-autocomplete="list"
           aria-expanded={isOpen && suggestions.length > 0}
-          aria-controls={isOpen && suggestions.length > 0 ? listboxId : undefined}
+          aria-controls={
+            isOpen && suggestions.length > 0 ? listboxId : undefined
+          }
           aria-activedescendant={
             highlightedIndex !== null
               ? `option-${noteId}-${highlightedIndex}`
